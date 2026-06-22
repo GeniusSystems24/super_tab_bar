@@ -1,9 +1,8 @@
 // super_tab_bar · Example app launcher
 //
-// Opens a simple launcher screen listing the three examples.
-// Each example is a self-contained StatefulWidget that can be run
-// independently — push to it from this launcher or set it directly
-// as the MaterialApp home for faster iteration.
+// A polished launcher: hero header + responsive card grid, each card carrying
+// a live token-driven mini-preview of the tab strip it opens. Every example is
+// a self-contained screen pushed with a floating "back to demos" button.
 
 import 'package:flutter/material.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
@@ -30,14 +29,17 @@ class _ExampleAppState extends State<ExampleApp> {
     return MaterialApp(
       title: 'super_tab_bar examples',
       debugShowCheckedModeBanner: false,
-      // Register both presets — the examples toggle between them.
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A7CFF)),
+        fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+        scaffoldBackgroundColor: BrowserStyleTabBarThemeData.light.bg,
         extensions: const [BrowserStyleTabBarThemeData.light],
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF4A7CFF), brightness: Brightness.dark),
+        fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+        scaffoldBackgroundColor: BrowserStyleTabBarThemeData.dark.bg,
         extensions: const [BrowserStyleTabBarThemeData.dark],
       ),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
@@ -49,6 +51,9 @@ class _ExampleAppState extends State<ExampleApp> {
   }
 }
 
+// ════════════════════════════════════════════════════════════
+// LAUNCHER
+// ════════════════════════════════════════════════════════════
 class LauncherScreen extends StatelessWidget {
   final bool dark;
   final ValueChanged<bool> onToggleTheme;
@@ -58,111 +63,665 @@ class LauncherScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
-    final examples = [
-      (
-        '01 · Basic workspace & state preservation',
-        'Four tabs, each with a counter + text field + scroll list.\n'
-            'Keep-alive vs Rebuild toggle + LTR/RTL toggle.',
-        const BasicWorkspaceExample(),
+
+    final demos = <_Demo>[
+      _Demo(
+        title: 'Basic workspace',
+        subtitle:
+            'Four stateful tabs — counter + text field + scroll list. Toggle '
+            'Keep-alive vs Rebuild and LTR/RTL to watch state survive (or reset).',
+        badge: 'State preservation',
+        preview: const _TabThumb(
+          labels: ['Accounts', 'Journal', 'Dashboard', 'Team'],
+          activeIndex: 1,
+          contentKind: _Content.list,
+        ),
+        screen: const BasicWorkspaceExample(),
       ),
-      (
-        '02 · Document management shell',
-        'ERP-style workspace: pinned CoA tab, dirty Journal Entry form,\n'
-            'open-from-row via of(context), save flow, onAddTab intercept.',
-        const DocumentShellExample(),
+      _Demo(
+        title: 'Document management shell',
+        subtitle:
+            'ERP-style workspace: a pinned Chart of Accounts tab, a dirty '
+            'Journal Entry form, open-from-row via of(context), and a save flow.',
+        badge: 'Dirty · pinned · of(context)',
+        preview: const _TabThumb(
+          labels: ['Journal', 'Dashboard'],
+          activeIndex: 0,
+          pinned: true,
+          dirty: {0},
+          contentKind: _Content.form,
+        ),
+        screen: const DocumentShellExample(),
       ),
-      (
-        '03 · Custom theme + RTL + overflow',
-        'copyWith accent, Dark/Light toggle, LTR/RTL toggle,\n'
-            '12+ tabs forcing overflow chevrons + ▾ list.',
-        const ThemeRtlOverflowExample(),
+      _Demo(
+        title: 'Custom theme + RTL + overflow',
+        subtitle:
+            'copyWith a warm palette, toggle Dark/Light and LTR/RTL, and add '
+            '12+ tabs to force the overflow chevrons and the ▾ tab list.',
+        badge: 'Theming · RTL',
+        preview: const _TabThumb(
+          labels: ['One', 'Two', 'Three', 'Four', 'Five'],
+          activeIndex: 2,
+          overflow: true,
+          warm: true,
+          contentKind: _Content.cards,
+        ),
+        screen: const ThemeRtlOverflowExample(),
       ),
-      (
-        '04 · Full component workbench (original)',
-        'State preservation · pin · drag-reorder · dirty-close guard ·\n'
-            'overflow · live hover thumbnails · ERP / Design Studio / Browser themes.',
-        const _OriginalDemo(),
+      _Demo(
+        title: 'Full component workbench',
+        subtitle:
+            'The original showcase — pin, drag-reorder, dirty-close guard, '
+            'overflow, live hover thumbnails across ERP / Design Studio / Browser themes.',
+        badge: 'Original',
+        preview: const _TabThumb(
+          labels: ['Ledger', 'Journal', 'Store'],
+          activeIndex: 1,
+          pinned: true,
+          preview: true,
+          contentKind: _Content.list,
+        ),
+        screen: const _OriginalDemo(),
       ),
     ];
 
     return Scaffold(
       backgroundColor: s.bg,
-      appBar: AppBar(
-        backgroundColor: s.surface,
-        elevation: 0,
-        title: Text(
-          'super_tab_bar',
-          style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.displayFont,
-              fontWeight: FontWeight.w800,
-              color: s.fg1),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: GestureDetector(
-              onTap: () => onToggleTheme(!dark),
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: s.inputBg,
-                  border: Border.all(color: s.border),
-                  borderRadius: BorderRadius.circular(
-                      BrowserStyleTabBarThemeData.radiusMd),
-                ),
-                child: Row(
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1040),
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 44),
+              children: [
+                // ── hero ──────────────────────────────────────
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                        dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        size: 15,
-                        color: s.fg2),
-                    const SizedBox(width: 6),
-                    Text(dark ? 'Light' : 'Dark',
-                        style: TextStyle(
-                            fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: s.fg1)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(children: [
+                            _Mark(),
+                            const SizedBox(width: 12),
+                            Text('SUPER_TAB_BAR',
+                                style: TextStyle(
+                                    fontFamily:
+                                        BrowserStyleTabBarThemeData.monoFont,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.8,
+                                    color:
+                                        BrowserStyleTabBarThemeData.accent)),
+                            const SizedBox(width: 10),
+                            _VersionPill(),
+                          ]),
+                          const SizedBox(height: 16),
+                          Text('Browser-style workspace tabs',
+                              style: TextStyle(
+                                  fontFamily:
+                                      BrowserStyleTabBarThemeData.displayFont,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.8,
+                                  height: 1.05,
+                                  color: s.fg1)),
+                          const SizedBox(height: 12),
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 640),
+                            child: Text(
+                              'Pinned / dirty / closable tabs, drag-to-reorder, '
+                              'context menu, overflow dropdown, live hover '
+                              'previews, and state-preserving pages. Open any '
+                              'example to try it live in Light / Dark and LTR / RTL.',
+                              style: TextStyle(
+                                  fontFamily:
+                                      BrowserStyleTabBarThemeData.bodyFont,
+                                  fontSize: 14.5,
+                                  height: 1.6,
+                                  color: s.fg3),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    _ThemeToggle(dark: dark, onToggle: onToggleTheme),
                   ],
                 ),
-              ),
+                const SizedBox(height: 36),
+                // ── grid ──────────────────────────────────────
+                LayoutBuilder(builder: (context, c) {
+                  final cols = c.maxWidth > 720 ? 2 : 1;
+                  return GridView.count(
+                    crossAxisCount: cols,
+                    crossAxisSpacing: 18,
+                    mainAxisSpacing: 18,
+                    childAspectRatio: 1.42,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      for (var i = 0; i < demos.length; i++)
+                        _DemoCard(
+                          index: i + 1,
+                          demo: demos[i],
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) =>
+                                    _BackScaffold(child: demos[i].screen)),
+                          ),
+                        ),
+                    ],
+                  );
+                }),
+                const SizedBox(height: 24),
+                Center(
+                  child: Text('MIT © GeniusLink · pure Flutter, zero dependencies',
+                      style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                          fontSize: 11,
+                          color: s.fg4)),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(24),
-        itemCount: examples.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (ctx, i) {
-          final ex = examples[i];
-          return _ExampleTile(
-            title: ex.$1,
-            desc: ex.$2,
-            onTap: () => Navigator.push(
-              ctx,
-              MaterialPageRoute(builder: (_) => ex.$3),
-            ),
-          );
-        },
+        ),
       ),
     );
   }
 }
 
-class _ExampleTile extends StatefulWidget {
-  final String title, desc;
-  final VoidCallback onTap;
-  const _ExampleTile(
-      {required this.title, required this.desc, required this.onTap});
-  @override
-  State<_ExampleTile> createState() => _ExampleTileState();
+class _Demo {
+  final String title, subtitle, badge;
+  final Widget preview;
+  final Widget screen;
+  const _Demo({
+    required this.title,
+    required this.subtitle,
+    required this.badge,
+    required this.preview,
+    required this.screen,
+  });
 }
 
-// ── Wrapper for the original BrowserTabsDemo from the monorepo ───
+// ── Demo card ─────────────────────────────────────────────────────
+class _DemoCard extends StatefulWidget {
+  final int index;
+  final _Demo demo;
+  final VoidCallback onTap;
+  const _DemoCard(
+      {required this.index, required this.demo, required this.onTap});
+  @override
+  State<_DemoCard> createState() => _DemoCardState();
+}
+
+class _DemoCardState extends State<_DemoCard> {
+  bool _h = false;
+  @override
+  Widget build(BuildContext context) {
+    final s = BrowserStyleTabBarThemeData.of(context);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _h = true),
+      onExit: (_) => setState(() => _h = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: BrowserStyleTabBarThemeData.durBase,
+          curve: BrowserStyleTabBarThemeData.curveStandard,
+          transform: _h
+              ? (Matrix4.identity()..translate(0.0, -4.0))
+              : Matrix4.identity(),
+          decoration: BoxDecoration(
+            color: s.surface,
+            border: Border.all(
+                color: _h
+                    ? BrowserStyleTabBarThemeData.accent.withOpacity(0.55)
+                    : s.border),
+            borderRadius:
+                BorderRadius.circular(BrowserStyleTabBarThemeData.radiusXl),
+            boxShadow: _h ? BrowserStyleTabBarThemeData.cardShadow : null,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // preview pane
+              Expanded(
+                child: Stack(
+                  children: [
+                    Positioned.fill(child: widget.demo.preview),
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: s.bg.withOpacity(0.82),
+                          borderRadius: BorderRadius.circular(7),
+                          border: Border.all(color: s.border),
+                        ),
+                        child: Text('0${widget.index}',
+                            style: TextStyle(
+                                fontFamily:
+                                    BrowserStyleTabBarThemeData.monoFont,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: s.fg2)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // text
+              Container(
+                decoration: BoxDecoration(
+                  color: s.surface,
+                  border: Border(top: BorderSide(color: s.border)),
+                ),
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(children: [
+                      Expanded(
+                        child: Text(widget.demo.title,
+                            style: TextStyle(
+                                fontFamily:
+                                    BrowserStyleTabBarThemeData.displayFont,
+                                fontSize: 16.5,
+                                fontWeight: FontWeight.w700,
+                                color: s.fg1)),
+                      ),
+                      Icon(Icons.arrow_outward,
+                          size: 16,
+                          color: _h
+                              ? BrowserStyleTabBarThemeData.accent
+                              : s.fg3),
+                    ]),
+                    const SizedBox(height: 6),
+                    Text(widget.demo.subtitle,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                            fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                            fontSize: 12.5,
+                            height: 1.5,
+                            color: s.fg3)),
+                    const SizedBox(height: 10),
+                    _TagPill(widget.demo.badge),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// MINI TAB-STRIP PREVIEW (token-driven; reflects dark/light)
+// ════════════════════════════════════════════════════════════
+enum _Content { list, form, cards }
+
+class _TabThumb extends StatelessWidget {
+  final List<String> labels;
+  final int activeIndex;
+  final bool pinned;
+  final Set<int> dirty;
+  final bool overflow;
+  final bool preview;
+  final bool warm;
+  final _Content contentKind;
+  const _TabThumb({
+    required this.labels,
+    required this.activeIndex,
+    this.pinned = false,
+    this.dirty = const {},
+    this.overflow = false,
+    this.preview = false,
+    this.warm = false,
+    this.contentKind = _Content.list,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final base = BrowserStyleTabBarThemeData.of(context);
+    // A warm-tinted variant for the theming demo, else the live theme.
+    final s = warm
+        ? base.copyWith(
+            bg: const Color(0xFFF3EEE7),
+            surface: const Color(0xFFFFFFFF),
+            inputBg: const Color(0xFFEAE3D9),
+            hover: const Color(0xFFEAE3D9),
+            border: const Color(0xFFDED7CB),
+            fg1: const Color(0xFF231F1A),
+            fg3: const Color(0xFF8A8175),
+          )
+        : base;
+    const accent = BrowserStyleTabBarThemeData.accent;
+
+    Widget tab(int i) {
+      final active = i == activeIndex;
+      return Container(
+        height: 22,
+        constraints: const BoxConstraints(maxWidth: 78),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        margin: EdgeInsets.only(left: i == 0 ? 0 : 3),
+        decoration: BoxDecoration(
+          color: active ? s.surface : Colors.transparent,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.description_outlined,
+              size: 9, color: active ? accent : s.fg3),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(labels[i],
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                    fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                    fontSize: 9.5,
+                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                    color: active ? s.fg1 : s.fg3)),
+          ),
+          if (dirty.contains(i)) ...[
+            const SizedBox(width: 5),
+            Container(
+                width: 5,
+                height: 5,
+                decoration: const BoxDecoration(
+                    color: BrowserStyleTabBarThemeData.warning,
+                    shape: BoxShape.circle)),
+          ],
+        ]),
+      );
+    }
+
+    return Container(
+      color: s.bg,
+      child: Column(children: [
+        // strip
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+            if (pinned) ...[
+              Container(
+                width: 22,
+                height: 22,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: s.surface,
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(6)),
+                ),
+                child: const Icon(Icons.push_pin,
+                    size: 9, color: accent),
+              ),
+              Container(
+                  width: 1,
+                  height: 14,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: s.borderStrong),
+            ],
+            Expanded(
+              child: ClipRect(
+                child: Row(children: [for (var i = 0; i < labels.length; i++) tab(i)]),
+              ),
+            ),
+            if (overflow)
+              Icon(Icons.chevron_right, size: 13, color: s.fg3),
+            const SizedBox(width: 2),
+            Icon(Icons.add, size: 12, color: s.fg3),
+            const SizedBox(width: 2),
+            Icon(Icons.expand_more, size: 12, color: s.fg3),
+          ]),
+        ),
+        // content surface
+        Expanded(
+          child: Container(
+            margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+            decoration: BoxDecoration(
+              color: s.surface,
+              borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(6), top: Radius.circular(2)),
+              border: Border.all(color: s.border),
+            ),
+            padding: const EdgeInsets.all(11),
+            child: _content(s),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget _content(BrowserStyleTabBarThemeData s) {
+    Widget bar(double w, {Color? c, double h = 6}) => Container(
+        width: w,
+        height: h,
+        decoration: BoxDecoration(
+            color: c ?? s.inputBg, borderRadius: BorderRadius.circular(3)));
+
+    switch (contentKind) {
+      case _Content.form:
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bar(70, c: s.fg1, h: 8),
+              const SizedBox(height: 10),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: s.bg,
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: s.border),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Column(children: [
+                    bar(double.infinity, h: 5),
+                    const SizedBox(height: 6),
+                    bar(double.infinity, h: 5),
+                    const SizedBox(height: 6),
+                    bar(120, h: 5),
+                  ]),
+                ),
+              ),
+            ]);
+      case _Content.cards:
+        return Column(children: [
+          Row(children: [
+            for (var i = 0; i < 3; i++) ...[
+              if (i > 0) const SizedBox(width: 6),
+              Expanded(
+                child: Container(
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: s.bg,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: s.border),
+                  ),
+                ),
+              ),
+            ],
+          ]),
+          const SizedBox(height: 7),
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: s.bg,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: s.border),
+              ),
+            ),
+          ),
+        ]);
+      case _Content.list:
+        return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              bar(70, c: s.fg1, h: 8),
+              const SizedBox(height: 9),
+              for (var i = 0; i < 4; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(children: [
+                    bar(26, h: 5),
+                    const SizedBox(width: 8),
+                    Expanded(child: bar(double.infinity, h: 5)),
+                    const SizedBox(width: 8),
+                    bar(30, c: BrowserStyleTabBarThemeData.accent.withOpacity(0.5), h: 5),
+                  ]),
+                ),
+            ]);
+    }
+  }
+}
+
+// ── small shared bits ─────────────────────────────────────────────
+class _Mark extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 30,
+      height: 30,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: BrowserStyleTabBarThemeData.accent,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Icon(Icons.tab_rounded, size: 17, color: Colors.white),
+    );
+  }
+}
+
+class _VersionPill extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: BrowserStyleTabBarThemeData.accent.withOpacity(0.13),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+            color: BrowserStyleTabBarThemeData.accent.withOpacity(0.35)),
+      ),
+      child: const Text('v1.0.0',
+          style: TextStyle(
+              fontFamily: BrowserStyleTabBarThemeData.monoFont,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+              color: BrowserStyleTabBarThemeData.accent)),
+    );
+  }
+}
+
+class _TagPill extends StatelessWidget {
+  final String text;
+  const _TagPill(this.text);
+  @override
+  Widget build(BuildContext context) {
+    final s = BrowserStyleTabBarThemeData.of(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: s.inputBg,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: s.border),
+      ),
+      child: Text(text,
+          style: TextStyle(
+              fontFamily: BrowserStyleTabBarThemeData.monoFont,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.3,
+              color: s.fg3)),
+    );
+  }
+}
+
+class _ThemeToggle extends StatelessWidget {
+  final bool dark;
+  final ValueChanged<bool> onToggle;
+  const _ThemeToggle({required this.dark, required this.onToggle});
+  @override
+  Widget build(BuildContext context) {
+    final s = BrowserStyleTabBarThemeData.of(context);
+    return GestureDetector(
+      onTap: () => onToggle(!dark),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          height: 38,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          decoration: BoxDecoration(
+            color: s.surface,
+            border: Border.all(color: s.borderStrong),
+            borderRadius:
+                BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+          ),
+          child: Row(children: [
+            Icon(dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                size: 15, color: s.fg2),
+            const SizedBox(width: 8),
+            Text(dark ? 'Dark' : 'Light',
+                style: TextStyle(
+                    fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: s.fg1)),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+// ── floating "back to demos" wrapper for a pushed screen ──────────
+class _BackScaffold extends StatelessWidget {
+  final Widget child;
+  const _BackScaffold({required this.child});
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      Positioned.fill(child: child),
+      Positioned(
+        left: 16,
+        bottom: 16,
+        child: SafeArea(
+          child: Material(
+            color: Colors.black.withOpacity(0.62),
+            borderRadius: BorderRadius.circular(999),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(999),
+              onTap: () => Navigator.of(context).maybePop(),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.arrow_back, size: 16, color: Colors.white),
+                  SizedBox(width: 7),
+                  Text('Demos',
+                      style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white)),
+                ]),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ]);
+  }
+}
+
+// ── Wrapper for the original BrowserTabsDemo from the monorepo ────
 class _OriginalDemo extends StatefulWidget {
   const _OriginalDemo();
   @override
@@ -175,81 +734,12 @@ class _OriginalDemoState extends State<_OriginalDemo> {
   Widget build(BuildContext context) {
     return themed(
       brightness: _light ? Brightness.light : Brightness.dark,
-      ext: _light ? BrowserStyleTabBarThemeData.light : BrowserStyleTabBarThemeData.dark,
+      ext: _light
+          ? BrowserStyleTabBarThemeData.light
+          : BrowserStyleTabBarThemeData.dark,
       child: BrowserTabsDemo(
         light: _light,
         onToggleTheme: (v) => setState(() => _light = v),
-      ),
-    );
-  }
-}
-
-class _ExampleTileState extends State<_ExampleTile> {
-  bool _hover = false;
-  @override
-  Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: AnimatedContainer(
-          duration: BrowserStyleTabBarThemeData.durBase,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: _hover ? s.hover : s.surface,
-            border: Border.all(
-                color: _hover
-                    ? BrowserStyleTabBarThemeData.accent
-                    : s.border),
-            borderRadius: BorderRadius.circular(
-                BrowserStyleTabBarThemeData.radiusLg),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: BrowserStyleTabBarThemeData.accent.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(
-                      BrowserStyleTabBarThemeData.radiusMd),
-                ),
-                child: const Icon(Icons.tab_outlined,
-                    size: 20,
-                    color: BrowserStyleTabBarThemeData.accent),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(widget.title,
-                        style: TextStyle(
-                            fontFamily:
-                                BrowserStyleTabBarThemeData.bodyFont,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: s.fg1)),
-                    const SizedBox(height: 4),
-                    Text(widget.desc,
-                        style: TextStyle(
-                            fontFamily:
-                                BrowserStyleTabBarThemeData.bodyFont,
-                            fontSize: 12.5,
-                            height: 1.5,
-                            color: s.fg3)),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios,
-                  size: 14, color: s.fg3),
-            ],
-          ),
-        ),
       ),
     );
   }
