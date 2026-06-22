@@ -11,6 +11,8 @@ import 'package:super_tab_bar/super_tab_bar.dart';
 import 'example_01_basic_workspace.dart';
 import 'example_02_document_shell.dart';
 import 'example_03_theme_rtl_overflow.dart';
+import 'browser_tabs_demo.dart';
+import 'shell_kit.dart';
 
 void main() => runApp(const ExampleApp());
 
@@ -74,6 +76,12 @@ class LauncherScreen extends StatelessWidget {
         'copyWith accent, Dark/Light toggle, LTR/RTL toggle,\n'
             '12+ tabs forcing overflow chevrons + ▾ list.',
         const ThemeRtlOverflowExample(),
+      ),
+      (
+        '04 · Full component workbench (original)',
+        'State preservation · pin · drag-reorder · dirty-close guard ·\n'
+            'overflow · live hover thumbnails · ERP / Design Studio / Browser themes.',
+        const _OriginalDemo(),
       ),
     ];
 
@@ -152,6 +160,28 @@ class _ExampleTile extends StatefulWidget {
       {required this.title, required this.desc, required this.onTap});
   @override
   State<_ExampleTile> createState() => _ExampleTileState();
+}
+
+// ── Wrapper for the original BrowserTabsDemo from the monorepo ───
+class _OriginalDemo extends StatefulWidget {
+  const _OriginalDemo();
+  @override
+  State<_OriginalDemo> createState() => _OriginalDemoState();
+}
+
+class _OriginalDemoState extends State<_OriginalDemo> {
+  bool _light = false;
+  @override
+  Widget build(BuildContext context) {
+    return themed(
+      brightness: _light ? Brightness.light : Brightness.dark,
+      ext: _light ? BrowserStyleTabBarThemeData.light : BrowserStyleTabBarThemeData.dark,
+      child: BrowserTabsDemo(
+        light: _light,
+        onToggleTheme: (v) => setState(() => _light = v),
+      ),
+    );
+  }
 }
 
 class _ExampleTileState extends State<_ExampleTile> {
