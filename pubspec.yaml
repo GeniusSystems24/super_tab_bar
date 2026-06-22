@@ -5,8 +5,8 @@ description: >
   previews on hover, and state-preserving pages. Full keyboard nav + RTL.
   Zero third-party dependencies.
 version: 1.0.0
-homepage: https://github.com/geniuslink/super_tab_bar
-repository: https://github.com/geniuslink/super_tab_bar
+homepage: https://github.com/geniussystems24/super_tab_bar
+repository: https://github.com/geniussystems24/super_tab_bar
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
