@@ -1,0 +1,25 @@
+name: super_tab_bar
+description: >
+  A browser-style workspace tab bar for Flutter — pinned / dirty / closable
+  tabs, drag-to-reorder, context menu, overflow dropdown, live mini-page
+  previews on hover, and state-preserving pages. Full keyboard nav + RTL.
+  Zero third-party dependencies.
+version: 1.0.0
+homepage: https://github.com/geniuslink/super_tab_bar
+repository: https://github.com/geniuslink/super_tab_bar
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+  flutter: ">=3.10.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
