@@ -32,8 +32,10 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
   // lazyPages: true  → build-on-visit (state resets)
   bool _lazy = false;
 
-  final _ctrl = BrowserStyleTabBarController(
-    tabs: [
+  String? _selectedLabel;
+
+  final _ctrl = SuperTabBarController(
+    tabs: const [
       BrowserTab(id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger),
       BrowserTab(id: 2, title: 'Journal Entry',      kind: GLTabKind.doc),
       BrowserTab(id: 3, title: 'Dashboard',           kind: GLTabKind.chart),
@@ -50,7 +52,7 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Scaffold(
       backgroundColor: s.bg,
       appBar: AppBar(
@@ -62,7 +64,7 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
         ),
         title: Text('01 · State preservation',
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.displayFont,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: s.fg1)),
@@ -93,6 +95,21 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
                   onChanged: (i) => setState(() => _rtl = i == 1),
                 ),
                 const Spacer(),
+                if (_selectedLabel != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: SuperTabBarThemeData.accent.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: SuperTabBarThemeData.accent.withOpacity(0.28)),
+                    ),
+                    child: Text('onTabSelected · $_selectedLabel',
+                        style: const TextStyle(
+                          fontFamily: SuperTabBarThemeData.monoFont,
+                          fontSize: 10, fontWeight: FontWeight.w700,
+                          color: SuperTabBarThemeData.accent)),
+                  ),
                 // live status badge
                 _StatusBadge(lazy: _lazy),
               ],
@@ -103,12 +120,9 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
             child: Directionality(
               textDirection:
                   _rtl ? TextDirection.rtl : TextDirection.ltr,
-              child: BrowserStyleTabBar(
+              child: SuperTabBar(
                 controller: _ctrl,
-                // Each page is a stateful counter + field + scroll list.
                 pageBuilder: (ctx, tab) => _StatefulTabPage(
-                  // ValueKey includes _lazy so rebuilding the page when
-                  // toggling modes gives it a fresh State.
                   key: ValueKey('page-${tab.id}-$_lazy'),
                   tab: tab,
                 ),
@@ -116,6 +130,10 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
                 fillContent: true,
                 scrollContent: false,
                 showChrome: false,
+                // v2: direct callback
+                onTabSelected: (id) => setState(() {
+                  _selectedLabel = _ctrl.tabById(id)?.title;
+                }),
               ),
             ),
           ),
@@ -148,7 +166,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Padding(
       padding: const EdgeInsets.all(22),
       child: Column(
@@ -161,19 +179,19 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
               height: 36,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: BrowserStyleTabBarThemeData.accent.withOpacity(0.12),
+                color: SuperTabBarThemeData.accent.withOpacity(0.12),
                 borderRadius: BorderRadius.circular(
-                    BrowserStyleTabBarThemeData.radiusMd),
+                    SuperTabBarThemeData.radiusMd),
               ),
               child: Icon(glTabIcon(widget.tab.kind),
                   size: 18,
-                  color: BrowserStyleTabBarThemeData.accent),
+                  color: SuperTabBarThemeData.accent),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(widget.tab.title,
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                      fontFamily: SuperTabBarThemeData.displayFont,
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       color: s.fg1)),
@@ -188,7 +206,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
               ),
               child: Text('tab #${widget.tab.id}',
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                      fontFamily: SuperTabBarThemeData.monoFont,
                       fontSize: 11,
                       color: s.fg3)),
             ),
@@ -199,7 +217,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
             'tabs and come back. With Keep-alive the state survives. '
             'Switch to Rebuild and the same trip resets everything.',
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                fontFamily: SuperTabBarThemeData.bodyFont,
                 fontSize: 12.5,
                 height: 1.55,
                 color: s.fg3),
@@ -218,7 +236,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
               child: TextField(
                 controller: _field,
                 style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                    fontFamily: SuperTabBarThemeData.bodyFont,
                     fontSize: 13,
                     color: s.fg1),
                 decoration: InputDecoration(
@@ -232,14 +250,14 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                   enabledBorder: OutlineInputBorder(
                     borderSide: BorderSide(color: s.border),
                     borderRadius: BorderRadius.circular(
-                        BrowserStyleTabBarThemeData.radiusMd),
+                        SuperTabBarThemeData.radiusMd),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderSide: const BorderSide(
-                        color: BrowserStyleTabBarThemeData.accent,
+                        color: SuperTabBarThemeData.accent,
                         width: 1.5),
                     borderRadius: BorderRadius.circular(
-                        BrowserStyleTabBarThemeData.radiusMd),
+                        SuperTabBarThemeData.radiusMd),
                   ),
                 ),
               ),
@@ -248,7 +266,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
           const SizedBox(height: 14),
           Text('Scroll position is also preserved:',
               style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                  fontFamily: SuperTabBarThemeData.bodyFont,
                   fontSize: 12,
                   color: s.fg3)),
           const SizedBox(height: 8),
@@ -258,7 +276,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                 color: s.bg,
                 border: Border.all(color: s.border),
                 borderRadius: BorderRadius.circular(
-                    BrowserStyleTabBarThemeData.radiusMd),
+                    SuperTabBarThemeData.radiusMd),
               ),
               clipBehavior: Clip.antiAlias,
               child: Scrollbar(
@@ -275,7 +293,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                       '${(i + 1).toString().padLeft(2, '0')}',
                       style: TextStyle(
                           fontFamily:
-                              BrowserStyleTabBarThemeData.monoFont,
+                              SuperTabBarThemeData.monoFont,
                           fontSize: 12,
                           color: s.fg4),
                     ),
@@ -283,7 +301,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                         'Row ${i + 1} · ${widget.tab.title}',
                         style: TextStyle(
                             fontFamily:
-                                BrowserStyleTabBarThemeData.bodyFont,
+                                SuperTabBarThemeData.bodyFont,
                             fontSize: 13,
                             color: s.fg2)),
                   ),
@@ -306,7 +324,7 @@ class _Counter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     Widget btn(IconData ic, VoidCallback fn) => GestureDetector(
           onTap: fn,
           child: Container(
@@ -321,7 +339,7 @@ class _Counter extends StatelessWidget {
         color: s.inputBg,
         border: Border.all(color: s.border),
         borderRadius: BorderRadius.circular(
-            BrowserStyleTabBarThemeData.radiusMd),
+            SuperTabBarThemeData.radiusMd),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         btn(Icons.remove_rounded, onMinus),
@@ -331,10 +349,10 @@ class _Counter extends StatelessWidget {
           child: Text('$value',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                  fontFamily: SuperTabBarThemeData.monoFont,
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: BrowserStyleTabBarThemeData.accent)),
+                  color: SuperTabBarThemeData.accent)),
         ),
         Container(width: 1, height: 22, color: s.border),
         btn(Icons.add_rounded, onPlus),
@@ -355,14 +373,14 @@ class _SegmentedToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: s.inputBg,
         border: Border.all(color: s.border),
         borderRadius:
-            BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+            BorderRadius.circular(SuperTabBarThemeData.radiusMd),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -371,18 +389,18 @@ class _SegmentedToggle extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(i),
             child: AnimatedContainer(
-              duration: BrowserStyleTabBarThemeData.durFast,
+              duration: SuperTabBarThemeData.durFast,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
               decoration: BoxDecoration(
                 color: active
-                    ? BrowserStyleTabBarThemeData.accent
+                    ? SuperTabBarThemeData.accent
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(
-                    BrowserStyleTabBarThemeData.radiusSm),
+                    SuperTabBarThemeData.radiusSm),
               ),
               child: Text(options[i],
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                      fontFamily: SuperTabBarThemeData.bodyFont,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: active ? Colors.white : s.fg2)),
@@ -401,8 +419,8 @@ class _StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = lazy
-        ? BrowserStyleTabBarThemeData.warning
-        : BrowserStyleTabBarThemeData.success;
+        ? SuperTabBarThemeData.warning
+        : SuperTabBarThemeData.success;
     return Container(
       padding:
           const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -424,7 +442,7 @@ class _StatusBadge extends StatelessWidget {
                 ? 'lazyPages: true · resets'
                 : 'lazyPages: false · preserved',
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                fontFamily: SuperTabBarThemeData.monoFont,
                 fontSize: 11,
                 fontWeight: FontWeight.w700,
                 color: c)),

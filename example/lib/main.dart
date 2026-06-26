@@ -10,6 +10,7 @@ import 'package:super_tab_bar/super_tab_bar.dart';
 import 'example_01_basic_workspace.dart';
 import 'example_02_document_shell.dart';
 import 'example_03_theme_rtl_overflow.dart';
+import 'example_04_tab_behaviors.dart';
 import 'browser_tabs_demo.dart';
 import 'shell_kit.dart';
 
@@ -31,16 +32,16 @@ class _ExampleAppState extends State<ExampleApp> {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A7CFF)),
-        fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-        scaffoldBackgroundColor: BrowserStyleTabBarThemeData.light.bg,
-        extensions: const [BrowserStyleTabBarThemeData.light],
+        fontFamily: SuperTabBarThemeData.bodyFont,
+        scaffoldBackgroundColor: SuperTabBarThemeData.light.bg,
+        extensions: const [SuperTabBarThemeData.light],
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF4A7CFF), brightness: Brightness.dark),
-        fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-        scaffoldBackgroundColor: BrowserStyleTabBarThemeData.dark.bg,
-        extensions: const [BrowserStyleTabBarThemeData.dark],
+        fontFamily: SuperTabBarThemeData.bodyFont,
+        scaffoldBackgroundColor: SuperTabBarThemeData.dark.bg,
+        extensions: const [SuperTabBarThemeData.dark],
       ),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
       home: LauncherScreen(
@@ -62,7 +63,7 @@ class LauncherScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
 
     final demos = <_Demo>[
       _Demo(
@@ -81,9 +82,10 @@ class LauncherScreen extends StatelessWidget {
       _Demo(
         title: 'Document management shell',
         subtitle:
-            'ERP-style workspace: a pinned Chart of Accounts tab, a dirty '
-            'Journal Entry form, open-from-row via of(context), and a save flow.',
-        badge: 'Dirty · pinned · of(context)',
+            'ERP-style shell: requiredPinned Chart of Accounts (no close/unpin in UI), '
+            'dirty Journal Entry with save flow, open-from-row via of(context), '
+            'and live onTab* event callbacks.',
+        badge: 'requiredPinned · dirty · callbacks',
         preview: const _TabThumb(
           labels: ['Journal', 'Dashboard'],
           activeIndex: 0,
@@ -96,9 +98,9 @@ class LauncherScreen extends StatelessWidget {
       _Demo(
         title: 'Custom theme + RTL + overflow',
         subtitle:
-            'copyWith a warm palette, toggle Dark/Light and LTR/RTL, and add '
-            '12+ tabs to force the overflow chevrons and the ▾ tab list.',
-        badge: 'Theming · RTL',
+            'copyWith a warm palette, toggle Dark/Light and LTR/RTL, force overflow, '
+            'and configure SuperTabBarPreviewOptions and SuperTabBarLocalizations (EN/AR) live.',
+        badge: 'Theming · RTL · Previews · L10n',
         preview: const _TabThumb(
           labels: ['One', 'Two', 'Three', 'Four', 'Five'],
           activeIndex: 2,
@@ -122,6 +124,21 @@ class LauncherScreen extends StatelessWidget {
           contentKind: _Content.list,
         ),
         screen: const _OriginalDemo(),
+      ),
+      _Demo(
+        title: 'Tab behaviors + callbacks',
+        subtitle:
+            'requiredPinned tabs that cannot be closed or unpinned, '
+            'uniqueNormal tabs that deduplicate on re-open, and a live '
+            'event log showing all seven direct callbacks.',
+        badge: 'v2 · Behaviors · Callbacks',
+        preview: const _TabThumb(
+          labels: ['Home', 'Settings', 'Dashboard'],
+          activeIndex: 2,
+          pinned: true,
+          contentKind: _Content.list,
+        ),
+        screen: const TabBehaviorsExample(),
       ),
     ];
 
@@ -148,12 +165,12 @@ class LauncherScreen extends StatelessWidget {
                             Text('SUPER_TAB_BAR',
                                 style: TextStyle(
                                     fontFamily:
-                                        BrowserStyleTabBarThemeData.monoFont,
+                                        SuperTabBarThemeData.monoFont,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.8,
                                     color:
-                                        BrowserStyleTabBarThemeData.accent)),
+                                        SuperTabBarThemeData.accent)),
                             const SizedBox(width: 10),
                             _VersionPill(),
                           ]),
@@ -161,7 +178,7 @@ class LauncherScreen extends StatelessWidget {
                           Text('Browser-style workspace tabs',
                               style: TextStyle(
                                   fontFamily:
-                                      BrowserStyleTabBarThemeData.displayFont,
+                                      SuperTabBarThemeData.displayFont,
                                   fontSize: 34,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.8,
@@ -177,7 +194,7 @@ class LauncherScreen extends StatelessWidget {
                               'example to try it live in Light / Dark and LTR / RTL.',
                               style: TextStyle(
                                   fontFamily:
-                                      BrowserStyleTabBarThemeData.bodyFont,
+                                      SuperTabBarThemeData.bodyFont,
                                   fontSize: 14.5,
                                   height: 1.6,
                                   color: s.fg3),
@@ -216,9 +233,9 @@ class LauncherScreen extends StatelessWidget {
                 }),
                 const SizedBox(height: 24),
                 Center(
-                  child: Text('MIT © GeniusLink · pure Flutter, zero dependencies',
+                  child: Text('MIT © GeniusSystems24 · pure Flutter, zero dependencies',
                       style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                          fontFamily: SuperTabBarThemeData.monoFont,
                           fontSize: 11,
                           color: s.fg4)),
                 ),
@@ -259,7 +276,7 @@ class _DemoCardState extends State<_DemoCard> {
   bool _h = false;
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _h = true),
@@ -267,8 +284,8 @@ class _DemoCardState extends State<_DemoCard> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: BrowserStyleTabBarThemeData.durBase,
-          curve: BrowserStyleTabBarThemeData.curveStandard,
+          duration: SuperTabBarThemeData.durBase,
+          curve: SuperTabBarThemeData.curveStandard,
           transform: _h
               ? (Matrix4.identity()..translate(0.0, -4.0))
               : Matrix4.identity(),
@@ -276,11 +293,11 @@ class _DemoCardState extends State<_DemoCard> {
             color: s.surface,
             border: Border.all(
                 color: _h
-                    ? BrowserStyleTabBarThemeData.accent.withOpacity(0.55)
+                    ? SuperTabBarThemeData.accent.withOpacity(0.55)
                     : s.border),
             borderRadius:
-                BorderRadius.circular(BrowserStyleTabBarThemeData.radiusXl),
-            boxShadow: _h ? BrowserStyleTabBarThemeData.cardShadow : null,
+                BorderRadius.circular(SuperTabBarThemeData.radiusXl),
+            boxShadow: _h ? SuperTabBarThemeData.cardShadow : null,
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -306,7 +323,7 @@ class _DemoCardState extends State<_DemoCard> {
                         child: Text('0${widget.index}',
                             style: TextStyle(
                                 fontFamily:
-                                    BrowserStyleTabBarThemeData.monoFont,
+                                    SuperTabBarThemeData.monoFont,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg2)),
@@ -330,7 +347,7 @@ class _DemoCardState extends State<_DemoCard> {
                         child: Text(widget.demo.title,
                             style: TextStyle(
                                 fontFamily:
-                                    BrowserStyleTabBarThemeData.displayFont,
+                                    SuperTabBarThemeData.displayFont,
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg1)),
@@ -338,7 +355,7 @@ class _DemoCardState extends State<_DemoCard> {
                       Icon(Icons.arrow_outward,
                           size: 16,
                           color: _h
-                              ? BrowserStyleTabBarThemeData.accent
+                              ? SuperTabBarThemeData.accent
                               : s.fg3),
                     ]),
                     const SizedBox(height: 6),
@@ -346,7 +363,7 @@ class _DemoCardState extends State<_DemoCard> {
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                            fontFamily: SuperTabBarThemeData.bodyFont,
                             fontSize: 12.5,
                             height: 1.5,
                             color: s.fg3)),
@@ -390,7 +407,7 @@ class _TabThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = BrowserStyleTabBarThemeData.of(context);
+    final base = SuperTabBarThemeData.of(context);
     // A warm-tinted variant for the theming demo, else the live theme.
     final s = warm
         ? base.copyWith(
@@ -403,7 +420,7 @@ class _TabThumb extends StatelessWidget {
             fg3: const Color(0xFF8A8175),
           )
         : base;
-    const accent = BrowserStyleTabBarThemeData.accent;
+    const accent = SuperTabBarThemeData.accent;
 
     Widget tab(int i) {
       final active = i == activeIndex;
@@ -425,7 +442,7 @@ class _TabThumb extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                    fontFamily: SuperTabBarThemeData.bodyFont,
                     fontSize: 9.5,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? s.fg1 : s.fg3)),
@@ -436,7 +453,7 @@ class _TabThumb extends StatelessWidget {
                 width: 5,
                 height: 5,
                 decoration: const BoxDecoration(
-                    color: BrowserStyleTabBarThemeData.warning,
+                    color: SuperTabBarThemeData.warning,
                     shape: BoxShape.circle)),
           ],
         ]),
@@ -500,7 +517,7 @@ class _TabThumb extends StatelessWidget {
     );
   }
 
-  Widget _content(BrowserStyleTabBarThemeData s) {
+  Widget _content(SuperTabBarThemeData s) {
     Widget bar(double w, {Color? c, double h = 6}) => Container(
         width: w,
         height: h,
@@ -575,7 +592,7 @@ class _TabThumb extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(child: bar(double.infinity, h: 5)),
                     const SizedBox(width: 8),
-                    bar(30, c: BrowserStyleTabBarThemeData.accent.withOpacity(0.5), h: 5),
+                    bar(30, c: SuperTabBarThemeData.accent.withOpacity(0.5), h: 5),
                   ]),
                 ),
             ]);
@@ -592,7 +609,7 @@ class _Mark extends StatelessWidget {
       height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: BrowserStyleTabBarThemeData.accent,
+        color: SuperTabBarThemeData.accent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Icons.tab_rounded, size: 17, color: Colors.white),
@@ -606,17 +623,17 @@ class _VersionPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: BrowserStyleTabBarThemeData.accent.withOpacity(0.13),
+        color: SuperTabBarThemeData.accent.withOpacity(0.13),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-            color: BrowserStyleTabBarThemeData.accent.withOpacity(0.35)),
+            color: SuperTabBarThemeData.accent.withOpacity(0.35)),
       ),
-      child: const Text('v1.0.0',
+      child: const Text('v2.0.0',
           style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.monoFont,
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
-              color: BrowserStyleTabBarThemeData.accent)),
+              color: SuperTabBarThemeData.accent)),
     );
   }
 }
@@ -626,7 +643,7 @@ class _TagPill extends StatelessWidget {
   const _TagPill(this.text);
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -636,7 +653,7 @@ class _TagPill extends StatelessWidget {
       ),
       child: Text(text,
           style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.monoFont,
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.3,
@@ -651,7 +668,7 @@ class _ThemeToggle extends StatelessWidget {
   const _ThemeToggle({required this.dark, required this.onToggle});
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return GestureDetector(
       onTap: () => onToggle(!dark),
       child: MouseRegion(
@@ -663,7 +680,7 @@ class _ThemeToggle extends StatelessWidget {
             color: s.surface,
             border: Border.all(color: s.borderStrong),
             borderRadius:
-                BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+                BorderRadius.circular(SuperTabBarThemeData.radiusMd),
           ),
           child: Row(children: [
             Icon(dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
@@ -671,7 +688,7 @@ class _ThemeToggle extends StatelessWidget {
             const SizedBox(width: 8),
             Text(dark ? 'Dark' : 'Light',
                 style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                    fontFamily: SuperTabBarThemeData.bodyFont,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: s.fg1)),
@@ -707,7 +724,7 @@ class _BackScaffold extends StatelessWidget {
                   SizedBox(width: 7),
                   Text('Demos',
                       style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontFamily: SuperTabBarThemeData.bodyFont,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: Colors.white)),
@@ -735,8 +752,8 @@ class _OriginalDemoState extends State<_OriginalDemo> {
     return themed(
       brightness: _light ? Brightness.light : Brightness.dark,
       ext: _light
-          ? BrowserStyleTabBarThemeData.light
-          : BrowserStyleTabBarThemeData.dark,
+          ? SuperTabBarThemeData.light
+          : SuperTabBarThemeData.dark,
       child: BrowserTabsDemo(
         light: _light,
         onToggleTheme: (v) => setState(() => _light = v),

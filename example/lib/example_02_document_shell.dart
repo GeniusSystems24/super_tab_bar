@@ -1,15 +1,16 @@
 // super_tab_bar · Example 02 — Document management shell (ERP-style)
 // ─────────────────────────────────────────────────────────────────
-// Goal: realistic workspace shell demonstrating:
+// Goal: realistic workspace shell demonstrating v2 features:
 //
-//   • Pinned permanent tab (Chart of Accounts — cannot be closed)
-//   • Dirty-state flow: Journal Entry form marks the tab dirty on the
-//     first keystroke; Save clears dirty + renames the tab to the ref
-//   • Open-from-row: rows in the CoA list call
-//     BrowserStyleTabBarController.of(context)?.add(...)
-//     proving the InheritedNotifier scope works from inside page content
+//   • SuperTabBehavior.requiredPinned — Chart of Accounts is always
+//     pinned; close / unpin / duplicate are hidden from the UI
+//   • Dirty-state flow: Journal Entry marks the tab dirty on the first
+//     keystroke; Save clears dirty + renames the tab to the ref
+//   • Open-from-row via SuperTabBarController.of(context): InheritedNotifier
+//     scope exposes the controller to every page widget
 //   • canCloseOthers guard before closeOthers
-//   • onAddTab intercept: opens a bottom-sheet to pick the new tab kind
+//   • onAddTab intercept: bottom-sheet to pick the new tab kind
+//   • onTabAdded / onTabClosed / onTabDirtyChanged / onTabReordered callbacks
 
 import 'package:flutter/material.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
@@ -22,23 +23,26 @@ class DocumentShellExample extends StatefulWidget {
 }
 
 class _DocumentShellExampleState extends State<DocumentShellExample> {
-  late final BrowserStyleTabBarController _tabs;
+  late final SuperTabBarController _tabs;
+  String? _lastEvent;
 
   @override
   void initState() {
     super.initState();
-    _tabs = BrowserStyleTabBarController(
-      tabs: [
+    _tabs = SuperTabBarController(
+      tabs: const [
+        // requiredPinned — always pinned; close / unpin / duplicate
+        // are hidden in the UI. Programmatic close() still works.
         BrowserTab(
             id: 1,
             title: 'Chart of Accounts',
             kind: GLTabKind.ledger,
-            pinned: true), // permanent — cannot be closed
+            pinned: true,
+            behavior: SuperTabBehavior.requiredPinned),
         BrowserTab(
             id: 2,
             title: 'New Journal Entry',
-            kind: GLTabKind.doc,
-            dirty: false),
+            kind: GLTabKind.doc),
         BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
       ],
       activeId: 1,
@@ -82,9 +86,11 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
     }
   }
 
+  void _setEvent(String msg) => setState(() => _lastEvent = msg);
+
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Scaffold(
       backgroundColor: s.bg,
       appBar: AppBar(
@@ -96,7 +102,7 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
         ),
         title: Text('02 · Document shell',
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.displayFont,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: s.fg1)),
@@ -116,13 +122,74 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
           ),
         ],
       ),
-      body: BrowserStyleTabBar(
-        controller: _tabs,
-        pageBuilder: _buildPage,
-        showChrome: false,
-        fillContent: true,
-        scrollContent: false,
-        onAddTab: _onAddTab,
+      body: Column(
+        children: [
+          // ── v2 behavior legend ──────────────────────────────
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+            decoration: BoxDecoration(
+              color: s.surface,
+              border: Border(bottom: BorderSide(color: s.border)),
+            ),
+            child: Wrap(
+              spacing: 10,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                _BehaviorChip(
+                  color: SuperTabBarThemeData.danger,
+                  label: 'requiredPinned',
+                  desc: 'Chart of Accounts — no close · unpin · dupe in UI',
+                ),
+                _BehaviorChip(
+                  color: SuperTabBarThemeData.success,
+                  label: 'normal',
+                  desc: 'all other tabs',
+                ),
+                if (_lastEvent != null) ...[
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: SuperTabBarThemeData.accent.withOpacity(0.10),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                          color: SuperTabBarThemeData.accent.withOpacity(0.30)),
+                    ),
+                    child: Text(
+                      _lastEvent!,
+                      style: TextStyle(
+                        fontFamily: SuperTabBarThemeData.monoFont,
+                        fontSize: 10,
+                        color: SuperTabBarThemeData.accent,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          // ── tab bar ─────────────────────────────────────────
+          Expanded(
+            child: SuperTabBar(
+              controller: _tabs,
+              pageBuilder: _buildPage,
+              showChrome: false,
+              fillContent: true,
+              scrollContent: false,
+              onAddTab: _onAddTab,
+              // v2 callbacks
+              onTabAdded:    (id) => _setEvent('onTabAdded · $id'),
+              onTabClosed:   (id) => _setEvent('onTabClosed · $id'),
+              onTabReordered:(f, t) => _setEvent('onTabReordered · $f→$t'),
+              onTabPinChanged:(id, p) => _setEvent('onTabPinChanged · $id → $p'),
+              onTabDirtyChanged:(id, d) => _setEvent('onTabDirtyChanged · $id → $d'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -149,7 +216,7 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
 }
 
 // ── Chart of Accounts page ────────────────────────────────────────
-// Rows call BrowserStyleTabBarController.of(context) to open a new tab.
+// Rows call SuperTabBarController.of(context) to open a new tab.
 class _CoAPage extends StatelessWidget {
   final BrowserTab tab;
   const _CoAPage({required this.tab});
@@ -166,22 +233,22 @@ class _CoAPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Chart of Accounts',
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.displayFont,
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
                 color: s.fg1)),
         const SizedBox(height: 6),
         Text(
           'Tap "Open ledger" on any row to open a new tab via '
-          'BrowserStyleTabBarController.of(context).',
+          'SuperTabBarController.of(context).',
           style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.bodyFont,
               fontSize: 13,
               color: s.fg3),
         ),
@@ -192,7 +259,7 @@ class _CoAPage extends StatelessWidget {
               color: s.bg,
               border: Border.all(color: s.border),
               borderRadius: BorderRadius.circular(
-                  BrowserStyleTabBarThemeData.radiusLg),
+                  SuperTabBarThemeData.radiusLg),
             ),
             clipBehavior: Clip.antiAlias,
             child: ListView.separated(
@@ -205,13 +272,13 @@ class _CoAPage extends StatelessWidget {
                   leading: Text(a.$1,
                       style: TextStyle(
                           fontFamily:
-                              BrowserStyleTabBarThemeData.monoFont,
+                              SuperTabBarThemeData.monoFont,
                           fontSize: 12,
                           color: s.fg3)),
                   title: Text(a.$2,
                       style: TextStyle(
                           fontFamily:
-                              BrowserStyleTabBarThemeData.bodyFont,
+                              SuperTabBarThemeData.bodyFont,
                           fontWeight: FontWeight.w600,
                           color: s.fg1)),
                   subtitle: Text(a.$3,
@@ -221,7 +288,7 @@ class _CoAPage extends StatelessWidget {
                     onPressed: () {
                       // ← This is the key pattern: open a new tab from
                       //   inside page content using the scope accessor.
-                      BrowserStyleTabBarController.of(ctx)?.add(
+                      SuperTabBarController.of(ctx)?.add(
                         title: '${a.$2} — Ledger',
                         kind: GLTabKind.ledger,
                       );
@@ -281,7 +348,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -289,7 +356,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           Expanded(
             child: Text(widget.tab.title,
                 style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                    fontFamily: SuperTabBarThemeData.displayFont,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: s.fg1)),
@@ -300,14 +367,14 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
                 height: 20,
                 child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    color: BrowserStyleTabBarThemeData.accent))
+                    color: SuperTabBarThemeData.accent))
           else
             ElevatedButton.icon(
               onPressed: _hasDirtied ? _save : null,
               icon: const Icon(Icons.save_outlined, size: 16),
               label: const Text('Save & rename tab'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: BrowserStyleTabBarThemeData.accent,
+                backgroundColor: SuperTabBarThemeData.accent,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -317,7 +384,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           'Type anything in the memo field — the tab gets a dirty dot. '
           'Press Save to clear the dot and rename the tab to a generated ref.',
           style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.bodyFont,
               fontSize: 12.5,
               color: s.fg3),
         ),
@@ -327,7 +394,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           onChanged: (_) => _markDirty(),
           maxLines: 5,
           style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.bodyFont,
               fontSize: 14,
               color: s.fg1),
           decoration: InputDecoration(
@@ -337,7 +404,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
             fillColor: s.inputBg,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(
-                  BrowserStyleTabBarThemeData.radiusMd),
+                  SuperTabBarThemeData.radiusMd),
             ),
           ),
         ),
@@ -352,15 +419,15 @@ class _PlaceholderPage extends StatelessWidget {
   const _PlaceholderPage({required this.tab});
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         Icon(glTabIcon(tab.kind),
-            size: 40, color: BrowserStyleTabBarThemeData.accent),
+            size: 40, color: SuperTabBarThemeData.accent),
         const SizedBox(height: 12),
         Text(tab.title,
             style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.displayFont,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: s.fg1)),
@@ -369,11 +436,37 @@ class _PlaceholderPage extends StatelessWidget {
   }
 }
 
+// ── Behavior chip ─────────────────────────────────────────────────
+class _BehaviorChip extends StatelessWidget {
+  final Color color;
+  final String label, desc;
+  const _BehaviorChip({required this.color, required this.label, required this.desc});
+  @override
+  Widget build(BuildContext context) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [
+      Container(
+          width: 7, height: 7,
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
+      const SizedBox(width: 5),
+      Text(label,
+          style: TextStyle(
+              fontFamily: SuperTabBarThemeData.monoFont,
+              fontSize: 10, fontWeight: FontWeight.w700, color: color)),
+      const SizedBox(width: 4),
+      Text('— $desc',
+          style: TextStyle(
+              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontSize: 10.5,
+              color: SuperTabBarThemeData.of(context).fg3)),
+    ]);
+  }
+}
+
 // ── New tab kind picker (bottom sheet) ────────────────────────────
 class _NewTabSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     final kinds = [
       (GLTabKind.doc, 'Journal Entry', Icons.description_outlined),
       (GLTabKind.ledger, 'Ledger View', Icons.menu_book_outlined),
@@ -394,7 +487,7 @@ class _NewTabSheet extends StatelessWidget {
         children: [
           Text('Open new tab',
               style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                  fontFamily: SuperTabBarThemeData.displayFont,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: s.fg1)),
@@ -412,17 +505,17 @@ class _NewTabSheet extends StatelessWidget {
                     color: s.inputBg,
                     border: Border.all(color: s.border),
                     borderRadius: BorderRadius.circular(
-                        BrowserStyleTabBarThemeData.radiusMd),
+                        SuperTabBarThemeData.radiusMd),
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
                     Icon(k.$3,
                         size: 15,
-                        color: BrowserStyleTabBarThemeData.accent),
+                        color: SuperTabBarThemeData.accent),
                     const SizedBox(width: 8),
                     Text(k.$2,
                         style: TextStyle(
                             fontFamily:
-                                BrowserStyleTabBarThemeData.bodyFont,
+                                SuperTabBarThemeData.bodyFont,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: s.fg1)),

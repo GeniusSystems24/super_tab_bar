@@ -1,17 +1,31 @@
 // ============================================================
-// BrowserStyleTabBarController — the tab strip's state, as a ChangeNotifier.
+// SuperTabBarController — the tab strip's state, as a ChangeNotifier.
 // ------------------------------------------------------------
 // Single source of truth for the open tabs, the active tab, and the live
-// page thumbnails. The widget delegates every op here, and the SAME
-// controller is exposed to the page content via an InheritedNotifier so any
+// page thumbnails. The widget delegates every operation here, and the SAME
+// controller is exposed to page content via an InheritedNotifier so any
 // page can drive the strip:
 //
-//   final tabs = BrowserStyleTabBarController.of(context); // may be null
+//   final tabs = SuperTabBarController.of(context); // may be null
 //   tabs?.add(title: 'New report', kind: GLTabKind.chart);
 //   tabs?.setDirty(myId, true);
 //
-// `of` returns null when a widget isn't hosted inside a BrowserStyleTabBar,
-// so pages can be reused stand-alone.
+// `of` returns null when a widget is not hosted inside a SuperTabBar, so
+// pages can be reused stand-alone.
+//
+// ── Tab behavior ────────────────────────────────────────────
+// [SuperTabBehavior] controls which UI actions are exposed per tab:
+//
+//   requiredPinned — always pinned; UI hides close / unpin / duplicate.
+//                    Programmatic close() still works.
+//   normal         — standard: close, duplicate, pin, unpin all available.
+//   uniqueNormal   — no duplicate from UI; add() with same uniqueKey
+//                    selects the existing tab instead.
+//
+// ── Immutability ────────────────────────────────────────────
+// [BrowserTab] is now @immutable. All mutations create new instances via
+// copyWith() and replace the slot in the internal list. Never mutate a
+// BrowserTab field directly — it won't notify listeners.
 //
 //   File: lib/src/controller.dart
 // ============================================================
@@ -20,19 +34,39 @@ import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'models.dart';
 
-class BrowserStyleTabBarController extends ChangeNotifier {
-  BrowserStyleTabBarController({List<BrowserTab>? tabs, int? activeId})
-      : _tabs = [...(tabs ?? _defaults())] {
+class SuperTabBarController extends ChangeNotifier {
+  SuperTabBarController({List<BrowserTab>? tabs, int? activeId})
+      : _tabs = _normalize(tabs ?? _defaults()) {
     _seed = _tabs.fold<int>(0, (m, t) => t.id > m ? t.id : m);
-    _activeId = activeId ?? (_tabs.length > 1 ? _tabs[1].id : (_tabs.isNotEmpty ? _tabs.first.id : null));
+    _activeId = activeId ??
+        (_tabs.length > 1 ? _tabs[1].id : (_tabs.isNotEmpty ? _tabs.first.id : null));
   }
 
+  // ── Default seed tabs ──────────────────────────────────────
   static List<BrowserTab> _defaults() => [
-        BrowserTab(id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger, pinned: true),
-        BrowserTab(id: 2, title: 'Opening Journal Entry — JV-2024-0042', kind: GLTabKind.doc, dirty: true),
-        BrowserTab(id: 3, title: 'Downtown Central Store', kind: GLTabKind.store),
-        BrowserTab(id: 4, title: 'Dashboard', kind: GLTabKind.chart),
-        BrowserTab(id: 5, title: 'Trial Balance — FY2024 Q3', kind: GLTabKind.ledger),
+        const BrowserTab(
+            id: 1,
+            title: 'Chart of Accounts',
+            kind: GLTabKind.ledger,
+            pinned: true,
+            behavior: SuperTabBehavior.requiredPinned),
+        const BrowserTab(
+            id: 2,
+            title: 'Opening Journal Entry — JV-2024-0042',
+            kind: GLTabKind.doc,
+            dirty: true),
+        const BrowserTab(id: 3, title: 'Downtown Central Store', kind: GLTabKind.store),
+        const BrowserTab(id: 4, title: 'Dashboard', kind: GLTabKind.chart),
+        const BrowserTab(
+            id: 5, title: 'Trial Balance — FY2024 Q3', kind: GLTabKind.ledger),
+      ];
+
+  /// Ensures requiredPinned tabs always have pinned: true.
+  static List<BrowserTab> _normalize(List<BrowserTab> tabs) => [
+        for (final t in tabs)
+          t.behavior == SuperTabBehavior.requiredPinned && !t.pinned
+              ? t.copyWith(pinned: true)
+              : t,
       ];
 
   final List<BrowserTab> _tabs;
@@ -40,7 +74,16 @@ class BrowserStyleTabBarController extends ChangeNotifier {
   late int _seed;
   final Map<int, ui.Image> _snaps = {};
 
-  // ── reads ──────────────────────────────────────────────────
+  // ── Optional event callbacks ───────────────────────────────
+  /// Called whenever [setDirty] changes a tab's dirty flag.
+  /// Useful for pages that drive dirty-state through the controller and
+  /// want to react without listening to the whole ChangeNotifier.
+  void Function(int id, bool isDirty)? onDirtyChanged;
+
+  /// Called whenever [rename] changes a tab's title.
+  void Function(int id, String newTitle)? onRenamed;
+
+  // ── Reads ──────────────────────────────────────────────────
   List<BrowserTab> get tabs => List.unmodifiable(_tabs);
   int? get activeId => _activeId;
   int get length => _tabs.length;
@@ -58,7 +101,7 @@ class BrowserStyleTabBarController extends ChangeNotifier {
   List<BrowserTab> get pinned => _tabs.where((t) => t.pinned).toList();
   List<BrowserTab> get unpinned => _tabs.where((t) => !t.pinned).toList();
 
-  /// Visual order: pinned first (in their relative order), then the rest.
+  /// Visual order: pinned first (preserving relative order), then unpinned.
   List<BrowserTab> get ordered => [...pinned, ...unpinned];
 
   bool canCloseOthers(int id) => _tabs.any((t) => t.id != id && !t.pinned);
@@ -68,37 +111,90 @@ class BrowserStyleTabBarController extends ChangeNotifier {
     return ordered.skip(oi + 1).any((t) => !t.pinned);
   }
 
-  // ── live page thumbnails ───────────────────────────────────
+  // ── UI-behavior guards ─────────────────────────────────────
+  // These are used by the widget to decide which UI actions to surface
+  // (close button, context-menu items). They do NOT restrict programmatic ops.
+
+  /// Whether the UI should offer a close action for [id].
+  bool canCloseFromUi(int id) {
+    final t = tabById(id);
+    return t != null && t.behavior != SuperTabBehavior.requiredPinned;
+  }
+
+  /// Whether the UI should offer a duplicate action for [id].
+  bool canDuplicateFromUi(int id) {
+    final t = tabById(id);
+    return t != null &&
+        t.behavior != SuperTabBehavior.requiredPinned &&
+        t.behavior != SuperTabBehavior.uniqueNormal;
+  }
+
+  /// Whether the UI should offer a pin/unpin toggle for [id].
+  bool canTogglePinFromUi(int id) {
+    final t = tabById(id);
+    return t != null && t.behavior != SuperTabBehavior.requiredPinned;
+  }
+
+  // ── Live page thumbnails ───────────────────────────────────
   ui.Image? snapshot(int id) => _snaps[id];
+
   void setSnapshot(int id, ui.Image img) {
     final old = _snaps[id];
     if (identical(old, img)) return;
     _snaps[id] = img;
     old?.dispose();
-    // No notifyListeners(): snapshots don't affect the strip's layout, and
-    // the open preview is refreshed directly by the widget. Avoids churn.
+    // No notifyListeners(): snapshots don't affect strip layout.
   }
 
   void _dropSnapshot(int id) {
     _snaps.remove(id)?.dispose();
   }
 
-  // ── mutations ──────────────────────────────────────────────
+  // ── Mutations ──────────────────────────────────────────────
+
   void select(int id) {
     if (_activeId == id || !_tabs.any((t) => t.id == id)) return;
     _activeId = id;
     notifyListeners();
   }
 
-  /// Adds a tab and (by default) activates it. Returns the new id.
-  int add({String? title, GLTabKind? kind, bool activate = true, bool pinned = false, int? at}) {
+  /// Adds a tab and (by default) activates it. Returns the id of the
+  /// affected tab.
+  ///
+  /// For [SuperTabBehavior.uniqueNormal] tabs with a non-null [uniqueKey]:
+  /// if a tab with the same key already exists it is activated and its id
+  /// returned — no new tab is created.
+  ///
+  /// [SuperTabBehavior.requiredPinned] tabs are always created with
+  /// `pinned: true` regardless of the [pinned] argument.
+  int add({
+    String? title,
+    GLTabKind? kind,
+    bool activate = true,
+    bool pinned = false,
+    int? at,
+    SuperTabBehavior behavior = SuperTabBehavior.normal,
+    String? uniqueKey,
+  }) {
+    // Deduplication for uniqueNormal tabs.
+    if (behavior == SuperTabBehavior.uniqueNormal && uniqueKey != null) {
+      final existing = _findByUniqueKey(uniqueKey);
+      if (existing != null) {
+        if (activate) select(existing.id);
+        return existing.id;
+      }
+    }
+
     final id = ++_seed;
     final tab = BrowserTab(
       id: id,
       title: title ?? 'New Tab',
       kind: kind ?? kNewTabCycle[id % kNewTabCycle.length],
-      pinned: pinned,
+      pinned: behavior == SuperTabBehavior.requiredPinned ? true : pinned,
+      behavior: behavior,
+      uniqueKey: uniqueKey,
     );
+
     if (at != null && at >= 0 && at <= _tabs.length) {
       _tabs.insert(at, tab);
     } else {
@@ -109,6 +205,11 @@ class BrowserStyleTabBarController extends ChangeNotifier {
     return id;
   }
 
+  /// Removes [id]. For [SuperTabBehavior.requiredPinned] tabs, the UI hides
+  /// the close button — but programmatic removal is always allowed.
+  ///
+  /// To make the intent explicit you can also call [forceClose], which is
+  /// semantically identical.
   void close(int id) {
     final i = _tabs.indexWhere((t) => t.id == id);
     if (i < 0) return;
@@ -121,13 +222,19 @@ class BrowserStyleTabBarController extends ChangeNotifier {
       if (_tabs.isEmpty) {
         _activeId = null;
       } else {
-        final candidates = ord.where((t) => t.id != id && _tabs.any((n) => n.id == t.id)).toList();
+        final candidates =
+            ord.where((t) => t.id != id && _tabs.any((n) => n.id == t.id)).toList();
         final idx = oi.clamp(0, candidates.length - 1);
         _activeId = candidates.isEmpty ? _tabs.first.id : candidates[idx].id;
       }
     }
     notifyListeners();
   }
+
+  /// Explicitly removes a [SuperTabBehavior.requiredPinned] tab (or any tab).
+  /// Semantically identical to [close] — use this to make programmatic
+  /// removal of a "required" tab clear at the call site.
+  void forceClose(int id) => close(id);
 
   void closeOthers(int id) {
     _tabs.removeWhere((t) => t.id != id && !t.pinned);
@@ -151,11 +258,19 @@ class BrowserStyleTabBarController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Duplicates [id] as the next sibling and activates the copy.
+  /// Returns the new tab's id, or `-1` if the tab doesn't exist or its
+  /// [SuperTabBehavior] doesn't permit duplication.
   int duplicate(int id) {
     final i = _tabs.indexWhere((t) => t.id == id);
     if (i < 0) return -1;
+    final src = _tabs[i];
+    if (src.behavior == SuperTabBehavior.uniqueNormal ||
+        src.behavior == SuperTabBehavior.requiredPinned) {
+      return -1;
+    }
     final nid = ++_seed;
-    _tabs.insert(i + 1, _tabs[i].copyWith(id: nid, dirty: false, pinned: false));
+    _tabs.insert(i + 1, src.copyWith(id: nid, dirty: false, pinned: false));
     _activeId = nid;
     notifyListeners();
     return nid;
@@ -163,10 +278,13 @@ class BrowserStyleTabBarController extends ChangeNotifier {
 
   void togglePin(int id) => setPinned(id, !(tabById(id)?.pinned ?? false));
 
+  /// Sets the pinned flag for [id].
+  /// No-op for [SuperTabBehavior.requiredPinned] tabs (they cannot be unpinned).
   void setPinned(int id, bool pinned) {
-    final t = tabById(id);
-    if (t == null || t.pinned == pinned) return;
-    t.pinned = pinned;
+    final i = _tabs.indexWhere((t) => t.id == id);
+    if (i < 0 || _tabs[i].pinned == pinned) return;
+    if (_tabs[i].behavior == SuperTabBehavior.requiredPinned && !pinned) return;
+    _tabs[i] = _tabs[i].copyWith(pinned: pinned);
     notifyListeners();
   }
 
@@ -179,21 +297,40 @@ class BrowserStyleTabBarController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Sets the dirty flag for [id] and fires [onDirtyChanged] if the value
+  /// actually changed.
   void setDirty(int id, bool dirty) {
-    final t = tabById(id);
-    if (t == null || t.dirty == dirty) return;
-    t.dirty = dirty;
+    final i = _tabs.indexWhere((t) => t.id == id);
+    if (i < 0 || _tabs[i].dirty == dirty) return;
+    _tabs[i] = _tabs[i].copyWith(dirty: dirty);
+    onDirtyChanged?.call(id, dirty);
     notifyListeners();
   }
 
+  /// Renames [id] and fires [onRenamed] if the title actually changed.
   void rename(int id, String title) {
-    final t = tabById(id);
-    if (t == null || t.title == title) return;
-    t.title = title;
+    final i = _tabs.indexWhere((t) => t.id == id);
+    if (i < 0 || _tabs[i].title == title) return;
+    _tabs[i] = _tabs[i].copyWith(title: title);
+    onRenamed?.call(id, title);
     notifyListeners();
   }
 
-  /// Escape hatch for arbitrary edits; call inside and we notify after.
+  /// Escape hatch for arbitrary batch edits. Call inside [fn] and
+  /// [notifyListeners] will fire once when it returns.
+  ///
+  /// Note: [BrowserTab] is immutable — you cannot mutate tab fields
+  /// directly. Use [tabById] to read, then [mutate] with list-index
+  /// replacement via [copyWith], e.g.:
+  ///
+  /// ```dart
+  /// controller.mutate(() {
+  ///   final i = controller.tabs.indexWhere((t) => t.id == myId);
+  ///   // tabs is unmodifiable — use the internal list via the controller API
+  ///   controller.rename(myId, 'New title');
+  ///   controller.setDirty(myId, false);
+  /// });
+  /// ```
   void mutate(VoidCallback fn) {
     fn();
     notifyListeners();
@@ -208,21 +345,43 @@ class BrowserStyleTabBarController extends ChangeNotifier {
     super.dispose();
   }
 
-  // ── inherited lookup ───────────────────────────────────────
-  /// The controller hosting [context], or null if not inside a tab bar.
-  static BrowserStyleTabBarController? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<BrowserStyleTabBarScope>()?.controller;
+  // ── Inherited lookup ───────────────────────────────────────
+  /// The controller hosting [context], or null if not inside a [SuperTabBar].
+  static SuperTabBarController? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SuperTabBarScope>()?.controller;
 
-  /// Non-listening variant (use in callbacks / initState).
-  static BrowserStyleTabBarController? read(BuildContext context) =>
-      (context.getElementForInheritedWidgetOfExactType<BrowserStyleTabBarScope>()?.widget as BrowserStyleTabBarScope?)
+  /// Non-listening variant — use in callbacks / initState.
+  static SuperTabBarController? read(BuildContext context) =>
+      (context.getElementForInheritedWidgetOfExactType<SuperTabBarScope>()?.widget
+              as SuperTabBarScope?)
           ?.controller;
+
+  // ── Private helpers ────────────────────────────────────────
+  BrowserTab? _findByUniqueKey(String key) {
+    for (final t in _tabs) {
+      if (t.behavior == SuperTabBehavior.uniqueNormal && t.uniqueKey == key) {
+        return t;
+      }
+    }
+    return null;
+  }
 }
 
-/// Exposes the controller to descendants; rebuilds dependents on notify.
-class BrowserStyleTabBarScope extends InheritedNotifier<BrowserStyleTabBarController> {
-  const BrowserStyleTabBarScope({super.key, required BrowserStyleTabBarController controller, required super.child})
-      : super(notifier: controller);
+// ── InheritedNotifier scope ───────────────────────────────────
+/// Exposes [controller] to descendants; rebuilds dependents on notify.
+class SuperTabBarScope extends InheritedNotifier<SuperTabBarController> {
+  const SuperTabBarScope({
+    super.key,
+    required SuperTabBarController controller,
+    required super.child,
+  }) : super(notifier: controller);
 
-  BrowserStyleTabBarController get controller => notifier!;
+  SuperTabBarController get controller => notifier!;
 }
+
+// ── Backward-compatible aliases ────────────────────────────────
+/// Alias for [SuperTabBarController]. Maintained for backward compatibility.
+typedef BrowserStyleTabBarController = SuperTabBarController;
+
+/// Alias for [SuperTabBarScope]. Maintained for backward compatibility.
+typedef BrowserStyleTabBarScope = SuperTabBarScope;

@@ -15,7 +15,6 @@
 /// ```
 library;
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
 /// Resolves a horizontal arrow [key] to a logical index *step* for the given

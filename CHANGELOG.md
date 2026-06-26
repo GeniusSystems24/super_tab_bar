@@ -1,87 +1,176 @@
 # Changelog
 
-All notable changes to `super_tab_bar` will be documented in this file.
-Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+All notable changes to `super_tab_bar` are documented here.
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [2.0.0] — 2026-06-27
+
+### Renamed (with backward-compatible aliases)
+
+Every top-level name has been shortened to match the package name.
+Old names remain usable via `typedef` aliases — existing code compiles
+without changes.
+
+| v1 name | v2 name | Alias kept? |
+|---|---|---|
+| `BrowserStyleTabBar` | `SuperTabBar` | ✓ |
+| `BrowserStyleTabBarController` | `SuperTabBarController` | ✓ |
+| `BrowserStyleTabBarScope` | `SuperTabBarScope` | ✓ |
+| `BrowserStyleTabBarThemeData` | `SuperTabBarThemeData` | ✓ |
+| `showGLDirtyCloseDialog` | `showSuperTabDirtyCloseDialog` | ✓ |
+
+### Changed (breaking for direct field mutation)
+
+- **`BrowserTab` is now `@immutable`.** Fields `title`, `dirty` and `pinned`
+  are now `final`. Code that mutated them directly (e.g. `tab.dirty = true`)
+  will not compile. Use the controller's `setDirty`, `rename`, `setPinned`
+  methods instead — they already existed in v1 and are unchanged in
+  behaviour. The controller internally uses `copyWith` to produce new
+  instances.
+
+### Added — `SuperTabBehavior` (tab behavior types)
+
+Three per-tab behavior modes control which UI actions the strip exposes:
+
+```dart
+BrowserTab(
+  id: 1, title: 'Home', kind: GLTabKind.globe,
+  pinned: true,
+  behavior: SuperTabBehavior.requiredPinned, // always pinned, no close/unpin/dupe in UI
+)
+
+BrowserTab(
+  id: 2, title: 'Settings', kind: GLTabKind.user,
+  behavior: SuperTabBehavior.uniqueNormal,  // no dupe; re-open selects existing
+  uniqueKey: 'settings',
+)
+
+BrowserTab(
+  id: 3, title: 'Report', kind: GLTabKind.ledger,
+  behavior: SuperTabBehavior.normal,        // default: all operations available
+)
+```
+
+- **`requiredPinned`** — always pinned; UI hides close, unpin and duplicate.
+  Programmatic `controller.close(id)` / `forceClose(id)` still works.
+- **`normal`** — existing behaviour (no change).
+- **`uniqueNormal`** — no duplicate from UI; `controller.add()` with a
+  matching `uniqueKey` selects the existing tab instead of creating a copy.
+
+New controller helpers:
+- `canCloseFromUi(id)`, `canDuplicateFromUi(id)`, `canTogglePinFromUi(id)`
+- `forceClose(id)` — explicit alias for `close(id)` to make programmatic
+  removal of required tabs clear at the call site.
+- `add()` gains `behavior` and `uniqueKey` parameters.
+- `duplicate()` returns `-1` for `requiredPinned` / `uniqueNormal` tabs.
+- `setPinned(id, false)` is silently ignored for `requiredPinned` tabs.
+
+### Added — Direct event callbacks on `SuperTabBar`
+
+Users no longer need to listen to the controller for common operations:
+
+```dart
+SuperTabBar(
+  controller: ctrl,
+  onTabSelected:    (id)       { },
+  onTabAdded:       (id)       { },
+  onTabClosed:      (id)       { },
+  onTabDuplicated:  (newId)    { },
+  onTabPinChanged:  (id, pin)  { },
+  onTabDirtyChanged:(id, dirty){ }, // fires from save-and-close dialog
+  onTabReordered:   (from, to) { },
+)
+```
+
+For dirty / rename changes that originate in **page content**, set the
+controller's own callbacks:
+
+```dart
+ctrl.onDirtyChanged = (id, dirty) { … };
+ctrl.onRenamed      = (id, title) { … };
+```
+
+### Added — `SuperTabBarLocalizations`
+
+All user-facing strings are now localizable. Pass to `SuperTabBar.localizations`:
+
+```dart
+SuperTabBar(localizations: SuperTabBarLocalizations.ar) // built-in Arabic
+```
+
+Built-in presets: `SuperTabBarLocalizations.en` (default), `.ar`.
+Custom languages: construct with all required fields.
+
+### Added — `SuperTabBarPreviewOptions`
+
+Configure or disable hover previews:
+
+```dart
+// Disable previews entirely:
+SuperTabBar(previewOptions: SuperTabBarPreviewOptions.disabled)
+
+// Custom delay + quality:
+SuperTabBar(
+  previewOptions: SuperTabBarPreviewOptions(
+    hoverDelay: Duration(milliseconds: 250),
+    snapshotPixelRatio: 1.0,
+    fallback: PreviewFallback.blank,
+  ),
+)
+```
+
+`PreviewFallback.liveRender` (default) or `PreviewFallback.blank`.
+
+### Added — Accessibility
+
+- `Semantics(button: true, selected: active, label: …)` on every tab chip.
+- `Semantics(button: true, label: 'Close {title}')` on close buttons.
+- `Semantics(button: true, enabled: …, label: …)` on context-menu rows.
+- `Semantics(label: 'Preview of {title}', excludeSemantics: true)` on
+  the hover-preview popover (decorative, excluded from traversal).
+
+### Added — Keyboard shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Ctrl/Cmd + T` | Open a new tab |
+| `Ctrl/Cmd + W` | Close the active tab (if `canCloseFromUi`) |
+
+Existing shortcuts (`←` `→` `Home` `End` `Esc`) are unchanged.
+
+### Added — Example 04
+
+`example/lib/example_04_tab_behaviors.dart` — live demo of all three
+behavior types with an event-log panel showing every callback in real time.
+
+### Added — Tests
+
+`test/super_tab_bar_test.dart` covers:
+- `BrowserTab` immutability and value equality.
+- `requiredPinned` UI guards and programmatic close.
+- `uniqueNormal` deduplication (same / different / null key).
+- Controller CRUD: select, add, close, duplicate, reorder, rename, dirty.
+- `onDirtyChanged` / `onRenamed` controller callbacks.
+- `SuperTabBarLocalizations` string helpers.
+- `SuperTabBarPreviewOptions` defaults and custom values.
+- Widget smoke tests: render, backward-compat alias, `onTabSelected`,
+  `onTabAdded`, custom localizations, preview disabled.
+
+### Fixed
+
+- Repository, homepage, and issue-tracker URLs now point to
+  `https://github.com/GeniusSystems24/super_tab_bar`.
+
+---
 
 ## [1.0.0] — 2026-06-22
 
 ### Added
 
-- **`BrowserStyleTabBar`** widget — browser-style workspace tab strip.
-  - Active tab merges with the content surface; inactive tabs are muted with
-    separators.
-  - `showChrome` · `fillContent` · `scrollContent` · `contentPadding` ·
-    `contentBackground` · `onAddTab` embedding options.
-  - `lazyPages` — opt-out of state-preserving `IndexedStack` (default `false`).
-
-- **`BrowserStyleTabBarController`** (`ChangeNotifier`) — single source of
-  truth for tabs, active state and thumbnails.
-  - Operations: `select` · `add` · `close` · `closeOthers` · `closeToRight` ·
-    `duplicate` · `togglePin` · `setPinned` · `reorder` · `setDirty` ·
-    `rename` · `mutate`.
-  - Reads: `tabs` · `activeId` · `activeTab` · `length` · `ordered` ·
-    `pinned` · `unpinned` · `isActive` · `tabById` · `canCloseOthers` ·
-    `canCloseRight` · `snapshot`.
-  - `of(context)` (listening) and `read(context)` (non-listening) scope
-    accessors — both return `null` outside a `BrowserStyleTabBar`.
-  - `BrowserStyleTabBarScope` (`InheritedNotifier`) exposes the controller
-    to descendant page content.
-
-- **`BrowserTab`** model — `id` · `title` · `kind` · `dirty` · `pinned`.
-- **`GLTabKind`** enum — `ledger` · `doc` · `store` · `chart` · `user` · `globe`.
-- **`TabPageBuilder`** typedef — `Widget Function(BuildContext, BrowserTab)`.
-- **`glTabIcon(GLTabKind)`** — returns the Material icon for a kind.
-- **`glPreviewMeta(GLTabKind)`** — returns the preview subtitle string.
-- **`kNewTabCycle`** — rotating kind list for the `+` button.
-
-- **`BrowserStyleTabBarThemeData`** (`ThemeExtension`) — self-contained theme.
-  - `.light` and `.dark` presets.
-  - Instance fields: `bg` · `surface` · `surface2` · `inputBg` · `hover` ·
-    `border` · `borderStrong` · `fg1` – `fg4`.
-  - Brand constants: `accent (#4A7CFF)` · `success (#1DB88A)` ·
-    `warning (#F97316)` · `danger (#EF4444)` · font families · radii ·
-    shadows · motion tokens (`durFast` · `durBase` · `durSlow` ·
-    `curveStandard` · `curveDecelerate` · `curveEmphasized`).
-  - Full `copyWith` and `lerp`.
-
-- **`GLTabPage`** — built-in content for each `GLTabKind` (ledger table ·
-  journal entry form · store detail · revenue dashboard · team directory ·
-  workspace overview).
-
-- **Overlays:**
-  - `TabContextMenu` — close · close others · close to right · duplicate ·
-    pin / unpin; clamps inside the screen.
-  - `TabListDropdown` — jump to any open tab; shows pinned/dirty indicators.
-  - `MiniPagePreview` — hover-intent (480 ms) popover with a real
-    `RepaintBoundary` capture of the page's current state; falls back to a
-    live scaled render for tabs not yet visited.
-  - `showGLDirtyCloseDialog` — animated confirm dialog for dirty-tab close;
-    returns `'discard'` · `'save'` · `null` (cancel).
-  - `TabMenuItem` — menu item model (icon · label · hint · danger ·
-    disabled · divider).
-
-- **`key_directions.dart`** — RTL-aware keyboard helpers:
-  - `horizontalStep(key, dir)` — resolves `←`/`→` to a logical `±1` step.
-  - `arrowGoesInto(key, dir)` — `true` when the arrow points toward deeper
-    nesting (used by `Tree`-style components).
-
-- **State-preserving pages** via `IndexedStack` + `_KeepAliveTabPage`
-  (`AutomaticKeepAliveClientMixin`) — scroll, text-field and controller state
-  survives tab switches with no rebuild.
-
-- **Live thumbnail capture** — debounced `RepaintBoundary.toImage` on every
-  active-tab change; snapshots stored on the controller.
-
-- **Drag-to-reorder** — `Draggable<int>` / `DragTarget<int>` with a ghost
-  feedback chip and a blue drop-indicator.
-
-- **Overflow** — `ScrollController`-measured chevrons + `▾` dropdown list.
-
-- **Keyboard navigation** — `←`/`→`/`Home`/`End`/`Esc` on the focused strip;
-  direction-aware under `Directionality`.
-
-- **RTL** — pinned anchor on start edge, chevrons mirror, keyboard follows
-  visual direction, dropdown anchor mirrors.
-
-- **Zero third-party dependencies** — pure Flutter + Material.
+Initial release — `BrowserStyleTabBar` widget with pinned / dirty /
+closable tabs, drag-to-reorder, context menu, overflow dropdown, live
+mini-page hover previews, state-preserving pages (`IndexedStack`),
+keyboard navigation, and RTL support.

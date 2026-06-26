@@ -1,19 +1,13 @@
-// super_tab_bar · Example 03 — Custom theme + RTL + overflow
+// super_tab_bar · Example 03 — Custom theme + RTL + overflow + previews + l10n
 // ─────────────────────────────────────────────────────────────────
-// Goal: demonstrate the theming API, RTL mirror, and overflow behaviour.
+// Goal: demonstrate v2 configuration surface:
 //
-//   • Three themes selectable from a segmented toggle:
-//       Default Dark  — BrowserStyleTabBarThemeData.dark
-//       Default Light — BrowserStyleTabBarThemeData.light
-//       Warm Custom   — light.copyWith(warm accent + warm surface)
-//
-//   • LTR / RTL toggle wrapping the whole bar in Directionality
-//
-//   • "Add tab" button that appends up to 20 tabs, forcing the overflow
-//     chevrons and ▾ dropdown list to appear
-//
-//   • showChrome: false variant switch at the bottom — shows the
-//     edge-to-edge embedding style alongside the default card style
+//   • Three themes (Dark / Light / Warm) via SuperTabBarThemeData.copyWith
+//   • LTR / RTL via Directionality
+//   • Overflow: add up to 20 tabs to force chevrons and ▾ dropdown
+//   • showChrome toggle (card vs edge-to-edge)
+//   • SuperTabBarPreviewOptions: On / Off / Instant (0 ms delay)
+//   • SuperTabBarLocalizations: English / Arabic built-in presets
 //
 //   Annotated comments explain every field changed in copyWith.
 
@@ -34,16 +28,19 @@ class _ThemeRtlOverflowExampleState
   _ThemeChoice _theme = _ThemeChoice.dark;
   bool _rtl = false;
   bool _showChrome = true;
+  bool _previewEnabled = true;
+  bool _previewInstant = false;
+  bool _arabic = false;
 
   int _nextId = 6;
 
-  late final BrowserStyleTabBarController _ctrl;
+  late final SuperTabBarController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _ctrl = BrowserStyleTabBarController(
-      tabs: [
+    _ctrl = SuperTabBarController(
+      tabs: const [
         BrowserTab(id: 1, title: 'Accounts', kind: GLTabKind.ledger, pinned: true),
         BrowserTab(id: 2, title: 'Journal Entry', kind: GLTabKind.doc),
         BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
@@ -61,17 +58,17 @@ class _ThemeRtlOverflowExampleState
   }
 
   // ── Theme definitions ─────────────────────────────────────────
-  static BrowserStyleTabBarThemeData _themeData(_ThemeChoice c) {
+  static SuperTabBarThemeData _themeData(_ThemeChoice c) {
     switch (c) {
       case _ThemeChoice.dark:
-        return BrowserStyleTabBarThemeData.dark;
+        return SuperTabBarThemeData.dark;
 
       case _ThemeChoice.light:
-        return BrowserStyleTabBarThemeData.light;
+        return SuperTabBarThemeData.light;
 
       case _ThemeChoice.warm:
         // Warm custom theme — every field explained:
-        return BrowserStyleTabBarThemeData.light.copyWith(
+        return SuperTabBarThemeData.light.copyWith(
           // bg: the strip container and page base — a warm parchment tone
           bg: const Color(0xFFF7F3EE),
           // surface: active-tab content card — pure white
@@ -94,7 +91,7 @@ class _ThemeRtlOverflowExampleState
         );
         // Note: accent, success, warning, danger are STATIC consts on the
         // class — they cannot be changed via copyWith. To use a different
-        // accent you would subclass BrowserStyleTabBarThemeData or set
+        // accent you would subclass SuperTabBarThemeData or set
         // a custom accent at the app-theme level.
     }
   }
@@ -113,12 +110,12 @@ class _ThemeRtlOverflowExampleState
   Widget build(BuildContext context) {
     final themeData = _themeData(_theme);
 
-    // Inject the chosen theme into the subtree so BrowserStyleTabBarThemeData.of
+    // Inject the chosen theme into the subtree so SuperTabBarThemeData.of
     // picks it up — this is the standard ThemeExtension registration pattern.
     return Theme(
       data: Theme.of(context).copyWith(extensions: [themeData]),
       child: Builder(builder: (ctx) {
-        final s = BrowserStyleTabBarThemeData.of(ctx);
+        final s = SuperTabBarThemeData.of(ctx);
         return Scaffold(
           backgroundColor: s.bg,
           appBar: AppBar(
@@ -130,7 +127,7 @@ class _ThemeRtlOverflowExampleState
             ),
             title: Text('03 · Theme + RTL + overflow',
                 style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                    fontFamily: SuperTabBarThemeData.displayFont,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: s.fg1)),
@@ -169,6 +166,21 @@ class _ThemeRtlOverflowExampleState
                     onChanged: (i) =>
                         setState(() => _showChrome = i == 0),
                   ),
+                  // Preview options (v2)
+                  _SegmentedToggle(
+                    options: const ['Preview On', 'Instant', 'Preview Off'],
+                    selected: !_previewEnabled ? 2 : (_previewInstant ? 1 : 0),
+                    onChanged: (i) => setState(() {
+                      _previewEnabled = i != 2;
+                      _previewInstant = i == 1;
+                    }),
+                  ),
+                  // Localizations (v2)
+                  _SegmentedToggle(
+                    options: const ['EN', 'AR عربي'],
+                    selected: _arabic ? 1 : 0,
+                    onChanged: (i) => setState(() => _arabic = i == 1),
+                  ),
                   // Add tab button
                   GestureDetector(
                     onTap: _addTab,
@@ -176,27 +188,27 @@ class _ThemeRtlOverflowExampleState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: BrowserStyleTabBarThemeData.accent
+                        color: SuperTabBarThemeData.accent
                             .withOpacity(0.12),
                         border: Border.all(
-                            color: BrowserStyleTabBarThemeData.accent
+                            color: SuperTabBarThemeData.accent
                                 .withOpacity(0.4)),
                         borderRadius: BorderRadius.circular(
-                            BrowserStyleTabBarThemeData.radiusMd),
+                            SuperTabBarThemeData.radiusMd),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
                         const Icon(Icons.add,
                             size: 14,
-                            color: BrowserStyleTabBarThemeData.accent),
+                            color: SuperTabBarThemeData.accent),
                         const SizedBox(width: 6),
                         Text(
                           'Add tab (${_ctrl.length}/20)',
                           style: const TextStyle(
                               fontFamily:
-                                  BrowserStyleTabBarThemeData.bodyFont,
+                                  SuperTabBarThemeData.bodyFont,
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
-                              color: BrowserStyleTabBarThemeData.accent),
+                              color: SuperTabBarThemeData.accent),
                         ),
                       ]),
                     ),
@@ -215,27 +227,90 @@ class _ThemeRtlOverflowExampleState
                   'bg #F7F3EE · surface #FFF · inputBg #EEE9E2 · '
                   'border #DDD7CE · fg1 #1A1714 · fg3 #7A7268',
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                      fontFamily: SuperTabBarThemeData.monoFont,
                       fontSize: 11,
                       color: s.fg3),
                 ),
               ),
+            // ── preview / l10n info bar ───────────────────────
+            AnimatedContainer(
+              duration: SuperTabBarThemeData.durBase,
+              height: (!_previewEnabled || _previewInstant || _arabic) ? 30 : 0,
+              color: s.surface,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                  color: s.surface,
+                  border: Border(bottom: BorderSide(color: s.border))),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(children: [
+                  if (_arabic)
+                    _InfoChip('SuperTabBarLocalizations.ar',
+                        SuperTabBarThemeData.accent),
+                  if (_previewInstant)
+                    _InfoChip(
+                        'SuperTabBarPreviewOptions(hoverDelay: Duration.zero)',
+                        SuperTabBarThemeData.success),
+                  if (!_previewEnabled)
+                    _InfoChip('SuperTabBarPreviewOptions.disabled',
+                        SuperTabBarThemeData.danger),
+                ]),
+              ),
+            ),
             // ── tab bar ───────────────────────────────────────
             Expanded(
               child: Directionality(
                 textDirection:
                     _rtl ? TextDirection.rtl : TextDirection.ltr,
-                child: BrowserStyleTabBar(
+                child: SuperTabBar(
                   controller: _ctrl,
                   showChrome: _showChrome,
                   fillContent: true,
                   scrollContent: false,
+                  // v2: localizations
+                  localizations: _arabic
+                      ? SuperTabBarLocalizations.ar
+                      : SuperTabBarLocalizations.en,
+                  // v2: preview options
+                  previewOptions: !_previewEnabled
+                      ? SuperTabBarPreviewOptions.disabled
+                      : _previewInstant
+                          ? const SuperTabBarPreviewOptions(
+                              hoverDelay: Duration.zero)
+                          : SuperTabBarPreviewOptions.defaults,
                 ),
               ),
             ),
           ]),
         );
       }),
+    );
+  }
+}
+
+// ── Info chip ─────────────────────────────────────────────────────
+class _InfoChip extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _InfoChip(this.text, this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.10),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withOpacity(0.30)),
+      ),
+      child: Text(text,
+          style: TextStyle(
+            fontFamily: SuperTabBarThemeData.monoFont,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: color,
+          )),
     );
   }
 }
@@ -252,14 +327,14 @@ class _SegmentedToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = BrowserStyleTabBarThemeData.of(context);
+    final s = SuperTabBarThemeData.of(context);
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: s.inputBg,
         border: Border.all(color: s.border),
         borderRadius:
-            BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+            BorderRadius.circular(SuperTabBarThemeData.radiusMd),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -268,19 +343,19 @@ class _SegmentedToggle extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(i),
             child: AnimatedContainer(
-              duration: BrowserStyleTabBarThemeData.durFast,
+              duration: SuperTabBarThemeData.durFast,
               padding: const EdgeInsets.symmetric(
                   horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
                 color: active
-                    ? BrowserStyleTabBarThemeData.accent
+                    ? SuperTabBarThemeData.accent
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(
-                    BrowserStyleTabBarThemeData.radiusSm),
+                    SuperTabBarThemeData.radiusSm),
               ),
               child: Text(options[i],
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                      fontFamily: SuperTabBarThemeData.bodyFont,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: active ? Colors.white : s.fg2)),

@@ -1,154 +1,255 @@
 ---
 name: super-tab-bar
 description: >
-  How to use the super_tab_bar Flutter package — a browser-style workspace tab
-  strip with pinned/closable/dirty tabs, drag-reorder, context menu, overflow
-  dropdown, live mini-page previews, and state-preserving pages. Use when
-  building or modifying a Flutter multi-tab workspace UI with the
-  `super_tab_bar` package, or wiring a `BrowserStyleTabBarController`.
+  How to use the super_tab_bar Flutter package: a browser-style workspace tab
+  strip with pinned/closable/dirty tabs, required pinned tabs, unique tab
+  behavior, drag-reorder, context menu, overflow dropdown, live or disabled
+  hover previews, localization, callbacks, and state-preserving pages.
 ---
 
-# super_tab_bar · BrowserStyleTabBar
+# super_tab_bar - SuperTabBar
 
-A browser-style workspace tab strip — pinned / closable / dirty tabs,
-drag-to-reorder, a context menu, an overflow dropdown, a dirty-close confirm
-dialog, and **live mini-page previews** on hover. It renders the strip **and**
-the active page below it, and by default **keeps every page's state alive**
-across tab switches.
+Use `super_tab_bar` to build a browser-style workspace tab strip for Flutter.
+It renders the tab strip and the active page surface, keeps pages mounted by
+default, and supports pinned, dirty, closable, draggable, unique, and required
+pinned tabs.
 
-## Import & theme
+Primary v2 names:
+
+- `SuperTabBar`
+- `SuperTabBarController`
+- `SuperTabBarScope`
+- `SuperTabBarThemeData`
+
+The legacy `BrowserStyleTabBar*` names remain available as typedef aliases.
+
+## Import And Theme
 
 ```dart
 import 'package:super_tab_bar/super_tab_bar.dart';
 
-// Register on MaterialApp (falls back to dark if omitted):
-ThemeData(extensions: const [BrowserStyleTabBarThemeData.light]); // + .dark
+MaterialApp(
+  theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
+  darkTheme: ThemeData(extensions: const [SuperTabBarThemeData.dark]),
+)
 ```
 
-## Quick start
+## Quick Start
 
 ```dart
-// zero-config — owns a controller with the default tab set:
-const BrowserStyleTabBar();
-
-// seed your own tabs:
-BrowserStyleTabBar(tabsState: [
-  BrowserTab(id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger, pinned: true),
-  BrowserTab(id: 2, title: 'Journal Entry',      kind: GLTabKind.doc,    dirty: true),
-  BrowserTab(id: 3, title: 'Dashboard',           kind: GLTabKind.chart),
-]);
-
-// external controller + custom pages:
-BrowserStyleTabBar(controller: myController, pageBuilder: (ctx, tab) => MyPage(tab));
+const SuperTabBar()
 ```
 
-Provide `tabsState` (widget owns a controller) **or** a `controller:`.
-`pageBuilder` supplies content for each tab and the hover preview; omit it
-for the built-in `GLTabPage` per kind.
-
-## The tab — `BrowserTab`
+```dart
+SuperTabBar(
+  tabsState: const [
+    BrowserTab(
+      id: 1,
+      title: 'Chart of Accounts',
+      kind: GLTabKind.ledger,
+      pinned: true,
+      behavior: SuperTabBehavior.requiredPinned,
+    ),
+    BrowserTab(id: 2, title: 'Journal Entry', kind: GLTabKind.doc, dirty: true),
+    BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+  ],
+)
+```
 
 ```dart
-BrowserTab({
-  required int id,          // stable, unique identity
+SuperTabBar(
+  controller: myController,
+  pageBuilder: (context, tab) => MyPage(tab: tab),
+)
+```
+
+Provide `tabsState` when the widget owns the controller, or `controller` when
+the app owns it. Do not provide both.
+
+## The Tab: `BrowserTab`
+
+```dart
+const BrowserTab({
+  required int id,
   required String title,
-  required GLTabKind kind,  // ledger · doc · store · chart · user · globe
-  bool dirty = false,       // unsaved dot + close-confirm
-  bool pinned = false,      // icon-only, anchored to the start edge
+  required GLTabKind kind,
+  bool dirty = false,
+  bool pinned = false,
+  SuperTabBehavior behavior = SuperTabBehavior.normal,
+  String? uniqueKey,
 });
 ```
 
-`GLTabKind` drives the leading icon, preview layout and built-in page.
-Pinned tabs render icon-only and sort to the start; a `dirty` tab shows
-an unsaved dot and triggers a confirm dialog on close.
+`BrowserTab` is immutable. Use controller methods or `mutate`/`copyWith` to
+change tab state.
 
-## State-preserving pages
+`GLTabKind` drives the leading icon, preview metadata, and built-in page:
+`ledger`, `doc`, `store`, `chart`, `user`, `globe`.
 
-By default each tab page is **built once and kept mounted** in an
-`IndexedStack` — switching preserves scroll, form input and controllers with
-no rebuild. Opt into rebuild-on-revisit with `lazyPages: true`.
+## Tab Behavior
+
+`SuperTabBehavior.requiredPinned`
+: Always pinned. The UI hides close, duplicate, and unpin. Programmatic
+`close` or `forceClose` still works.
+
+`SuperTabBehavior.normal`
+: Standard tab. Close, duplicate, pin, and unpin are available.
+
+`SuperTabBehavior.uniqueNormal`
+: Standard tab except duplicate is hidden. When `add` receives the same
+non-null `uniqueKey`, the existing tab is selected instead of creating another.
 
 ```dart
-BrowserStyleTabBar(controller: c, pageBuilder: buildPage);                  // state survives
-BrowserStyleTabBar(controller: c, pageBuilder: buildPage, lazyPages: true); // rebuild each visit
+tabs.add(
+  title: 'Customer A-100',
+  kind: GLTabKind.user,
+  behavior: SuperTabBehavior.uniqueNormal,
+  uniqueKey: 'customer:A-100',
+);
 ```
 
-## Embedding options
+## State-Preserving Pages
+
+By default each tab page is built once and kept mounted in an `IndexedStack`.
+Switching tabs preserves scroll position, form input, focus state, and
+controllers. Use `lazyPages: true` only when pages should rebuild on revisit.
+
+```dart
+SuperTabBar(controller: c, pageBuilder: buildPage);
+SuperTabBar(controller: c, pageBuilder: buildPage, lazyPages: true);
+```
+
+## Embedding Options
 
 | Property | Default | Description |
 |---|---|---|
-| `showChrome` | `true` | Bordered rounded card. `false` = edge-to-edge. |
-| `fillContent` | `false` | Page fills all height. `false` caps at 440 px. |
-| `scrollContent` | `true` | Wrap page in `SingleChildScrollView`. |
-| `contentPadding` | `all(24)` | Padding around the active page. |
-| `contentBackground` | theme `surface` | Content surface background. |
-| `onAddTab` | `null` | Intercept the `+` button. |
+| `showChrome` | `true` | Bordered rounded card shell; `false` is edge-to-edge. |
+| `fillContent` | `false` | Page fills all available height. |
+| `scrollContent` | `true` | Wrap active page in `SingleChildScrollView`. |
+| `contentPadding` | `EdgeInsets.all(24)` | Padding around active page. |
+| `contentBackground` | theme surface | Active page surface background. |
+| `onAddTab` | null | Override plus-button behavior. |
+| `localizations` | English | Custom user-facing strings; `.en` and `.ar` built in. |
+| `previewOptions` | defaults | Enable/disable and tune hover previews. |
 
-## Driving it — `BrowserStyleTabBarController`
+## Controller Operations
 
 ```dart
-final tabs = BrowserStyleTabBarController(tabs: [...], activeId: 2);
+final tabs = SuperTabBarController(tabs: [...], activeId: 2);
 
-// operations:
-tabs.add(title: 'New report', kind: GLTabKind.chart); // → new id; activates
+tabs.add(title: 'New report', kind: GLTabKind.chart);
 tabs.select(id);
 tabs.setDirty(id, true);
 tabs.togglePin(id);
+tabs.setPinned(id, true);
 tabs.rename(id, 'Q3 Trial Balance');
 tabs.duplicate(id);
 tabs.reorder(fromId, toId);
 tabs.close(id);
-tabs.closeOthers(id);   // guard: tabs.canCloseOthers(id)
-tabs.closeToRight(id);  // guard: tabs.canCloseRight(id)
+tabs.forceClose(id);
+tabs.closeOthers(id);
+tabs.closeToRight(id);
+tabs.mutate(id, (tab) => tab.copyWith(title: 'Updated'));
 
-// reads:
-tabs.tabs; tabs.activeTab; tabs.length; tabs.ordered; // pinned-first
-
-// from inside a page:
-BrowserStyleTabBarController.of(context)?.add(title: 'Detail', kind: GLTabKind.doc);
+tabs.tabs;
+tabs.activeTab;
+tabs.length;
+tabs.ordered;
+tabs.pinned;
+tabs.unpinned;
 ```
 
-Full op set: `select · add · close · closeOthers · closeToRight · duplicate ·
-togglePin · setPinned · reorder · setDirty · rename · mutate`.
-
-`of(context)` returns **null** outside a tab bar — guard every call.
-`read(context)` is the non-listening variant for callbacks / `initState`.
-
-## Keyboard & pointer
-
-Focus the strip: `← →` move (visual direction, RTL-aware), `Home` / `End`
-first / last. Right-click / long-press a tab → context menu (close, close
-others, close to the right, duplicate, pin / unpin). Drag a tab to reorder.
-
-## Theming
+Guard UI-sensitive actions:
 
 ```dart
-// copyWith a preset:
-BrowserStyleTabBarThemeData.light.copyWith(
-  bg:      const Color(0xFFF5F3EF),
-  surface: const Color(0xFFFFFFFF),
-  border:  const Color(0xFFDDD8D0),
+if (tabs.canCloseOthers(id)) tabs.closeOthers(id);
+if (tabs.canCloseRight(id)) tabs.closeToRight(id);
+if (tabs.canDuplicateFromUi(id)) tabs.duplicate(id);
+```
+
+Controller callbacks:
+
+```dart
+tabs.onDirtyChanged = (id, dirty) {};
+tabs.onRenamed = (id, title) {};
+```
+
+From inside a page:
+
+```dart
+SuperTabBarController.of(context)?.add(title: 'Detail', kind: GLTabKind.doc);
+SuperTabBarController.read(context)?.setDirty(tabId, true);
+```
+
+Both return null outside a `SuperTabBar`, so guard calls.
+
+## Event Callbacks
+
+```dart
+SuperTabBar(
+  controller: tabs,
+  onTabSelected: (id) {},
+  onTabAdded: (id) {},
+  onTabClosed: (id) {},
+  onTabDuplicated: (newId) {},
+  onTabPinChanged: (id, pinned) {},
+  onTabDirtyChanged: (id, dirty) {},
+  onTabReordered: (fromId, toId) {},
 )
 ```
 
-Brand constants (static): `accent #4A7CFF` · `success #1DB88A` ·
-`warning #F97316` · `danger #EF4444`.
+## Localizations
+
+Use the built-in Arabic strings:
+
+```dart
+Directionality(
+  textDirection: TextDirection.rtl,
+  child: SuperTabBar(localizations: SuperTabBarLocalizations.ar),
+)
+```
+
+Or pass a custom `SuperTabBarLocalizations` instance to translate context
+menus, dirty-close dialogs, overflow labels, and strip buttons.
+
+## Preview Options
+
+```dart
+SuperTabBar(previewOptions: SuperTabBarPreviewOptions.disabled)
+```
+
+```dart
+SuperTabBar(
+  previewOptions: const SuperTabBarPreviewOptions(
+    hoverDelay: Duration(milliseconds: 250),
+    snapshotPixelRatio: 1.0,
+    fallback: PreviewFallback.blank,
+  ),
+)
+```
+
+Use `PreviewFallback.blank` for expensive or sensitive page content.
+
+## Keyboard And Pointer
+
+Focus the strip, then use arrow keys in visual direction, `Home`, and `End`.
+Right-click or long-press opens the context menu. Drag tabs to reorder. RTL
+mirrors keyboard movement, overflow controls, drag indicators, and overlay
+anchors.
 
 ## Gotchas
 
-1. **Stable IDs** — `select`, `reorder`, `close`, `setDirty`, `rename` all key
-   on `id`. Never reuse an id.
-2. **`pageBuilder` renders twice** — full surface + scaled hover preview. Keep
-   it pure; put side-effects in page `State`.
-3. **State-preservation is the default** — pass `lazyPages: true` only when
-   pages should reset on revisit.
-4. **`of(context)` is null outside a tab bar** — guard every call.
-5. **Register the theme extension** — without it the widget uses the dark
-   preset; one line in `ThemeData.extensions` is all it takes.
+1. Stable IDs are mandatory. Never reuse a closed tab id.
+2. `BrowserTab` is immutable. Change state through the controller.
+3. `pageBuilder` may be used for the active page and preview fallback; keep it pure.
+4. Page state is preserved by default. Use `lazyPages: true` only when desired.
+5. Required pinned restrictions are UI-only; code can still close the tab.
+6. `of(context)` and `read(context)` return null outside a `SuperTabBar`.
+7. Register `SuperTabBarThemeData` in `ThemeData.extensions`.
 
 ## Reference
 
-- **Examples (read first):** `EXAMPLES.md` in this folder.
-- Source: `lib/src/` (tab_bar · controller · theme · models · pages · overlays)
+- Examples: `EXAMPLES.md` in this folder.
+- Source: `lib/src/`
 - README: `../../README.md`
 - Example app: `../../example/lib/`
