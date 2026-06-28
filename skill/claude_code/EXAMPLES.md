@@ -1,209 +1,395 @@
-# super_tab_bar - professional examples
+# super_tab_bar — comprehensive examples (v2)
 
-Realistic, copy-ready recipes. Each assumes the import and
-`SuperTabBarThemeData` registration from `SKILL.md`.
+Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
+registration from `SKILL.md`.
 
-## 1. ERP Workspace Shell
+---
 
-State-preserving pages mean a half-filled journal entry survives a tab switch.
+## 1 · ERP workspace shell — `requiredPinned` + callbacks
+
+The canonical production pattern. Chart of Accounts is always pinned and its
+close/unpin/duplicate UI is hidden via `SuperTabBehavior.requiredPinned`.
+All seven widget callbacks are wired for analytics / sync.
 
 ```dart
-class Workspace extends StatefulWidget {
-  const Workspace({super.key});
-
+class ErpWorkspace extends StatefulWidget {
+  const ErpWorkspace({super.key});
   @override
-  State<Workspace> createState() => _WorkspaceState();
+  State<ErpWorkspace> createState() => _ErpWorkspaceState();
 }
 
-class _WorkspaceState extends State<Workspace> {
-  final tabs = SuperTabBarController(
+class _ErpWorkspaceState extends State<ErpWorkspace> {
+  late final SuperTabBarController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = SuperTabBarController(
+      tabs: const [
+        // requiredPinned — always pinned; UI hides close/unpin/duplicate.
+        // Programmatic ctrl.close(id) / forceClose(id) still works.
+        BrowserTab(
+          id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger,
+          pinned: true, behavior: SuperTabBehavior.requiredPinned,
+        ),
+        BrowserTab(id: 2, title: 'Journal Entry — Draft', kind: GLTabKind.doc, dirty: true),
+        BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+      ],
+      activeId: 2,
+    );
+    // Controller-level callbacks fire for changes from page content too:
+    _ctrl.onDirtyChanged = (id, dirty) => _sync('dirty', id, dirty);
+    _ctrl.onRenamed      = (id, title) => _sync('rename', id, title);
+  }
+
+  void _sync(String event, int id, Object value) =>
+      debugPrint('[$event] tab $id → $value');
+
+  Widget _page(BuildContext ctx, BrowserTab tab) => switch (tab.kind) {
+    GLTabKind.ledger => const ChartOfAccountsPage(),
+    GLTabKind.doc    => JournalEntryPage(tabId: tab.id),
+    GLTabKind.chart  => const DashboardPage(),
+    _                => Center(child: Text(tab.title)),
+  };
+
+  @override
+  Widget build(BuildContext context) => SuperTabBar(
+    controller: _ctrl,
+    pageBuilder: _page,
+    showChrome: false,
+    fillContent: true,
+    scrollContent: false,
+    // Widget callbacks fire for UI-initiated events:
+    onTabSelected:    (id)       => _sync('selected', id, ''),
+    onTabAdded:       (id)       => _sync('added', id, ''),
+    onTabClosed:      (id)       => _sync('closed', id, ''),
+    onTabDuplicated:  (newId)    => _sync('duplicated', newId, ''),
+    onTabPinChanged:  (id, pin)  => _sync('pin', id, pin),
+    onTabDirtyChanged:(id, dirty)=> _sync('dirtyDialog', id, dirty),
+    onTabReordered:   (f, t)     => _sync('reorder', f, t),
+  );
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+}
+```
+
+---
+
+## 2 · `uniqueNormal` — deduplicated singleton tabs
+
+Settings can only be open once. Pressing "Open Settings" a second time
+activates the existing tab instead of duplicating it.
+
+```dart
+class AppShell extends StatefulWidget {
+  const AppShell({super.key});
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
+  static const _settingsKey = 'settings';
+
+  final _ctrl = SuperTabBarController(
     tabs: const [
-      BrowserTab(
-        id: 1,
-        title: 'Chart of Accounts',
-        kind: GLTabKind.ledger,
-        pinned: true,
-        behavior: SuperTabBehavior.requiredPinned,
-      ),
-      BrowserTab(id: 2, title: 'Journal Entry', kind: GLTabKind.doc, dirty: true),
-      BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+      BrowserTab(id: 1, title: 'Home', kind: GLTabKind.globe,
+          pinned: true, behavior: SuperTabBehavior.requiredPinned),
+      BrowserTab(id: 2, title: 'Dashboard', kind: GLTabKind.chart),
     ],
     activeId: 2,
   );
 
-  Widget page(BuildContext context, BrowserTab tab) {
-    switch (tab.kind) {
-      case GLTabKind.ledger:
-        return const ChartOfAccountsPage();
-      case GLTabKind.doc:
-        return JournalEntryPage(onDirty: (dirty) => tabs.setDirty(tab.id, dirty));
-      case GLTabKind.chart:
-        return const DashboardPage();
-      default:
-        return Center(child: Text(tab.title));
-    }
-  }
+  // Call from anywhere — add() returns existing id if uniqueKey matches:
+  void openSettings() => _ctrl.add(
+    title: 'Settings',
+    kind: GLTabKind.user,
+    behavior: SuperTabBehavior.uniqueNormal,
+    uniqueKey: _settingsKey,
+  );
 
   @override
-  Widget build(BuildContext context) {
-    return SuperTabBar(
-      controller: tabs,
-      pageBuilder: page,
-      showChrome: false,
-      fillContent: true,
-      onAddTab: () => tabs.add(title: 'New report', kind: GLTabKind.chart),
-      onTabClosed: (id) => debugPrint('closed $id'),
-      onTabDirtyChanged: (id, dirty) => debugPrint('dirty $id: $dirty'),
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    children: [
+      TextButton(onPressed: openSettings, child: const Text('Open Settings')),
+      Expanded(child: SuperTabBar(controller: _ctrl, fillContent: true, showChrome: false)),
+    ],
+  );
 
   @override
-  void dispose() {
-    tabs.dispose();
-    super.dispose();
-  }
+  void dispose() { _ctrl.dispose(); super.dispose(); }
 }
 ```
 
-## 2. Open Or Focus A Detail Tab
+---
 
-A row in one page opens a detail tab. Reopening the same row focuses the
-existing tab because the tab is `uniqueNormal`.
+## 3 · Dirty-aware save flow — `setDirty` + `rename`
+
+Page content marks its tab dirty on first edit. Saving clears the flag
+and renames the tab to the real document reference.
+
+```dart
+class JournalEntryPage extends StatefulWidget {
+  final int tabId;
+  const JournalEntryPage({super.key, required this.tabId});
+  @override
+  State<JournalEntryPage> createState() => _JournalEntryPageState();
+}
+
+class _JournalEntryPageState extends State<JournalEntryPage> {
+  bool _isDirty = false;
+
+  void _markDirty() {
+    if (_isDirty) return;
+    _isDirty = true;
+    // Use read() — we're in a callback, not build():
+    SuperTabBarController.read(context)?.setDirty(widget.tabId, true);
+  }
+
+  Future<void> _save() async {
+    final ctrl = SuperTabBarController.read(context);
+    await api.post(entry);
+    _isDirty = false;
+    ctrl?.setDirty(widget.tabId, false);
+    ctrl?.rename(widget.tabId, 'JE-2025-0042');
+  }
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+    TextField(onChanged: (_) => _markDirty()),
+    ElevatedButton(onPressed: _save, child: const Text('Save')),
+  ]);
+}
+```
+
+---
+
+## 4 · Open a detail tab from inside a page (`of` / `read`)
+
+Rows in a list open linked document tabs. Pages stay reusable because
+`of(context)` returns null outside a `SuperTabBar`.
 
 ```dart
 class AccountRow extends StatelessWidget {
   const AccountRow({super.key, required this.account});
-
   final Account account;
 
   @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      title: Text(account.name),
-      onTap: () {
-        SuperTabBarController.of(context)?.add(
-          title: account.name,
-          kind: GLTabKind.doc,
-          behavior: SuperTabBehavior.uniqueNormal,
-          uniqueKey: 'account:${account.id}',
-        );
-      },
-    );
-  }
+  Widget build(BuildContext context) => ListTile(
+    title: Text(account.name),
+    onTap: () {
+      // of() is listening — use in build(). Returns null outside a tab bar.
+      SuperTabBarController.of(context)
+          ?.add(title: account.name, kind: GLTabKind.doc);
+    },
+  );
 }
 ```
 
-For callbacks or `initState`, use the non-listening variant:
+Use `read(context)` in callbacks, `initState`, or anywhere that must not
+trigger a rebuild:
 
 ```dart
+// In a button onPressed or initState:
 SuperTabBarController.read(context)?.setDirty(tabId, true);
 ```
 
-## 3. Dirty-Aware Save, Rename, Pin, And Duplicate
+---
+
+## 5 · Localizations — English + Arabic
 
 ```dart
-TextField(onChanged: (_) => tabs.setDirty(tabId, true));
-
-Future<void> save() async {
-  await api.post(entry);
-  tabs.setDirty(tabId, false);
-  tabs.rename(tabId, 'JE-2026-0042');
-}
-
-tabs.onDirtyChanged = (id, dirty) => debugPrint('dirty $id: $dirty');
-tabs.onRenamed = (id, title) => debugPrint('renamed $id: $title');
-
-tabs.togglePin(tabId);
-
-if (tabs.canCloseOthers(tabId)) {
-  tabs.closeOthers(tabId);
-}
-
-if (tabs.canCloseRight(tabId)) {
-  tabs.closeToRight(tabId);
-}
-
-final duplicateId = tabs.duplicate(tabId);
-if (duplicateId == -1) {
-  debugPrint('Duplicate is not available for this tab behavior.');
-}
-```
-
-## 4. Arabic RTL Workspace
-
-```dart
-class RtlWorkspace extends StatelessWidget {
-  const RtlWorkspace({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: SuperTabBar(
-        localizations: SuperTabBarLocalizations.ar,
-        tabsState: const [
-          BrowserTab(
-            id: 1,
-            title: 'دليل الحسابات',
-            kind: GLTabKind.ledger,
-            pinned: true,
-            behavior: SuperTabBehavior.requiredPinned,
-          ),
-          BrowserTab(id: 2, title: 'قيد يومية', kind: GLTabKind.doc, dirty: true),
-          BrowserTab(id: 3, title: 'لوحة التحكم', kind: GLTabKind.chart),
-        ],
-      ),
-    );
-  }
-}
-```
-
-Under RTL, pinned anchoring, overflow controls, drag indicators, keyboard
-movement, and overlay anchors mirror to the visual direction.
-
-## 5. Custom Localization
-
-```dart
-const strings = SuperTabBarLocalizations(
-  closeTab: 'Close tab',
-  closeOtherTabs: 'Close other tabs',
-  closeTabsToRight: 'Close tabs to the right',
-  duplicateTab: 'Duplicate tab',
-  pinTab: 'Pin tab',
-  unpinTab: 'Unpin tab',
-  newTab: 'New tab',
-  showAllTabs: 'Show all tabs',
-  scrollForward: 'Scroll tabs forward',
-  scrollBack: 'Scroll tabs back',
-  noOpenTabs: 'No open tabs - press + to start.',
-  openTabsHeader: 'OPEN TABS - {count}',
-  discardChangesTitle: 'Discard unsaved changes?',
-  cancel: 'Cancel',
-  saveAndClose: 'Save and close',
-  discardAndClose: 'Discard and close',
-);
-
-SuperTabBar(localizations: strings)
-```
-
-## 6. Preview Policy For Expensive Or Sensitive Pages
-
-```dart
+// Built-in Arabic preset:
 SuperTabBar(
-  controller: tabs,
-  pageBuilder: buildExpensivePage,
-  previewOptions: SuperTabBarPreviewOptions.disabled,
+  controller: _ctrl,
+  localizations: SuperTabBarLocalizations.ar,
+  // RTL layout:
+  // Wrap with Directionality(textDirection: TextDirection.rtl, ...) if needed
+)
+
+// Custom language (e.g. French):
+SuperTabBar(
+  controller: _ctrl,
+  localizations: const SuperTabBarLocalizations(
+    closeTab: 'Fermer l\'onglet',
+    closeOtherTabs: 'Fermer les autres',
+    closeTabsToRight: 'Fermer à droite',
+    duplicateTab: 'Dupliquer',
+    pinTab: 'Épingler', unpinTab: 'Désépingler',
+    newTab: 'Nouvel onglet',
+    showAllTabs: 'Tous les onglets',
+    scrollForward: 'Avancer', scrollBack: 'Reculer',
+    noOpenTabs: 'Aucun onglet ouvert.',
+    openTabsHeader: 'ONGLETS · {count}',   // {count} substituted automatically
+    discardChangesTitle: 'Abandonner les modifications ?',
+    cancel: 'Annuler',
+    saveAndClose: 'Enregistrer et fermer',
+    discardAndClose: 'Abandonner et fermer',
+  ),
 )
 ```
 
+---
+
+## 6 · Preview options
+
 ```dart
+// Default (480 ms hover delay, 0.6× snapshot ratio, live fallback):
+SuperTabBar(controller: _ctrl) // defaults apply automatically
+
+// Disable previews entirely:
 SuperTabBar(
-  controller: tabs,
-  pageBuilder: buildSensitivePage,
+  controller: _ctrl,
+  previewOptions: SuperTabBarPreviewOptions.disabled,
+)
+
+// Fast appear + high-quality snapshot:
+SuperTabBar(
+  controller: _ctrl,
   previewOptions: const SuperTabBarPreviewOptions(
-    hoverDelay: Duration(milliseconds: 300),
-    snapshotPixelRatio: 0.8,
+    hoverDelay: Duration(milliseconds: 200),
+    snapshotPixelRatio: 1.0,
+    fallback: PreviewFallback.liveRender,
+  ),
+)
+
+// Blank surface when no snapshot captured yet (e.g. sensitive content):
+SuperTabBar(
+  controller: _ctrl,
+  previewOptions: const SuperTabBarPreviewOptions(
     fallback: PreviewFallback.blank,
+  ),
+)
+```
+
+---
+
+## 7 · RTL workspace — Arabic ERP
+
+```dart
+class ArabicWorkspace extends StatelessWidget {
+  const ArabicWorkspace({super.key});
+
+  @override
+  Widget build(BuildContext context) => Directionality(
+    textDirection: TextDirection.rtl,
+    child: SuperTabBar(
+      localizations: SuperTabBarLocalizations.ar,
+      tabsState: const [
+        BrowserTab(
+          id: 1, title: 'دليل الحسابات', kind: GLTabKind.ledger,
+          pinned: true, behavior: SuperTabBehavior.requiredPinned,
+        ),
+        BrowserTab(id: 2, title: 'قيد يومية', kind: GLTabKind.doc, dirty: true),
+        BrowserTab(id: 3, title: 'لوحة التحكم', kind: GLTabKind.chart),
+        BrowserTab(id: 4, title: 'الفروع', kind: GLTabKind.store),
+      ],
+    ),
+  );
+}
+```
+
+RTL mirrors: pinned anchor on visual left, chevrons swap sides,
+`←`/`→` follow visual direction, drag drop-indicator, `▾` dropdown anchor.
+
+---
+
+## 8 · Custom theming — warm palette
+
+```dart
+// In ThemeData.extensions:
+SuperTabBarThemeData.light.copyWith(
+  bg:           const Color(0xFFFAF7F2),   // warm off-white strip
+  surface:      const Color(0xFFFFFFFF),
+  surface2:     const Color(0xFFF5EFE6),
+  inputBg:      const Color(0xFFEDE8DF),
+  hover:        const Color(0xFFEEE8DE),
+  border:       const Color(0xFFDDD6CA),
+  borderStrong: const Color(0xFFC4B9AC),
+  fg1:          const Color(0xFF2C1810),
+  fg2:          const Color(0xFF5C4A38),
+  fg3:          const Color(0xFF8C7A68),
+  fg4:          const Color(0xFFC4B9AC),
+)
+```
+
+Static brand constants stay the same: `accent #4A7CFF` · `success #1DB88A` ·
+`warning #F97316` · `danger #EF4444`.
+
+---
+
+## 9 · Programmatic removal of a `requiredPinned` tab
+
+The UI hides the close button for `requiredPinned` tabs — but the controller
+always allows programmatic removal. Use `forceClose` to make intent explicit:
+
+```dart
+// Normal close — works for all behaviors including requiredPinned:
+ctrl.close(id);
+
+// Explicit alias — signals at the call site that this is intentional:
+ctrl.forceClose(id);
+
+// Example: user confirms in a custom dialog, then removes the tab:
+final confirmed = await showDialog<bool>(context: context, builder: (_) => ...);
+if (confirmed == true) ctrl.forceClose(homeTabId);
+```
+
+---
+
+## 10 · Batch operations with `mutate`
+
+```dart
+// Opens a set of tabs at once, notifies listeners once at the end:
+ctrl.mutate(() {
+  ctrl.close(oldId);
+  ctrl.add(title: 'Monthly Report', kind: GLTabKind.doc);
+  ctrl.add(title: 'Q3 Variance',    kind: GLTabKind.chart);
+  ctrl.setDirty(reportId, false);
+});
+```
+
+---
+
+## 11 · Guard-aware bulk close
+
+```dart
+// Always guard bulk-close operations before calling:
+if (ctrl.canCloseOthers(activeId)) ctrl.closeOthers(activeId);
+if (ctrl.canCloseRight(activeId))  ctrl.closeToRight(activeId);
+
+// Disable a button when the operation would be a no-op:
+ElevatedButton(
+  onPressed: ctrl.canCloseOthers(ctrl.activeId ?? -1)
+      ? () => ctrl.closeOthers(ctrl.activeId!)
+      : null,
+  child: const Text('Close other tabs'),
+)
+```
+
+---
+
+## 12 · Embedding in a full-screen shell (no chrome)
+
+```dart
+Scaffold(
+  body: Column(
+    children: [
+      const MyTopBar(),      // your own app bar
+      Expanded(
+        child: SuperTabBar(
+          controller: _ctrl,
+          pageBuilder: _page,
+          showChrome: false,    // no card border — blends into Scaffold
+          fillContent: true,    // page fills the Expanded area
+          scrollContent: false, // page manages its own scroll
+          contentPadding: EdgeInsets.zero,
+          localizations: _isArabic
+              ? SuperTabBarLocalizations.ar
+              : SuperTabBarLocalizations.en,
+        ),
+      ),
+    ],
   ),
 )
 ```

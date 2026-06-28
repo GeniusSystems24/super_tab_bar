@@ -171,7 +171,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
   @override
   void initState() {
     super.initState();
-    _ctrl = widget.controller ?? SuperTabBarController(tabs: widget.tabsState);
+    _ctrl = widget.controller ??
+        SuperTabBarController(tabs: widget.tabsState);
     _ownsCtrl = widget.controller == null;
     _ctrl.addListener(_onCtrl);
     _scroll.addListener(_measure);
@@ -187,8 +188,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
     if (widget.controller != old.controller) {
       _ctrl.removeListener(_onCtrl);
       if (_ownsCtrl) _ctrl.dispose();
-      _ctrl =
-          widget.controller ?? SuperTabBarController(tabs: widget.tabsState);
+      _ctrl = widget.controller ??
+          SuperTabBarController(tabs: widget.tabsState);
       _ownsCtrl = widget.controller == null;
       _ctrl.addListener(_onCtrl);
     }
@@ -196,16 +197,14 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   void _onCtrl() {
     if (mounted) setState(() {});
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _measure();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
     _scheduleCapture();
   }
 
   @override
   void dispose() {
     _captureTimer?.cancel();
-    _hideAllOverlays(notify: false);
+    _hideAllOverlays();
     _ctrl.removeListener(_onCtrl);
     if (_ownsCtrl) _ctrl.dispose();
     _scroll.dispose();
@@ -236,7 +235,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   void _scrollToEnd() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _scroll.hasClients) {
+      if (_scroll.hasClients) {
         _scroll.jumpTo(_scroll.position.maxScrollExtent);
       }
     });
@@ -271,7 +270,6 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   // ── Overflow chevrons ─────────────────────────────────────
   void _measure() {
-    if (!mounted) return;
     if (!_scroll.hasClients) return;
     final pos = _scroll.position;
     final max = pos.maxScrollExtent;
@@ -288,8 +286,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   void _scrollByDir(bool towardEnd) {
     if (!_scroll.hasClients) return;
-    final target = (_scroll.offset + 220 * (towardEnd ? 1 : -1))
-        .clamp(0.0, _scroll.position.maxScrollExtent);
+    final target =
+        (_scroll.offset + 220 * (towardEnd ? 1 : -1)).clamp(
+            0.0, _scroll.position.maxScrollExtent);
     _scroll.animateTo(target,
         duration: SuperTabBarThemeData.durSlow,
         curve: SuperTabBarThemeData.curveStandard);
@@ -387,9 +386,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   // ════════ OVERLAYS ════════════════════════════════════════
-  void _hideAllOverlays({bool notify = true}) {
+  void _hideAllOverlays() {
     _hideMenu();
-    _hideList(notify: notify);
+    _hideList();
     _hidePreview();
   }
 
@@ -398,10 +397,10 @@ class _SuperTabBarState extends State<SuperTabBar> {
     _menuEntry = null;
   }
 
-  void _hideList({bool notify = true}) {
+  void _hideList() {
     _listEntry?.remove();
     _listEntry = null;
-    if (notify && mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   void _hidePreview() {
@@ -549,13 +548,17 @@ class _SuperTabBarState extends State<SuperTabBar> {
                         BorderRadius.circular(SuperTabBarThemeData.radiusLg),
                   )
                 : BoxDecoration(color: s.bg),
-            clipBehavior: widget.showChrome ? Clip.antiAlias : Clip.none,
+            clipBehavior:
+                widget.showChrome ? Clip.antiAlias : Clip.none,
             child: Column(
               mainAxisSize:
                   widget.fillContent ? MainAxisSize.max : MainAxisSize.min,
               children: [
                 _buildStrip(s),
-                if (widget.fillContent) Expanded(child: content) else content,
+                if (widget.fillContent)
+                  Expanded(child: content)
+                else
+                  content,
               ],
             ),
           ),
@@ -661,8 +664,10 @@ class _SuperTabBarState extends State<SuperTabBar> {
         feedback: _StaticTab(tab: tab, active: active, feedback: true),
         childWhenDragging: Opacity(
             opacity: 0.4,
-            child: IgnorePointer(child: _StaticTab(tab: tab, active: active))),
-        child: _tabChip(tab, compact: false, first: first, isOver: isOver),
+            child: IgnorePointer(
+                child: _StaticTab(tab: tab, active: active))),
+        child: _tabChip(tab,
+            compact: false, first: first, isOver: isOver),
       ),
     );
   }
@@ -703,7 +708,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
       child: show
           ? _IconBtn(
               icon: towardEnd ? Icons.chevron_right : Icons.chevron_left,
-              tooltip: towardEnd ? _loc.scrollForward : _loc.scrollBack,
+              tooltip:
+                  towardEnd ? _loc.scrollForward : _loc.scrollBack,
               size: 26,
               onTap: () => _scrollByDir(towardEnd),
             )
@@ -736,14 +742,13 @@ class _SuperTabBarState extends State<SuperTabBar> {
     }
 
     final ordered = _ctrl.ordered;
-    final activeIndex = ordered
-        .indexWhere((t) => t.id == activeTab.id)
-        .clamp(0, ordered.length - 1);
+    final activeIndex =
+        ordered.indexWhere((t) => t.id == activeTab.id).clamp(0, ordered.length - 1);
 
     Widget pageFor(BrowserTab t) {
       final raw = widget.pageBuilder?.call(context, t) ?? GLTabPage(tab: t);
-      final page =
-          KeyedSubtree(key: ValueKey('tabpage-content-${t.id}'), child: raw);
+      final page = KeyedSubtree(
+          key: ValueKey('tabpage-content-${t.id}'), child: raw);
       final body = widget.scrollContent
           ? SingleChildScrollView(
               key: PageStorageKey('tabpage-${t.id}'),
@@ -760,7 +765,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
       surface = widget.fillContent
           ? body
           : ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 440), child: body);
+              constraints: const BoxConstraints(maxHeight: 440),
+              child: body);
     } else {
       final stack = IndexedStack(
         index: activeIndex,
@@ -774,7 +780,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
       surface = widget.fillContent
           ? stack
           : ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 440), child: stack);
+              constraints: const BoxConstraints(maxHeight: 440),
+              child: stack);
     }
 
     return Container(
@@ -900,7 +907,9 @@ class _TabChipState extends State<_TabChip> {
     final s = SuperTabBarThemeData.of(context);
     final tab = widget.tab;
     final active = widget.active;
-    final bg = active ? s.surface : (_hover ? s.hover : Colors.transparent);
+    final bg = active
+        ? s.surface
+        : (_hover ? s.hover : Colors.transparent);
     final fg = active ? s.fg1 : s.fg3;
 
     // Build the semantic label for screen readers.
@@ -987,8 +996,7 @@ class _TabChipState extends State<_TabChip> {
     );
   }
 
-  Widget _content(
-      SuperTabBarThemeData s, BrowserTab tab, bool active, Color fg) {
+  Widget _content(SuperTabBarThemeData s, BrowserTab tab, bool active, Color fg) {
     if (widget.compact) {
       return Stack(
         children: [
