@@ -29,13 +29,20 @@
 // showSuperTabDirtyCloseDialog (alias: showGLDirtyCloseDialog)
 // ScopeWrapper
 //
+// ── Compact mode (mobile) ─────────────────────────────────────────
+// SuperTabSwitcher        — thumbnail grid of open tabs (tap to switch,
+//                           drag to reorder)
+// showSuperTabSwitcher    — opens the switcher as a full-screen modal
+//
 // ── Pages ────────────────────────────────────────────────────────
 // GLTabPage
 //
-// ── Keyboard helpers ──────────────────────────────────────────────
-// horizontalStep · arrowGoesInto
+//
+// ── Removed in v2.1 ───────────────────────────────────────────────
+// The tab-navigation keyboard shortcuts and the `horizontalStep` /
+// `arrowGoesInto` helpers were removed. Compact mode replaces keyboard
+// switching on mobile; see SuperTabSwitcher.
 
-export 'src/key_directions.dart';
 export 'src/models.dart';
 export 'src/localizations.dart';
 export 'src/preview_options.dart';
@@ -44,3 +51,4 @@ export 'src/controller.dart';
 export 'src/tab_bar.dart';
 export 'src/pages.dart';
 export 'src/overlays.dart';
+export 'src/compact.dart';

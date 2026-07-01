@@ -6,6 +6,61 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.1.0] — 2026-07-01
+
+Mobile-focused release: a compact tab-switching experience, dirty-aware back
+navigation, and the removal of the desktop tab-navigation keyboard shortcuts.
+
+### Added — Compact mode
+
+- **`SuperTabBar(compact: true)`** hides the horizontal tab strip and shows
+  only the active page — ideal for narrow phone screens where the full strip
+  does not fit.
+- **`SuperTabSwitcher`** — a scrollable grid of thumbnail previews of every
+  open tab. Tap a thumbnail to jump to that tab; **long-press-drag** one
+  thumbnail onto another to reorder (drives `SuperTabBarController.reorder`).
+  A per-thumbnail close (×) button removes a tab (routed through your close
+  handler so dirty tabs can confirm first).
+- **`showSuperTabSwitcher(context, controller: …)`** — opens the switcher as a
+  full-screen modal and returns the id of the picked tab (or `null` if
+  dismissed). Recommended trigger: a `FloatingActionButton`.
+
+```dart
+FloatingActionButton(
+  child: const Icon(Icons.grid_view_rounded),
+  onPressed: () => showSuperTabSwitcher(context, controller: controller),
+)
+```
+
+### Added — Dirty-aware back navigation
+
+- **`SuperTabBar(closeTabOnBack: true)`** — a system back gesture / button
+  closes the active tab instead of popping the route, **but only when that tab
+  is not dirty**. A dirty tab is never auto-closed on back; the pop proceeds
+  normally so unsaved work is never discarded silently. Implemented with
+  `PopScope` (requires Flutter ≥ 3.16).
+
+### Removed (breaking)
+
+- **Tab-navigation keyboard shortcuts** — `Ctrl/Cmd+T` (new tab),
+  `Ctrl/Cmd+W` (close tab) and the `← → Home End` selection keys were removed.
+  On mobile, compact mode replaces keyboard switching. `Escape` still dismisses
+  an open context menu / tab-list dropdown.
+- **`horizontalStep` / `arrowGoesInto`** helpers and `src/key_directions.dart`
+  were removed — they existed only to power the tab-navigation keys. Remove any
+  imports of these symbols.
+
+### Localizations
+
+- Added `switcherTitle` and `reorderHint` strings (EN + AR presets updated).
+  Custom `SuperTabBarLocalizations` instances must supply the two new fields.
+
+### Requirements
+
+- Minimum Flutter bumped to **3.16.0** / Dart **3.2.0** (for `PopScope`).
+
+---
+
 ## [2.0.0] — 2026-06-27
 
 ### Renamed (with backward-compatible aliases)

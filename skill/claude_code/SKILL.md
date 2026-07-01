@@ -1,15 +1,17 @@
 ---
 name: super-tab-bar
 description: >
-  How to use the super_tab_bar Flutter package (v2) — a browser-style workspace
+  How to use the super_tab_bar Flutter package (v2.1) — a browser-style workspace
   tab strip with pinned/closable/dirty tabs, configurable behavior types
   (requiredPinned · normal · uniqueNormal), drag-reorder, context menu, overflow
   dropdown, live mini-page previews, state-preserving pages, localization,
-  direct event callbacks, and accessibility semantics. Use when building or
-  modifying a Flutter multi-tab workspace UI with the `super_tab_bar` package.
+  direct event callbacks, a mobile compact-mode thumbnail switcher
+  (SuperTabSwitcher), dirty-aware back navigation, and accessibility semantics.
+  Use when building or modifying a Flutter multi-tab workspace UI with the
+  `super_tab_bar` package.
 ---
 
-# super_tab_bar · SuperTabBar — v2
+# super_tab_bar · SuperTabBar — v2.1
 
 A browser-style workspace tab strip. Renders the strip **and** the active page
 below it. By default keeps every page's state alive across tab switches via
@@ -168,6 +170,8 @@ SuperTabBar(
 
   // ── Shell ───────────────────────────────────────────────────────
   showChrome: true,          // bordered card (false = edge-to-edge)
+  compact: false,            // v2.1 · hide the strip (mobile) — see below
+  closeTabOnBack: false,     // v2.1 · back closes active tab unless dirty
   fillContent: false,        // page fills all height (false → 440 px cap)
   scrollContent: true,       // wrap in SingleChildScrollView
   contentPadding: EdgeInsets.all(24),
@@ -216,6 +220,8 @@ SuperTabBar(
     scrollForward: 'Forward', scrollBack: 'Back',
     noOpenTabs: 'No open tabs.',
     openTabsHeader: 'TABS · {count}',  // {count} auto-substituted
+    switcherTitle: 'Open tabs',        // v2.1
+    reorderHint: 'Drag to reorder',    // v2.1
     discardChangesTitle: 'Discard changes?',
     cancel: 'Cancel',
     saveAndClose: 'Save & close',
@@ -246,15 +252,55 @@ const SuperTabBarPreviewOptions(
 
 ---
 
+## Compact mode & tab switcher (v2.1)
+
+For phones, hide the strip and switch tabs from a full-screen thumbnail grid.
+
+```dart
+// 1 · Hide the strip; show only the active page.
+SuperTabBar(
+  controller: ctrl,
+  compact: true,
+  closeTabOnBack: true,       // back closes the current tab unless dirty
+  showChrome: false,
+  fillContent: true,
+)
+
+// 2 · Open the switcher (e.g. from a FloatingActionButton).
+final picked = await showSuperTabSwitcher(
+  context,
+  controller: ctrl,
+  pageBuilder: (ctx, tab) => MyPage(tab: tab),  // live thumbnail fallback
+  onCloseTab: (id) => myDirtyAwareClose(id),    // optional close routing
+);
+// picked == tapped tab id (already selected on ctrl), or null if dismissed.
+```
+
+Inside the switcher: **tap** a thumbnail to switch · **long-press-drag** one
+onto another to reorder (`ctrl.reorder`) · **close (×)** removes a tab. Embed
+`SuperTabSwitcher` directly for custom presentation (bottom sheet, etc.).
+
+`showSuperTabSwitcher` params: `controller` (required), `pageBuilder`,
+`localizations`, `previewOptions`, `crossAxisCount` (null = responsive),
+`showCloseButtons` (default true), `onCloseTab`.
+
+## Back navigation (v2.1)
+
+`closeTabOnBack: true` → a back gesture closes the active tab **only if it is
+not dirty**. Dirty tabs stay open and the back pops the route normally. Uses
+`PopScope` (Flutter ≥ 3.16).
+
+---
+
 ## Keyboard shortcuts
 
 | Key | Action |
 |---|---|
-| `← →` | Prev / next tab (RTL-aware) |
-| `Home` / `End` | First / last tab |
 | `Esc` | Close context menu / tab-list dropdown |
-| `Ctrl/Cmd + T` | New tab |
-| `Ctrl/Cmd + W` | Close active tab (if `canCloseFromUi`) |
+
+> **Removed in v2.1:** the tab-navigation shortcuts (`← →`, `Home`/`End`,
+> `Ctrl/Cmd+T`, `Ctrl/Cmd+W`) and the `horizontalStep` / `arrowGoesInto`
+> helpers. On mobile use compact mode + the tab switcher.
 
 ---
 
@@ -279,7 +325,8 @@ Static brand constants: `accent #4A7CFF` · `success #1DB88A` ·
 Directionality(textDirection: TextDirection.rtl, child: SuperTabBar(...))
 ```
 
-Mirrors: pinned anchor, chevrons, keyboard `← →`, drag indicator, dropdown.
+Mirrors: pinned anchor, chevrons, drag indicator, dropdown, and the compact
+tab switcher.
 
 ---
 
@@ -313,6 +360,6 @@ v1 names are live `typedef` aliases — existing code compiles unchanged:
 ## Reference
 
 - **Comprehensive examples:** `EXAMPLES.md` in this folder.
-- Source: `lib/src/` — tab_bar · controller · models · theme · localizations · preview_options · overlays · pages
+- Source: `lib/src/` — tab_bar · controller · models · theme · localizations · preview_options · overlays · pages · compact
 - README: `../../README.md`
 - Example app: `../../example/lib/`

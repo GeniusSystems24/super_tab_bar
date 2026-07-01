@@ -1,15 +1,16 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.0.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
-[![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.10-1DB88A.svg)](https://flutter.dev)
+[![pub package](https://img.shields.io/badge/pub-v2.1.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
+[![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.16-1DB88A.svg)](https://flutter.dev)
 [![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
 
 A browser-style workspace tab bar for Flutter — pinned / dirty / closable tabs,
 configurable **tab behavior types** (`requiredPinned` · `normal` · `uniqueNormal`),
 drag-to-reorder, context menu, overflow dropdown, **live mini-page previews** on
 hover, **state-preserving pages**, **localization support**, **direct event
-callbacks**, and accessibility semantics. Full keyboard navigation + RTL. Zero
-third-party dependencies.
+callbacks**, and accessibility semantics. New in 2.1: a mobile **compact mode**
+with a draggable thumbnail **tab switcher** and **dirty-aware back navigation**.
+RTL throughout. Zero third-party dependencies.
 
 ---
 
@@ -35,13 +36,16 @@ third-party dependencies.
 - 🔔 **Direct callbacks** — `onTabSelected`, `onTabAdded`, `onTabClosed`,
   `onTabDuplicated`, `onTabPinChanged`, `onTabDirtyChanged`,
   `onTabReordered` — no need to listen to the controller for common events.
+- 📱 **Compact mode** — hide the strip on phones and switch tabs from a
+  full-screen grid of thumbnail previews (`SuperTabSwitcher` /
+  `showSuperTabSwitcher`). Tap to switch, **drag a thumbnail to reorder**.
+- 🔙 **Dirty-aware back** — `closeTabOnBack` closes the current tab on a back
+  gesture, but never a dirty one.
 - 🌐 **Localization** — all user-facing strings in `SuperTabBarLocalizations`;
   built-in English and Arabic presets.
 - ♿ **Accessibility** — `Semantics` on every tab chip, close button and
   context-menu row.
-- ⌨ **Full keyboard** — `← →` (RTL-aware), `Home` / `End`,
-  `Ctrl/Cmd+T` (new tab), `Ctrl/Cmd+W` (close active).
-- 🌍 **RTL** — strip, chevrons, drag, keyboard and dropdown all mirror.
+- 🌍 **RTL** — strip, chevrons, drag, dropdown and switcher all mirror.
 - 🔌 **Zero dependencies** — pure Flutter + Material.
 
 ---
@@ -50,7 +54,7 @@ third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.0.0
+  super_tab_bar: ^2.1.0
 ```
 
 ```bash
@@ -240,6 +244,8 @@ SuperTabBar(
     scrollBack: 'Back',
     noOpenTabs: 'No open tabs.',
     openTabsHeader: 'TABS · {count}',   // {count} is replaced automatically
+    switcherTitle: 'Open tabs',
+    reorderHint: 'Drag to reorder',
     discardChangesTitle: 'Discard changes?',
     cancel: 'Cancel',
     saveAndClose: 'Save & close',
@@ -344,6 +350,8 @@ Both return `null` when called outside a `SuperTabBar`.
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `showChrome` | `bool` | `true` | Bordered rounded card. `false` = edge-to-edge. |
+| `compact` | `bool` | `false` | Hide the strip (mobile); switch via `SuperTabSwitcher`. |
+| `closeTabOnBack` | `bool` | `false` | Back closes the active tab unless it is dirty. |
 | `fillContent` | `bool` | `false` | Page fills all height (`Expanded`). |
 | `scrollContent` | `bool` | `true` | Wrap page in `SingleChildScrollView`. |
 | `contentPadding` | `EdgeInsets` | `all(24)` | Padding inside the content surface. |
@@ -355,17 +363,112 @@ Both return `null` when called outside a `SuperTabBar`.
 
 ---
 
+## Compact mode (mobile)
+
+On small screens the horizontal strip is too wide to be usable. Set
+`compact: true` to hide it and switch tabs from a full-screen grid of thumbnail
+previews instead.
+
+```dart
+// 1 · Hide the strip; show only the active page.
+SuperTabBar(
+  controller: ctrl,
+  compact: true,
+  closeTabOnBack: true,   // back closes the current tab (unless dirty)
+  showChrome: false,
+  fillContent: true,
+)
+
+// 2 · Open the switcher from a FloatingActionButton.
+FloatingActionButton(
+  child: const Icon(Icons.grid_view_rounded),
+  onPressed: () async {
+    final picked = await showSuperTabSwitcher(context, controller: ctrl);
+    if (picked != null) debugPrint('switched to $picked');
+  },
+)
+```
+
+**`showSuperTabSwitcher`** opens a full-screen modal and returns the id of the
+tapped tab (or `null` if dismissed). Selecting a thumbnail activates that tab on
+the controller and pops the route.
+
+Inside the switcher:
+
+- **Tap** a thumbnail → jump to that tab.
+- **Long-press-drag** one thumbnail onto another → reorder
+  (`controller.reorder`).
+- **Close (×)** → close a tab. Pass `onCloseTab` to run your own
+  dirty-confirmation dialog first:
+
+```dart
+showSuperTabSwitcher(
+  context,
+  controller: ctrl,
+  pageBuilder: (ctx, tab) => MyPage(tab: tab),  // for live thumbnail fallback
+  onCloseTab: (id) async {
+    final tab = ctrl.tabById(id)!;
+    if (tab.dirty) {
+      final r = await showSuperTabDirtyCloseDialog(context, tab);
+      if (r == 'discard') ctrl.close(id);
+      else if (r == 'save') { ctrl.setDirty(id, false); ctrl.close(id); }
+    } else {
+      ctrl.close(id);
+    }
+  },
+)
+```
+
+Thumbnails reuse the live page snapshots the controller already captures for
+hover previews; tabs without a fresh snapshot fall back to a scaled live render
+of their page (pass `pageBuilder` so it matches your real content), or a plain
+icon card when previews are disabled.
+
+You can also embed `SuperTabSwitcher` directly (e.g. in a bottom sheet) for full
+control over presentation.
+
+| Parameter (`showSuperTabSwitcher`) | Type | Default | Description |
+|---|---|---|---|
+| `controller` | `SuperTabBarController` | **required** | Tabs to show / reorder. |
+| `pageBuilder` | `TabPageBuilder?` | `null` | Live thumbnail fallback for snapshot-less tabs. |
+| `localizations` | `SuperTabBarLocalizations?` | `.en` | Switcher strings. |
+| `crossAxisCount` | `int?` | adaptive | Fixed column count (else responsive). |
+| `showCloseButtons` | `bool` | `true` | Per-thumbnail close (×) button. |
+| `onCloseTab` | `void Function(int id)?` | `close` | Route the close button through your logic. |
+
+---
+
+## Back navigation
+
+Set `closeTabOnBack: true` so a system back gesture / button closes the active
+tab instead of popping the route — **but only when that tab is not dirty**. A
+dirty tab is never auto-closed; the back proceeds normally so unsaved work is
+never discarded silently.
+
+```dart
+SuperTabBar(controller: ctrl, closeTabOnBack: true)
+```
+
+| Active tab | Back gesture result |
+|---|---|
+| not dirty | tab is closed; route stays |
+| dirty | tab stays open; back pops the route normally |
+| none open | back pops the route normally |
+
+Implemented with `PopScope` (requires Flutter ≥ 3.16). Pairs naturally with
+`compact` on mobile.
+
+---
+
 ## Keyboard reference
 
 | Key | Action |
 |---|---|
-| `← →` | Previous / next tab (follows layout direction in RTL). |
-| `Home` / `End` | First / last tab. |
 | `Esc` | Close context menu or tab-list dropdown. |
-| `Ctrl/Cmd + T` | Open a new tab. |
-| `Ctrl/Cmd + W` | Close the active tab (if `canCloseFromUi`). |
 
-Click the strip or tab to it first to give it focus.
+> **Removed in 2.1.** The tab-navigation shortcuts (`← →`, `Home` / `End`,
+> `Ctrl/Cmd+T`, `Ctrl/Cmd+W`) and the `horizontalStep` / `arrowGoesInto`
+> helpers were removed. On mobile, use **compact mode** and the tab switcher.
 
 ---
 
@@ -419,8 +522,8 @@ Directionality(
 )
 ```
 
-What mirrors: pinned anchor on start edge, scroll chevrons, keyboard
-`← →` follow visual direction, drag drop-indicator, dropdown anchor.
+What mirrors: pinned anchor on start edge, scroll chevrons, drag drop-indicator,
+dropdown anchor, and the compact tab switcher.
 
 ---
 
@@ -445,7 +548,8 @@ lib/
     ├── overlays.dart           TabContextMenu · TabListDropdown
     │                           MiniPagePreview · showSuperTabDirtyCloseDialog
     │                           alias: showGLDirtyCloseDialog
-    └── key_directions.dart     horizontalStep · arrowGoesInto (RTL helpers)
+    └── compact.dart            SuperTabSwitcher · showSuperTabSwitcher
+                                (mobile thumbnail switcher)
 ```
 
 ---

@@ -1,4 +1,4 @@
-# super_tab_bar — ChatGPT / Codex agent instructions (v2)
+# super_tab_bar — ChatGPT / Codex agent instructions (v2.1)
 
 Use these instructions when asked to build or modify a Flutter UI that needs a
 **browser-style workspace tab bar** using the `super_tab_bar` package.
@@ -9,7 +9,7 @@ Use these instructions when asked to build or modify a Flutter UI that needs a
 
 ```
 name:    super_tab_bar
-version: 2.0.0
+version: 2.1.0
 import:  package:super_tab_bar/super_tab_bar.dart
 ```
 
@@ -32,7 +32,7 @@ Apply this skill when the user asks for:
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.0.0
+  super_tab_bar: ^2.1.0
 ```
 
 ### 2 · Register theme extension
@@ -102,6 +102,8 @@ UI-behavior guards (used internally; expose in your own UI if needed):
 | `controller` | — | External controller. Provide one OR `tabsState`. |
 | `pageBuilder` | `null` | Custom page per tab; falls back to `GLTabPage`. |
 | `showChrome` | `true` | Bordered card (`false` = edge-to-edge). |
+| `compact` | `false` | v2.1 · Hide the strip (mobile); switch via `SuperTabSwitcher`. |
+| `closeTabOnBack` | `false` | v2.1 · Back closes the active tab — unless it is dirty. |
 | `fillContent` | `false` | Page fills all height. |
 | `scrollContent` | `true` | Wrap in `SingleChildScrollView`. |
 | `contentPadding` | `all(24)` | Padding inside content surface. |
@@ -249,7 +251,34 @@ Directionality(
 Directionality(textDirection: TextDirection.rtl, child: SuperTabBar(...))
 ```
 
-Mirrors: pinned anchor, chevrons, `← →` keys, drag indicator, `▾` dropdown.
+Mirrors: pinned anchor, chevrons, drag indicator, `▾` dropdown, compact switcher.
+
+---
+
+## Compact mode (v2.1)
+
+For phones: hide the strip and switch tabs from a full-screen thumbnail grid.
+
+```dart
+// Hide the strip; back closes the active tab unless dirty.
+SuperTabBar(controller: ctrl, compact: true, closeTabOnBack: true,
+           showChrome: false, fillContent: true);
+
+// Open the switcher (e.g. from a FloatingActionButton). Returns picked id / null.
+final picked = await showSuperTabSwitcher(
+  context,
+  controller: ctrl,
+  pageBuilder: (ctx, tab) => MyPage(tab: tab),  // live thumbnail fallback
+  onCloseTab: (id) => myDirtyAwareClose(id),    // optional
+);
+```
+
+Inside the switcher: tap a thumbnail to switch · long-press-drag to reorder
+(`ctrl.reorder`) · × to close. `SuperTabSwitcher` can also be embedded directly
+(e.g. bottom sheet) via `onSelect` / `onDismiss`.
+
+`closeTabOnBack: true` closes the active tab on the system back gesture only
+when it is **not** dirty (dirty tabs stay open). Uses `PopScope` (Flutter ≥ 3.16).
 
 ---
 
@@ -257,11 +286,11 @@ Mirrors: pinned anchor, chevrons, `← →` keys, drag indicator, `▾` dropdown
 
 | Key | Action |
 |---|---|
-| `← →` | Prev / next tab (RTL-aware) |
-| `Home` / `End` | First / last tab |
 | `Esc` | Close open menu / dropdown |
-| `Ctrl/Cmd + T` | New tab |
-| `Ctrl/Cmd + W` | Close active tab (if `canCloseFromUi`) |
+
+**Removed in v2.1:** the tab-navigation keys (`← →`, `Home`/`End`,
+`Ctrl/Cmd+T`, `Ctrl/Cmd+W`) and `horizontalStep` / `arrowGoesInto`. Use compact
+mode + the tab switcher on mobile.
 
 ---
 

@@ -1,4 +1,4 @@
-# super_tab_bar — comprehensive examples (v2)
+# super_tab_bar — comprehensive examples (v2.1)
 
 Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
 registration from `SKILL.md`.
@@ -221,6 +221,8 @@ SuperTabBar(
     scrollForward: 'Avancer', scrollBack: 'Reculer',
     noOpenTabs: 'Aucun onglet ouvert.',
     openTabsHeader: 'ONGLETS · {count}',   // {count} substituted automatically
+    switcherTitle: 'Onglets ouverts',
+    reorderHint: 'Glisser pour réordonner',
     discardChangesTitle: 'Abandonner les modifications ?',
     cancel: 'Annuler',
     saveAndClose: 'Enregistrer et fermer',
@@ -290,7 +292,7 @@ class ArabicWorkspace extends StatelessWidget {
 ```
 
 RTL mirrors: pinned anchor on visual left, chevrons swap sides,
-`←`/`→` follow visual direction, drag drop-indicator, `▾` dropdown anchor.
+drag drop-indicator, `▾` dropdown anchor, and the compact tab switcher.
 
 ---
 
@@ -392,4 +394,99 @@ Scaffold(
     ],
   ),
 )
+```
+
+---
+
+## 13 · Compact mode — mobile tab switcher (v2.1)
+
+On phones, hide the strip and switch tabs from a full-screen thumbnail grid
+opened by a `FloatingActionButton`. `closeTabOnBack` makes the system back
+button close the current tab — unless it is dirty.
+
+```dart
+class MobileWorkspace extends StatefulWidget {
+  const MobileWorkspace({super.key});
+  @override
+  State<MobileWorkspace> createState() => _MobileWorkspaceState();
+}
+
+class _MobileWorkspaceState extends State<MobileWorkspace> {
+  final _ctrl = SuperTabBarController(
+    tabs: const [
+      BrowserTab(id: 1, title: 'Inbox', kind: GLTabKind.doc),
+      BrowserTab(id: 2, title: 'Invoice INV-2043', kind: GLTabKind.ledger, dirty: true),
+      BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+    ],
+    activeId: 1,
+  );
+
+  // Dirty-aware close, reused by the switcher's × button.
+  Future<void> _close(int id) async {
+    final tab = _ctrl.tabById(id);
+    if (tab == null) return;
+    if (tab.dirty) {
+      final r = await showSuperTabDirtyCloseDialog(context, tab);
+      if (r == 'discard') _ctrl.close(id);
+      else if (r == 'save') { _ctrl.setDirty(id, false); _ctrl.close(id); }
+    } else {
+      _ctrl.close(id);
+    }
+  }
+
+  Future<void> _openSwitcher() => showSuperTabSwitcher(
+    context,
+    controller: _ctrl,
+    pageBuilder: (ctx, tab) => MyPage(tab: tab), // live thumbnail fallback
+    onCloseTab: _close,
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    floatingActionButton: FloatingActionButton(
+      onPressed: _openSwitcher,
+      child: const Icon(Icons.grid_view_rounded),
+    ),
+    body: SuperTabBar(
+      controller: _ctrl,
+      compact: true,          // strip hidden
+      closeTabOnBack: true,   // back closes non-dirty active tab
+      showChrome: false,
+      fillContent: true,
+      pageBuilder: (ctx, tab) => MyPage(tab: tab),
+    ),
+  );
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+}
+```
+
+---
+
+## 14 · Embed the switcher directly (bottom sheet)
+
+`showSuperTabSwitcher` is a full-screen modal; when you want a different
+presentation, mount `SuperTabSwitcher` yourself and wire selection/dismiss.
+
+```dart
+void openSwitcherSheet(BuildContext context, SuperTabBarController ctrl) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => SizedBox(
+      height: MediaQuery.of(ctx).size.height * 0.7,
+      child: SuperTabSwitcher(
+        controller: ctrl,
+        pageBuilder: (c, tab) => MyPage(tab: tab),
+        onSelect: (id) {           // tap a thumbnail
+          ctrl.select(id);
+          Navigator.of(ctx).pop();
+        },
+        onDismiss: () => Navigator.of(ctx).pop(),
+        // long-press-drag reordering + close (×) work automatically
+      ),
+    ),
+  );
+}
 ```

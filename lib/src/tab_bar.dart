@@ -9,8 +9,14 @@
 //   • [SuperTabBarPreviewOptions] for configurable hover previews
 //   • [SuperTabBehavior] per-tab UI guards (requiredPinned / uniqueNormal)
 //   • Accessibility Semantics on every interactive element
-//   • Keyboard shortcuts: Ctrl/Cmd+T → new tab, Ctrl/Cmd+W → close active
 //   • [BrowserStyleTabBar] typedef for backward compatibility
+//
+// New in v2.1:
+//   • Compact mode ([SuperTabBar.compact]) hides the strip for small screens;
+//     pair it with the [SuperTabSwitcher] thumbnail grid.
+//   • Dirty-aware back navigation ([SuperTabBar.closeTabOnBack]).
+//   • Removed the tab-navigation keyboard shortcuts (Ctrl/Cmd+T, Ctrl/Cmd+W,
+//     ← → Home End). Escape still dismisses open overlays.
 //
 //   File: lib/src/tab_bar.dart
 // ============================================================
@@ -19,7 +25,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'key_directions.dart';
 import 'theme.dart';
 import 'controller.dart';
 import 'models.dart';
@@ -48,6 +53,20 @@ class SuperTabBar extends StatefulWidget {
   // ── Shell / embedding ────────────────────────────────────
   /// Draw the outer bordered card. Set false for edge-to-edge embedding.
   final bool showChrome;
+
+  /// Compact mode — hides the tab strip entirely and shows only the active
+  /// page. Intended for small screens (phones) where the full strip is too
+  /// wide. Pair it with [SuperTabSwitcher] (see `showSuperTabSwitcher`) to give
+  /// users a thumbnail grid for switching and reordering tabs. Defaults to
+  /// `false`.
+  final bool compact;
+
+  /// When `true`, a system back gesture / button closes the active tab instead
+  /// of popping the route — but only when that tab is **not** dirty. A dirty
+  /// tab is never auto-closed on back; the pop proceeds normally so unsaved
+  /// work is never discarded silently. Especially useful together with
+  /// [compact] on mobile. Defaults to `false`.
+  final bool closeTabOnBack;
 
   /// Let the content surface fill all available height via [Expanded].
   /// Default caps at 440 px.
@@ -114,6 +133,8 @@ class SuperTabBar extends StatefulWidget {
     this.controller,
     this.pageBuilder,
     this.showChrome = true,
+    this.compact = false,
+    this.closeTabOnBack = false,
     this.fillContent = false,
     this.lazyPages = false,
     this.contentPadding = const EdgeInsets.all(24),
@@ -332,57 +353,20 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   // ── Keyboard ──────────────────────────────────────────────
+  // The tab-navigation shortcuts (Ctrl/Cmd+T, Ctrl/Cmd+W, ← → Home End) were
+  // removed in v2.1. Only Escape is handled, purely to dismiss open overlays.
   KeyEventResult _onKey(FocusNode node, KeyEvent e) {
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
 
-    // Ctrl / Cmd + T → new tab
-    final mod = HardwareKeyboard.instance.isControlPressed ||
-        HardwareKeyboard.instance.isMetaPressed;
-    if (mod && e.logicalKey == LogicalKeyboardKey.keyT) {
-      _add();
-      return KeyEventResult.handled;
-    }
-    // Ctrl / Cmd + W → close active tab
-    if (mod && e.logicalKey == LogicalKeyboardKey.keyW) {
-      final active = _ctrl.activeId;
-      if (active != null && _ctrl.canCloseFromUi(active)) {
-        _requestClose(active);
-      }
-      return KeyEventResult.handled;
-    }
-
-    // Escape → close open overlays
+    // Escape → close open overlays (not tab navigation).
     if (e.logicalKey == LogicalKeyboardKey.escape) {
       if (_menuEntry != null || _listEntry != null) {
         _hideMenu();
         _hideList();
         return KeyEventResult.handled;
       }
-      return KeyEventResult.ignored;
     }
-
-    final arrowKeys = {
-      LogicalKeyboardKey.arrowRight,
-      LogicalKeyboardKey.arrowLeft,
-      LogicalKeyboardKey.home,
-      LogicalKeyboardKey.end,
-    };
-    if (!arrowKeys.contains(e.logicalKey)) return KeyEventResult.ignored;
-
-    final ord = _ctrl.ordered;
-    if (ord.isEmpty) return KeyEventResult.handled;
-    final i = ord.indexWhere((t) => t.id == _ctrl.activeId);
-    var ni = i;
-    final step = horizontalStep(e.logicalKey, Directionality.of(context));
-    if (step != 0) {
-      ni = (i + step).clamp(0, ord.length - 1);
-    } else if (e.logicalKey == LogicalKeyboardKey.home) {
-      ni = 0;
-    } else if (e.logicalKey == LogicalKeyboardKey.end) {
-      ni = ord.length - 1;
-    }
-    if (ni >= 0 && ni < ord.length) _select(ord[ni].id);
-    return KeyEventResult.handled;
+    return KeyEventResult.ignored;
   }
 
   // ════════ OVERLAYS ════════════════════════════════════════
@@ -525,6 +509,28 @@ class _SuperTabBarState extends State<SuperTabBar> {
   Widget _scopeFor(Widget child) =>
       SuperTabBarScope(controller: _ctrl, child: child);
 
+  // ── Back navigation ───────────────────────────────────────
+  /// Whether a system back gesture is allowed to pop the route. Returns false
+  /// (i.e. we intercept the back to close the active tab) only when
+  /// [SuperTabBar.closeTabOnBack] is on AND there is a non-dirty active tab.
+  bool _canPopOnBack() {
+    if (!widget.closeTabOnBack) return true;
+    final t = _ctrl.activeTab;
+    if (t == null) return true; // nothing to close → allow normal pop
+    if (t.dirty) return true; // dirty → never auto-close → allow normal pop
+    return false; // non-dirty tab present → intercept and close it
+  }
+
+  void _handleBack(bool didPop) {
+    if (didPop) return; // route already popped; nothing to do
+    final id = _ctrl.activeId;
+    if (id == null) return;
+    final t = _ctrl.tabById(id);
+    if (t == null || t.dirty) return; // guard: never close a dirty tab here
+    _ctrl.close(id);
+    widget.onTabClosed?.call(id);
+  }
+
   // ════════ BUILD ═══════════════════════════════════════════
   @override
   Widget build(BuildContext context) {
@@ -532,7 +538,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
     final activeTab = _ctrl.activeTab;
     final content = _buildContent(s, activeTab);
 
-    return SuperTabBarScope(
+    Widget shell = SuperTabBarScope(
       controller: _ctrl,
       child: Focus(
         focusNode: _focusNode,
@@ -554,7 +560,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
               mainAxisSize:
                   widget.fillContent ? MainAxisSize.max : MainAxisSize.min,
               children: [
-                _buildStrip(s),
+                // Compact mode hides the strip; the SuperTabSwitcher is the
+                // intended way to change/reorder tabs on small screens.
+                if (!widget.compact) _buildStrip(s),
                 if (widget.fillContent)
                   Expanded(child: content)
                 else
@@ -565,6 +573,15 @@ class _SuperTabBarState extends State<SuperTabBar> {
         ),
       ),
     );
+
+    if (widget.closeTabOnBack) {
+      shell = PopScope(
+        canPop: _canPopOnBack(),
+        onPopInvoked: _handleBack,
+        child: shell,
+      );
+    }
+    return shell;
   }
 
   Widget _buildStrip(SuperTabBarThemeData s) {
@@ -573,9 +590,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
     return Container(
       constraints: const BoxConstraints(minHeight: 44),
       color: s.bg,
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Pinned region — anchored, does not scroll
           if (pinned.isNotEmpty) ...[
@@ -586,7 +603,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
             Container(
               width: 1,
               height: 24,
-              margin: const EdgeInsets.only(left: 4, right: 4, top: 8),
+              margin: const EdgeInsets.symmetric(horizontal: 4),
               color: s.borderStrong,
             ),
           ],
@@ -597,7 +614,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
               controller: _scroll,
               scrollDirection: Axis.horizontal,
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   for (int i = 0; i < unpinned.length; i++) ...[
                     if (i > 0) const SizedBox(width: 2),
@@ -961,8 +978,7 @@ class _TabChipState extends State<_TabChip> {
                 : const EdgeInsetsDirectional.only(start: 12, end: 8),
             decoration: BoxDecoration(
               color: bg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(9)),
+              borderRadius: BorderRadius.circular(9),
             ),
             child: Stack(
               clipBehavior: Clip.none,
@@ -1129,7 +1145,7 @@ class _StaticTab extends StatelessWidget {
       padding: const EdgeInsetsDirectional.only(start: 12, end: 8),
       decoration: BoxDecoration(
         color: active ? s.surface : s.hover,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(9)),
+        borderRadius: BorderRadius.circular(9),
         border: feedback ? Border.all(color: s.borderStrong) : null,
       ),
       child: Row(

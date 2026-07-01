@@ -25,6 +25,8 @@
 ///     scrollBack: 'تمرير للخلف',
 ///     noOpenTabs: 'لا توجد تبويبات — اضغط + للبدء.',
 ///     openTabsHeader: 'التبويبات المفتوحة · {count}',
+///     switcherTitle: 'التبويبات المفتوحة',
+///     reorderHint: 'اسحب لإعادة الترتيب',
 ///     discardChangesTitle: 'تجاهل التغييرات؟',
 ///     cancel: 'إلغاء',
 ///     saveAndClose: 'حفظ وإغلاق',
@@ -46,6 +48,8 @@ class SuperTabBarLocalizations {
     required this.scrollBack,
     required this.noOpenTabs,
     required this.openTabsHeader,
+    required this.switcherTitle,
+    required this.reorderHint,
     required this.discardChangesTitle,
     required this.cancel,
     required this.saveAndClose,
@@ -73,6 +77,13 @@ class SuperTabBarLocalizations {
   // ── Tab-list dropdown ──────────────────────────────────────
   /// Header label. Use `{count}` as a placeholder — see [openTabsHeaderFor].
   final String openTabsHeader;
+
+  // ── Compact-mode tab switcher ──────────────────────────────
+  /// Title shown at the top of the [SuperTabSwitcher] thumbnail screen.
+  final String switcherTitle;
+
+  /// Hint telling users they can drag thumbnails to reorder tabs.
+  final String reorderHint;
 
   // ── Dirty-close dialog ─────────────────────────────────────
   final String discardChangesTitle;
@@ -105,6 +116,8 @@ class SuperTabBarLocalizations {
     scrollBack: 'Scroll tabs back',
     noOpenTabs: 'No open tabs — press + to start.',
     openTabsHeader: 'OPEN TABS · {count}',
+    switcherTitle: 'Open tabs',
+    reorderHint: 'Drag to reorder',
     discardChangesTitle: 'Discard unsaved changes?',
     cancel: 'Cancel',
     saveAndClose: 'Save & close',
@@ -125,6 +138,8 @@ class SuperTabBarLocalizations {
     scrollBack: 'تمرير التبويبات للخلف',
     noOpenTabs: 'لا توجد تبويبات مفتوحة — اضغط + للبدء.',
     openTabsHeader: 'التبويبات المفتوحة · {count}',
+    switcherTitle: 'التبويبات المفتوحة',
+    reorderHint: 'اسحب لإعادة الترتيب',
     discardChangesTitle: 'تجاهل التغييرات غير المحفوظة؟',
     cancel: 'إلغاء',
     saveAndClose: 'حفظ وإغلاق',

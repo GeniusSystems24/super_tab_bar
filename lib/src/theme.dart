@@ -107,8 +107,8 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     bg: Color(0xFFF7F8FA),
     surface: Color(0xFFFFFFFF),
     surface2: Color(0xFFFFFFFF),
-    inputBg: Color(0xFFF1F3F8),
-    hover: Color(0xFFEEF1F7),
+    inputBg: Color(0xFFE6ECF5),   // close-button hover — clearly visible on light bg
+    hover: Color(0xFFDDE5F2),     // tab hover — distinct from bg #F7F8FA
     border: Color(0xFFE2E8F0),
     borderStrong: Color(0xFFC2C6D6),
     fg1: Color(0xFF0F172A),

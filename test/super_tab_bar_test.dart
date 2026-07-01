@@ -364,6 +364,13 @@ void main() {
       const loc = SuperTabBarLocalizations.en;
       expect(loc.dirtyTabBody('My Report'), contains('My Report'));
     });
+
+    test('compact-switcher strings are populated (en + ar)', () {
+      expect(SuperTabBarLocalizations.en.switcherTitle, isNotEmpty);
+      expect(SuperTabBarLocalizations.en.reorderHint, isNotEmpty);
+      expect(SuperTabBarLocalizations.ar.switcherTitle, isNotEmpty);
+      expect(SuperTabBarLocalizations.ar.reorderHint, isNotEmpty);
+    });
   });
 
   // ════════════════════════════════════════════════════════
@@ -500,6 +507,8 @@ void main() {
             scrollBack: 'Custom Back',
             noOpenTabs: 'Custom Empty',
             openTabsHeader: 'TABS · {count}',
+            switcherTitle: 'Custom Switcher',
+            reorderHint: 'Custom Reorder',
             discardChangesTitle: 'Custom Discard?',
             cancel: 'Custom Cancel',
             saveAndClose: 'Custom Save',
@@ -526,6 +535,206 @@ void main() {
       await tester.pumpAndSettle();
       // When disabled, no snapshot is ever captured.
       expect(ctrl.snapshot(1), isNull);
+    });
+  });
+
+  // ════════════════════════════════════════════════════════
+  // Compact mode & dirty-aware back navigation (v2.1)
+  // ════════════════════════════════════════════════════════
+  group('SuperTabBar — compact mode & back navigation', () {
+    Widget wrap(Widget child) => MaterialApp(
+          theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
+          home: Scaffold(body: child),
+        );
+
+    SuperTabBarController two({bool dirty = false}) => SuperTabBarController(
+          tabs: [
+            const BrowserTab(id: 1, title: 'One', kind: GLTabKind.doc),
+            BrowserTab(id: 2, title: 'Two', kind: GLTabKind.chart, dirty: dirty),
+          ],
+          activeId: 2,
+        );
+
+    testWidgets('non-compact renders the strip controls', (tester) async {
+      final ctrl = two();
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        pageBuilder: (ctx, tab) => const Text('page'),
+      )));
+      await tester.pumpAndSettle();
+      // + (new tab) and ▾ (tab list) live in the strip.
+      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(find.byIcon(Icons.expand_more), findsOneWidget);
+    });
+
+    testWidgets('compact: true hides the strip', (tester) async {
+      final ctrl = two();
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        compact: true,
+        pageBuilder: (ctx, tab) => const Text('page'),
+      )));
+      await tester.pumpAndSettle();
+      // Strip controls are gone; only the active page remains.
+      expect(find.byIcon(Icons.add), findsNothing);
+      expect(find.byIcon(Icons.expand_more), findsNothing);
+      expect(find.text('page'), findsOneWidget);
+    });
+
+    testWidgets('closeTabOnBack: false wraps no PopScope', (tester) async {
+      final ctrl = two();
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        pageBuilder: (ctx, tab) => const Text('page'),
+      )));
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+            of: find.byType(SuperTabBar), matching: find.byType(PopScope)),
+        findsNothing,
+      );
+    });
+
+    testWidgets('closeTabOnBack blocks pop for a clean active tab',
+        (tester) async {
+      final ctrl = two(); // active tab #2 is clean
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        closeTabOnBack: true,
+        pageBuilder: (ctx, tab) => const Text('page'),
+      )));
+      await tester.pumpAndSettle();
+      final scope = find.descendant(
+          of: find.byType(SuperTabBar), matching: find.byType(PopScope));
+      expect(scope, findsOneWidget);
+      // Clean active tab → we intercept the back (canPop == false).
+      expect(tester.widget<PopScope>(scope).canPop, isFalse);
+    });
+
+    testWidgets('closeTabOnBack allows pop when the active tab is dirty',
+        (tester) async {
+      final ctrl = two(dirty: true); // active tab #2 is dirty
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        closeTabOnBack: true,
+        pageBuilder: (ctx, tab) => const Text('page'),
+      )));
+      await tester.pumpAndSettle();
+      final scope = find.descendant(
+          of: find.byType(SuperTabBar), matching: find.byType(PopScope));
+      // Dirty active tab → never auto-closed → back pops normally (canPop true).
+      expect(tester.widget<PopScope>(scope).canPop, isTrue);
+    });
+  });
+
+  // ════════════════════════════════════════════════════════
+  // SuperTabSwitcher / showSuperTabSwitcher (v2.1)
+  // ════════════════════════════════════════════════════════
+  group('SuperTabSwitcher', () {
+    Widget wrap(Widget child) => MaterialApp(
+          theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
+          home: Scaffold(body: child),
+        );
+
+    // Blank fallback → thumbnails show an icon, not a live-rendered title,
+    // so each tab's title appears exactly once (in the card footer).
+    const blankPreview =
+        SuperTabBarPreviewOptions(fallback: PreviewFallback.blank);
+
+    SuperTabBarController three() => SuperTabBarController(
+          tabs: const [
+            BrowserTab(id: 1, title: 'One', kind: GLTabKind.doc),
+            BrowserTab(id: 2, title: 'Two', kind: GLTabKind.chart),
+            BrowserTab(id: 3, title: 'Three', kind: GLTabKind.store),
+          ],
+          activeId: 1,
+        );
+
+    testWidgets('renders a thumbnail per tab with the switcher title',
+        (tester) async {
+      final ctrl = three();
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabSwitcher(
+        controller: ctrl,
+        previewOptions: blankPreview,
+      )));
+      await tester.pumpAndSettle();
+      expect(find.text('Open tabs'), findsOneWidget); // switcherTitle
+      expect(find.text('One'), findsOneWidget);
+      expect(find.text('Two'), findsOneWidget);
+      expect(find.text('Three'), findsOneWidget);
+    });
+
+    testWidgets('tapping a thumbnail selects that tab', (tester) async {
+      final ctrl = three();
+      addTearDown(ctrl.dispose);
+      int? picked;
+      await tester.pumpWidget(wrap(SuperTabSwitcher(
+        controller: ctrl,
+        previewOptions: blankPreview,
+        onSelect: (id) {
+          picked = id;
+          ctrl.select(id);
+        },
+      )));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Three'));
+      await tester.pump();
+      expect(picked, 3);
+      expect(ctrl.activeId, 3);
+    });
+
+    testWidgets('onCloseTab fires for the thumbnail close button',
+        (tester) async {
+      final ctrl = three();
+      addTearDown(ctrl.dispose);
+      final closed = <int>[];
+      await tester.pumpWidget(wrap(SuperTabSwitcher(
+        controller: ctrl,
+        previewOptions: blankPreview,
+        onCloseTab: closed.add,
+      )));
+      await tester.pumpAndSettle();
+      // Thumbnail close buttons carry the localized "Close tab" semantics label;
+      // the header dismiss button does not.
+      await tester.tap(find.bySemanticsLabel('Close tab').first);
+      await tester.pump();
+      expect(closed, isNotEmpty);
+      expect(closed.first, 1, reason: 'first ordered tab is #1');
+    });
+
+    testWidgets('showSuperTabSwitcher returns the picked id and pops',
+        (tester) async {
+      final ctrl = three();
+      addTearDown(ctrl.dispose);
+      int? result;
+      await tester.pumpWidget(wrap(Builder(
+        builder: (ctx) => ElevatedButton(
+          onPressed: () async {
+            result = await showSuperTabSwitcher(
+              ctx,
+              controller: ctrl,
+              previewOptions: blankPreview,
+            );
+          },
+          child: const Text('open'),
+        ),
+      )));
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('Open tabs'), findsOneWidget);
+
+      await tester.tap(find.text('Two'));
+      await tester.pumpAndSettle();
+      // Route popped, controller updated, id returned.
+      expect(find.text('Open tabs'), findsNothing);
+      expect(ctrl.activeId, 2);
+      expect(result, 2);
     });
   });
 }

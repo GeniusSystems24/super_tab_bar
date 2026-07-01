@@ -11,6 +11,7 @@ import 'example_01_basic_workspace.dart';
 import 'example_02_document_shell.dart';
 import 'example_03_theme_rtl_overflow.dart';
 import 'example_04_tab_behaviors.dart';
+import 'example_05_compact_mobile.dart';
 import 'browser_tabs_demo.dart';
 import 'shell_kit.dart';
 
@@ -139,6 +140,21 @@ class LauncherScreen extends StatelessWidget {
           contentKind: _Content.list,
         ),
         screen: const TabBehaviorsExample(),
+      ),
+      _Demo(
+        title: 'Compact mode (mobile)',
+        subtitle:
+            'Strip hidden for phones. A FloatingActionButton opens a full-screen '
+            'grid of tab thumbnails — tap to switch, drag to reorder. Back closes '
+            'the current tab only when it is not dirty.',
+        badge: 'v2.1 · Compact · Switcher · Back',
+        preview: const _TabThumb(
+          labels: ['Inbox', 'Invoice', 'Store', 'Dashboard'],
+          activeIndex: 0,
+          dirty: {1},
+          contentKind: _Content.cards,
+        ),
+        screen: const CompactMobileExample(),
       ),
     ];
 
@@ -628,7 +644,7 @@ class _VersionPill extends StatelessWidget {
         border: Border.all(
             color: SuperTabBarThemeData.accent.withOpacity(0.35)),
       ),
-      child: const Text('v2.0.0',
+      child: const Text('v2.1.0',
           style: TextStyle(
               fontFamily: SuperTabBarThemeData.monoFont,
               fontSize: 10.5,

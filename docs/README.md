@@ -39,9 +39,28 @@ Legend
 | **Pinned** | 40 × 36 px — icon only, anchored before the scrolling region. |
 | **Dirty** | Unsaved dot (warning orange) replaces close button when not hovering; close button visible on hover — clicking it triggers the confirm dialog. |
 | **Dragging** | Ghost feedback chip (0.9 opacity, border); drag target shows a blue 2 px drop indicator on its start edge. |
-| **Focused** | Strip has keyboard focus; `← →` / `Home` / `End` navigate. |
 | **Overflow** | `⟩` chevrons appear on the sides that have hidden tabs; scroll by 220 px per click. |
 | **Preview** | Hover for ≈ 480 ms triggers the popover; dismisses when the pointer leaves the tab chip. |
+| **Compact** | `compact: true` hides the whole strip; switch tabs from the `SuperTabSwitcher` thumbnail grid. |
+
+---
+
+## Compact mode & tab switcher
+
+On phones, set `compact: true` to hide the strip and drive tab switching from a
+full-screen thumbnail grid instead.
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `SuperTabBar(compact: true)` | Widget flag | Hides the tab strip; shows only the active page. |
+| `SuperTabBar(closeTabOnBack: true)` | Widget flag | Back gesture closes the active tab — unless it is dirty. |
+| `SuperTabSwitcher` | Widget | Scrollable grid of tab thumbnails; tap to switch, long-press-drag to reorder. |
+| `showSuperTabSwitcher` | Function | Opens `SuperTabSwitcher` as a full-screen modal; returns the picked tab id (or `null`). |
+
+Thumbnails reuse the controller's cached page snapshots and fall back to a
+scaled live render (or an icon card) when none is available. Reordering drives
+`SuperTabBarController.reorder`; the per-thumbnail close button can be routed
+through `onCloseTab` for dirty-confirmation.
 
 ---
 
@@ -107,5 +126,5 @@ Legend
 | `MiniPagePreview` | Widget | Hover-intent mini-page preview popover. |
 | `TabMenuItem` | Class | Menu item model. |
 | `showGLDirtyCloseDialog` | Function | Animated confirm dialog; returns `'discard'`/`'save'`/`null`. |
-| `horizontalStep` | Function | RTL-aware `← →` key → `±1` step. |
-| `arrowGoesInto` | Function | `true` when arrow points toward nesting. |
+| `SuperTabSwitcher` | Widget | Compact-mode thumbnail grid of open tabs. |
+| `showSuperTabSwitcher` | Function | Opens the switcher as a full-screen modal; returns the picked tab id. |

@@ -359,7 +359,7 @@ class _BehaviorPage extends StatelessWidget {
             'All operations available: close, duplicate, pin, unpin',
             'Right-click to see the full context menu',
             'Drag to reorder (only for unpinned tabs)',
-            'Ctrl/Cmd+W closes this tab; Ctrl/Cmd+T opens a new one',
+            'Hover a tab for a live mini-page preview',
           ]
         ),
     };

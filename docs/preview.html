@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>super_tab_bar · v2.1 feature preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300,0,0&display=block" rel="stylesheet" />
+<style>
+/* ============================================================
+   super_tab_bar — HTML feature preview
+   A faithful, framework-free recreation of the Flutter widget,
+   using the exact SuperTabBarThemeData tokens (theme.dart).
+   Everything here is a demonstration, not the shipping code.
+   ============================================================ */
+
+/* ── Theme tokens (mirror lib/src/theme.dart) ─────────────── */
+:root[data-theme="dark"]{
+  --bg:#111318; --surface:#1E2025; --surface2:#292D38; --input:#33353A;
+  --hover:#2F3540; --border:rgba(67,70,79,.4); --border-strong:#434654;
+  --fg1:#E2E2E9; --fg2:#C3C6D7; --fg3:#8D90A0; --fg4:#44474E;
+  --card-shadow:0 25px 50px -12px rgba(0,0,0,.5);
+  --pop-shadow:0 12px 32px -8px rgba(0,0,0,.72);
+  --strip-grad:linear-gradient(180deg,#15171d,#111318);
+}
+:root[data-theme="light"]{
+  --bg:#F7F8FA; --surface:#FFFFFF; --surface2:#FFFFFF; --input:#E6ECF5;
+  --hover:#DDE5F2; --border:#E2E8F0; --border-strong:#C2C6D6;
+  --fg1:#0F172A; --fg2:#424754; --fg3:#64748B; --fg4:#C2C6D6;
+  --card-shadow:0 24px 48px -18px rgba(15,23,42,.22);
+  --pop-shadow:0 16px 40px -12px rgba(15,23,42,.28);
+  --strip-grad:linear-gradient(180deg,#ffffff,#F7F8FA);
+}
+:root{
+  --accent:#4A7CFF; --success:#1DB88A; --warning:#F97316; --danger:#EF4444;
+  --r-sm:4px; --r-md:6px; --r-lg:8px; --r-xl:12px;
+  --display:'Manrope',sans-serif; --body:'Inter',sans-serif; --mono:'JetBrains Mono',monospace;
+  --dur:.15s; --ease:cubic-bezier(.4,0,.2,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--fg1);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+body{padding:0 0 96px}
+.mi{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;
+  line-height:1;letter-spacing:normal;text-transform:none;white-space:nowrap;
+  direction:ltr;-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;
+  user-select:none;font-size:20px}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+
+/* ── Page shell ───────────────────────────────────────────── */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+header.top{position:sticky;top:0;z-index:50;background:var(--strip-grad);
+  border-bottom:1px solid var(--border);backdrop-filter:blur(8px)}
+.top .wrap{display:flex;align-items:center;gap:16px;height:64px}
+.brand{display:flex;align-items:center;gap:12px;font-family:var(--display);font-weight:800;
+  font-size:18px;letter-spacing:-.02em}
+.logo{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--accent),#7b5bff);color:#fff;box-shadow:0 6px 16px -6px rgba(74,124,255,.7)}
+.logo .mi{font-size:20px}
+.ver{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  padding:3px 8px;border-radius:999px}
+.top .spacer{flex:1}
+.seg{display:flex;background:var(--input);border:1px solid var(--border);border-radius:999px;padding:3px;gap:2px}
+.seg button{font-family:var(--body);font-size:12px;font-weight:600;color:var(--fg3);
+  border:0;background:transparent;padding:6px 12px;border-radius:999px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.seg button.on{background:var(--surface);color:var(--fg1);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.seg button .mi{font-size:16px}
+
+/* ── Section scaffolding ──────────────────────────────────── */
+section.block{margin-top:48px}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+h2.title{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;margin-bottom:6px}
+.lede{color:var(--fg3);font-size:14.5px;max-width:70ch;line-height:1.55}
+[dir="rtl"] .lede,[dir="rtl"] h2.title,[dir="rtl"] .eyebrow{text-align:right}
+
+/* ── SuperTabBar card ─────────────────────────────────────── */
+.stb{border:1px solid var(--border-strong);border-radius:var(--r-lg);overflow:hidden;
+  background:var(--bg);box-shadow:var(--card-shadow);margin-top:22px}
+.strip{display:flex;align-items:stretch;gap:0;background:var(--strip-grad);
+  border-bottom:1px solid var(--border);padding:8px 8px 0;position:relative;min-height:52px}
+.pins{display:flex;gap:6px;align-items:flex-end;padding-bottom:8px;padding-right:6px}
+[dir="rtl"] .pins{padding-right:0;padding-left:6px}
+.pin{width:38px;height:34px;border-radius:var(--r-md) var(--r-md) 0 0;display:grid;place-items:center;
+  background:var(--surface2);border:1px solid var(--border);border-bottom:0;cursor:pointer;color:var(--fg2);position:relative}
+.pin.active{background:var(--surface);color:var(--accent)}
+.pin .mi{font-size:18px}
+.pin .lock{position:absolute;bottom:3px;right:3px;font-size:10px;color:var(--fg3)}
+.scroller{flex:1;display:flex;align-items:flex-end;gap:4px;overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;padding-bottom:0;scroll-behavior:smooth}
+.scroller::-webkit-scrollbar{display:none}
+.tab{position:relative;display:flex;align-items:center;gap:8px;height:38px;padding:0 10px 0 12px;
+  min-width:140px;max-width:220px;border-radius:var(--r-md) var(--r-md) 0 0;
+  background:var(--surface2);border:1px solid var(--border);border-bottom:0;cursor:pointer;
+  color:var(--fg2);flex:0 0 auto;transition:background var(--dur) var(--ease),color var(--dur) var(--ease);user-select:none}
+.tab:hover{background:var(--hover);color:var(--fg1)}
+.tab.active{background:var(--surface);color:var(--fg1)}
+.tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent)}
+.tab .ti{font-size:17px;flex:0 0 auto}
+.tab.active .ti{color:var(--accent)}
+.tab .label{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1}
+.tab.active .label{font-weight:600}
+.tab .end{width:18px;height:18px;flex:0 0 auto;display:grid;place-items:center;border-radius:var(--r-sm)}
+.tab .dot{width:8px;height:8px;border-radius:50%;background:var(--warning)}
+.tab .x{font-size:15px;color:var(--fg3);opacity:0;transition:opacity var(--dur)}
+.tab:hover .x{opacity:1}
+.tab:hover .dot{display:none}
+.tab .end:hover .x{color:var(--fg1)}
+.tab.dragging{opacity:.4}
+.tab.dropbefore{box-shadow:inset 2px 0 0 var(--accent)}
+[dir="rtl"] .tab.dropbefore{box-shadow:inset -2px 0 0 var(--accent)}
+.striptools{display:flex;align-items:center;gap:2px;padding:0 2px 8px 6px}
+[dir="rtl"] .striptools{padding:0 6px 8px 2px}
+.iconbtn{width:32px;height:32px;border-radius:var(--r-md);border:0;background:transparent;color:var(--fg3);
+  cursor:pointer;display:grid;place-items:center}
+.iconbtn:hover{background:var(--hover);color:var(--fg1)}
+.iconbtn .mi{font-size:20px}
+
+/* ── Content surface (state-preserving) ───────────────────── */
+.surface{background:var(--surface);min-height:300px;position:relative}
+.page{padding:24px 26px;display:none}
+.page.show{display:block;animation:fade .2s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page h3{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+.page h3 .mi{color:var(--accent);font-size:22px}
+.pmeta{font-family:var(--mono);font-size:11px;color:var(--fg3);margin-top:2px;letter-spacing:.04em}
+.prow{display:flex;gap:14px;flex-wrap:wrap;margin-top:18px}
+.kpi{flex:1;min-width:150px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 16px}
+.kpi .k{font-family:var(--mono);font-size:11px;color:var(--fg3);text-transform:uppercase;letter-spacing:.08em}
+.kpi .v{font-family:var(--display);font-weight:800;font-size:24px;margin-top:4px}
+.kpi .d{font-size:12px;margin-top:2px}
+.up{color:var(--success)} .dn{color:var(--danger)}
+.bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:20px;padding:14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg)}
+.bars i{flex:1;background:linear-gradient(180deg,var(--accent),#7b5bff);border-radius:4px 4px 0 0;min-height:8px}
+.statenote{margin-top:18px;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--fg2);
+  background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 22%,transparent);
+  padding:10px 12px;border-radius:var(--r-md)}
+.counter{display:inline-flex;align-items:center;gap:10px;margin-top:16px}
+.counter button{width:32px;height:32px;border-radius:var(--r-md);border:1px solid var(--border);
+  background:var(--surface2);color:var(--fg1);cursor:pointer;font-size:18px}
+.counter .n{font-family:var(--mono);font-weight:700;font-size:18px;min-width:34px;text-align:center}
+.dirtybtn{margin-top:16px;display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;
+  padding:8px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface2);color:var(--fg1);cursor:pointer}
+.dirtybtn.isdirty{border-color:color-mix(in srgb,var(--warning) 50%,transparent);color:var(--warning)}
+.rows{margin-top:16px;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.rows .rr{display:flex;align-items:center;gap:12px;padding:11px 14px;border-top:1px solid var(--border);font-size:13px}
+.rows .rr:first-child{border-top:0}
+.rows .av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#7b5bff);
+  color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
+
+/* ── Overlays: context menu + overflow dropdown ───────────── */
+.pop{position:fixed;z-index:120;background:var(--surface);border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);box-shadow:var(--pop-shadow);padding:6px;min-width:210px;
+  animation:pop .12s var(--ease)}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(-4px)}to{opacity:1;transform:none}}
+.pop .mrow{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:var(--r-md);
+  font-size:13px;color:var(--fg1);cursor:pointer}
+.pop .mrow:hover{background:var(--hover)}
+.pop .mrow.danger{color:var(--danger)}
+.pop .mrow.danger:hover{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.pop .mrow.disabled{color:var(--fg4);cursor:not-allowed;pointer-events:none}
+.pop .mrow .mi{font-size:18px}
+.pop .sep{height:1px;background:var(--border);margin:5px 4px}
+.pop .hd{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--fg3);padding:8px 10px 6px}
+.pop .listrow .sw{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--fg3)}
+[dir="rtl"] .pop .listrow .sw{margin-left:0;margin-right:auto}
+
+/* ── Hover mini-page preview ──────────────────────────────── */
+.preview{position:fixed;z-index:110;width:280px;background:var(--surface);border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);box-shadow:var(--pop-shadow);overflow:hidden;pointer-events:none;animation:pop .14s var(--ease)}
+.preview .phd{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--border);background:var(--strip-grad)}
+.preview .phd .mi{font-size:16px;color:var(--accent)}
+.preview .phd b{font-size:12.5px;font-weight:700}
+.preview .phd span{font-family:var(--mono);font-size:9.5px;color:var(--fg3);margin-left:auto}
+[dir="rtl"] .preview .phd span{margin-left:0;margin-right:auto}
+.preview .pbody{height:150px;padding:12px;overflow:hidden;position:relative}
+.skl{display:flex;flex-direction:column;gap:7px}
+.skl i{height:9px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);display:block}
+.skl .w1{width:70%}.skl .w2{width:100%}.skl .w3{width:45%}
+.skl .grid{display:flex;gap:7px}.skl .grid i{flex:1;height:34px}
+.skl .mini-bars{display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:2px}
+.skl .mini-bars i{flex:1;background:linear-gradient(180deg,var(--accent),#7b5bff);border:0;border-radius:3px 3px 0 0}
+
+/* ── Event log ────────────────────────────────────────────── */
+.logwrap{margin-top:22px}
+.logbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.logbar b{font-family:var(--display);font-weight:700;font-size:14px}
+.logbar .clr{margin-left:auto;font-size:12px;color:var(--fg3);background:transparent;border:0;cursor:pointer;display:flex;align-items:center;gap:4px}
+[dir="rtl"] .logbar .clr{margin-left:0;margin-right:auto}
+.log{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  font-family:var(--mono);font-size:12px;height:150px;overflow-y:auto;padding:10px 12px}
+.log .l{display:flex;gap:8px;padding:3px 0;color:var(--fg2);border-bottom:1px dashed var(--border)}
+.log .l:last-child{border-bottom:0}
+.log .l .t{color:var(--fg4)}
+.log .l .e{color:var(--accent);font-weight:700}
+.log .l .m{color:var(--fg2)}
+
+/* ── Feature grid ─────────────────────────────────────────── */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:22px}
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px}
+.fcard .fi{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);margin-bottom:12px}
+.fcard h4{font-family:var(--display);font-weight:700;font-size:15px;margin-bottom:5px}
+.fcard p{font-size:13px;color:var(--fg3);line-height:1.5}
+.fcard code{font-family:var(--mono);font-size:11.5px;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);
+  padding:1px 5px;border-radius:4px}
+
+/* ── Compact / mobile section ─────────────────────────────── */
+.mobilelayout{display:grid;grid-template-columns:auto 1fr;gap:32px;align-items:start;margin-top:24px}
+@media(max-width:820px){.mobilelayout{grid-template-columns:1fr;justify-items:center}}
+.phone{width:340px;height:680px;border-radius:38px;border:9px solid var(--border-strong);
+  background:var(--bg);box-shadow:var(--card-shadow);overflow:hidden;position:relative;display:flex;flex-direction:column;flex:0 0 auto}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:22px;background:var(--border-strong);
+  border-radius:0 0 14px 14px;z-index:6}
+.pbar{height:54px;display:flex;align-items:center;gap:4px;padding:0 6px;background:var(--surface);border-bottom:1px solid var(--border);flex:0 0 auto}
+.pbar .ttl{flex:1;font-family:var(--display);font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pbar .chip{font-family:var(--mono);font-size:10px;font-weight:700;padding:4px 8px;border-radius:999px;border:1px solid var(--border);color:var(--fg3);background:var(--input)}
+.pbar .chip.dirty{color:var(--warning);border-color:color-mix(in srgb,var(--warning) 45%,transparent);
+  background:color-mix(in srgb,var(--warning) 12%,transparent)}
+.pcontent{flex:1;overflow-y:auto;position:relative;background:var(--surface)}
+.pcontent .page{padding:18px 18px}
+.fab{position:absolute;right:16px;bottom:16px;width:56px;height:56px;border-radius:18px;border:0;cursor:pointer;
+  background:var(--accent);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(74,124,255,.8);z-index:7}
+.fab .mi{font-size:26px}
+.fab:active{transform:scale(.94)}
+
+/* ── Tab switcher (compact) ───────────────────────────────── */
+.switcher{position:absolute;inset:0;background:var(--bg);z-index:9;display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .3s var(--ease);pointer-events:none}
+.switcher.open{transform:none;pointer-events:auto}
+.swhd{display:flex;align-items:center;gap:8px;padding:14px 12px 8px}
+.swhd .tt{flex:1}
+.swhd .tt b{font-family:var(--display);font-weight:800;font-size:18px;display:block}
+.swhd .tt small{font-family:var(--body);font-size:11px;color:var(--fg3)}
+.swgrid{flex:1;overflow-y:auto;padding:4px 14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+.thumb{border:1px solid var(--border);border-radius:var(--r-xl);background:var(--surface);overflow:hidden;cursor:pointer;
+  display:flex;flex-direction:column;transition:border-color var(--dur),box-shadow var(--dur),transform var(--dur);position:relative}
+.thumb.active{border-color:var(--accent);border-width:2px}
+.thumb.over{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.thumb.dragging{opacity:.4}
+.thumb .prev{flex:1;min-height:96px;background:var(--surface);padding:10px;overflow:hidden;position:relative}
+.thumb .badge{position:absolute;top:7px;left:7px;font-family:var(--body);font-size:8.5px;font-weight:700;letter-spacing:.4px;
+  color:#fff;background:var(--accent);padding:2px 6px;border-radius:var(--r-sm)}
+.thumb .cls{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.55);
+  color:#fff;display:grid;place-items:center;border:0;cursor:pointer;z-index:2}
+.thumb .cls .mi{font-size:15px}
+.thumb .foot{display:flex;align-items:center;gap:7px;padding:8px 9px;border-top:1px solid var(--border);background:var(--surface)}
+.thumb .foot .mi{font-size:15px;color:var(--fg3)}
+.thumb.active .foot .mi{color:var(--accent)}
+.thumb .foot .fl{flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thumb .foot .fdot{width:7px;height:7px;border-radius:50%;background:var(--warning);flex:0 0 auto}
+.thumb .foot .fpin{font-size:13px;color:var(--fg3)}
+.sw-empty{flex:1;display:grid;place-items:center;color:var(--fg3);font-size:13px}
+
+/* ── Back-nav demo panel ──────────────────────────────────── */
+.backpanel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px 20px}
+.backpanel h4{font-family:var(--display);font-weight:700;font-size:16px;margin-bottom:12px}
+.btbl{width:100%;border-collapse:collapse;font-size:13px}
+.btbl th,.btbl td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border)}
+[dir="rtl"] .btbl th,[dir="rtl"] .btbl td{text-align:right}
+.btbl th{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--fg3)}
+.btbl td .tag{font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:999px}
+.tag.ok{color:var(--success);background:color-mix(in srgb,var(--success) 14%,transparent)}
+.tag.no{color:var(--warning);background:color-mix(in srgb,var(--warning) 14%,transparent)}
+.hint{margin-top:14px;font-size:12.5px;color:var(--fg3);display:flex;gap:8px;align-items:flex-start}
+.hint .mi{font-size:16px;color:var(--accent)}
+
+/* ── Removed shortcuts note ───────────────────────────────── */
+.removed{margin-top:18px;background:color-mix(in srgb,var(--warning) 7%,transparent);
+  border:1px solid color-mix(in srgb,var(--warning) 30%,transparent);border-radius:var(--r-xl);padding:16px 18px}
+.removed h4{font-family:var(--display);font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px;color:var(--warning)}
+.removed p{font-size:13px;color:var(--fg2);margin-top:6px;line-height:1.55}
+.keys{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.kbd{font-family:var(--mono);font-size:11px;padding:4px 9px;border-radius:6px;border:1px solid var(--border-strong);
+  background:var(--surface2);color:var(--fg3);text-decoration:line-through;position:relative}
+.kbd.keep{text-decoration:none;color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,transparent)}
+
+footer.foot{margin-top:60px;border-top:1px solid var(--border);padding-top:24px;color:var(--fg3);font-size:12.5px;
+  display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+footer.foot .mi{font-size:15px}
+footer.foot code{font-family:var(--mono);color:var(--fg2)}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
+  background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--pop-shadow);
+  border-radius:var(--r-lg);padding:11px 16px;font-size:13px;color:var(--fg1);opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;display:flex;align-items:center;gap:9px}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.toast .mi{font-size:18px;color:var(--accent)}
+.hero{padding:44px 0 6px}
+.hero h1{font-family:var(--display);font-weight:800;font-size:40px;letter-spacing:-.03em;line-height:1.05}
+.hero p{color:var(--fg3);font-size:16px;margin-top:12px;max-width:64ch;line-height:1.55}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{font-size:12px;font-weight:600;color:var(--fg2);background:var(--surface);border:1px solid var(--border);
+  padding:6px 12px;border-radius:999px;display:flex;align-items:center;gap:6px}
+.pill .mi{font-size:15px;color:var(--accent)}
+</style>
+</head>
+<body>
+
+<!-- ══ Top bar ══════════════════════════════════════════════ -->
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <span class="logo"><span class="mi">tab</span></span>
+      super_tab_bar
+    </div>
+    <span class="ver">v2.1.0</span>
+    <div class="spacer"></div>
+    <div class="seg" id="langSeg">
+      <button data-lang="en" class="on">EN</button>
+      <button data-lang="ar">AR · RTL</button>
+    </div>
+    <div class="seg" id="themeSeg">
+      <button data-theme="dark" class="on"><span class="mi">dark_mode</span></button>
+      <button data-theme="light"><span class="mi">light_mode</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- ══ Hero ══ -->
+  <div class="hero">
+    <h1 data-i18n="heroTitle">A browser-style workspace tab bar for Flutter</h1>
+    <p data-i18n="heroSub">Every feature of the widget, recreated below as a live, framework-free demo — using the package's exact theme tokens. Try the desktop strip and the mobile compact switcher.</p>
+    <div class="pills">
+      <span class="pill"><span class="mi">push_pin</span><span data-i18n="pPin">Pin / dirty / close</span></span>
+      <span class="pill"><span class="mi">drag_indicator</span><span data-i18n="pDrag">Drag-to-reorder</span></span>
+      <span class="pill"><span class="mi">preview</span><span data-i18n="pPrev">Live previews</span></span>
+      <span class="pill"><span class="mi">grid_view</span><span data-i18n="pCompact">Compact switcher</span></span>
+      <span class="pill"><span class="mi">arrow_back</span><span data-i18n="pBack">Dirty-aware back</span></span>
+      <span class="pill"><span class="mi">translate</span>RTL · i18n</span>
+    </div>
+  </div>
+
+  <!-- ══ 1 · Desktop tab strip ══ -->
+  <section class="block">
+    <div class="eyebrow">01 · Desktop</div>
+    <h2 class="title" data-i18n="s1title">The full tab strip</h2>
+    <p class="lede" data-i18n="s1lede">Click a tab to switch (pages preserve their state). Hover ~0.5 s for a mini-page preview. Right-click for the context menu. Drag an unpinned tab to reorder. Use ＋ to add and ▾ for the overflow list. Pinned tabs are icon-only and anchored to the start edge.</p>
+
+    <div class="stb">
+      <div class="strip">
+        <div class="pins" id="pins"></div>
+        <div class="scroller" id="scroller"></div>
+        <div class="striptools">
+          <button class="iconbtn" id="btnAdd" title="New tab"><span class="mi">add</span></button>
+          <button class="iconbtn" id="btnList" title="Open tabs"><span class="mi">expand_more</span></button>
+        </div>
+      </div>
+      <div class="surface" id="surface"></div>
+    </div>
+
+    <div class="logwrap">
+      <div class="logbar">
+        <span class="mi" style="font-size:18px;color:var(--accent)">bolt</span>
+        <b data-i18n="events">Event callbacks</b>
+        <button class="clr" id="clrLog"><span class="mi" style="font-size:15px">clear_all</span><span data-i18n="clear">Clear</span></button>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </section>
+
+  <!-- ══ 2 · Behavior types ══ -->
+  <section class="block">
+    <div class="eyebrow">02 · Behaviors</div>
+    <h2 class="title" data-i18n="s2title">Per-tab behavior types</h2>
+    <p class="lede" data-i18n="s2lede">Each tab declares a SuperTabBehavior that governs which UI actions it exposes — right-click any tab above to see the menu adapt.</p>
+    <div class="fgrid">
+      <div class="fcard">
+        <div class="fi"><span class="mi">lock</span></div>
+        <h4>requiredPinned</h4>
+        <p data-i18n="bReq">Always pinned. The UI hides close, unpin and duplicate — but <code>controller.close(id)</code> still works programmatically.</p>
+      </div>
+      <div class="fcard">
+        <div class="fi"><span class="mi">tab</span></div>
+        <h4>normal</h4>
+        <p data-i18n="bNorm">The standard tab: close, duplicate, pin and unpin are all available.</p>
+      </div>
+      <div class="fcard">
+        <div class="fi"><span class="mi">filter_1</span></div>
+        <h4>uniqueNormal</h4>
+        <p data-i18n="bUniq">Like normal, but never duplicated. Re-adding with the same <code>uniqueKey</code> just re-selects the existing tab.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 3 · Compact mode ══ -->
+  <section class="block">
+    <div class="eyebrow">03 · Mobile · New in 2.1</div>
+    <h2 class="title" data-i18n="s3title">Compact mode &amp; the tab switcher</h2>
+    <p class="lede" data-i18n="s3lede">On phones, set compact:true to hide the strip. A FloatingActionButton opens a full-screen grid of tab thumbnails. Tap a thumbnail to switch, long-press-drag one onto another to reorder, and × to close (dirty tabs confirm first).</p>
+
+    <div class="mobilelayout">
+      <div class="phone">
+        <div class="notch"></div>
+        <div class="pbar">
+          <button class="iconbtn" id="mBack" title="Back"><span class="mi flip">arrow_back</span></button>
+          <span class="ttl" id="mTitle">—</span>
+          <span class="chip" id="mDirty" title="Toggle dirty">Clean</span>
+          <span class="chip" id="mCount">0</span>
+        </div>
+        <div class="pcontent" id="mContent"></div>
+        <button class="fab" id="fab" title="Open switcher"><span class="mi">grid_view</span></button>
+
+        <!-- switcher overlay -->
+        <div class="switcher" id="switcher">
+          <div class="swhd">
+            <div class="tt">
+              <b data-i18n="swTitle">Open tabs</b>
+              <small><span id="swCount">0</span> · <span data-i18n="reorder">Drag to reorder</span></small>
+            </div>
+            <button class="iconbtn" id="swClose"><span class="mi">close</span></button>
+          </div>
+          <div class="swgrid" id="swGrid"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="backpanel">
+          <h4 data-i18n="backTitle">Dirty-aware back navigation</h4>
+          <p class="lede" style="font-size:13.5px" data-i18n="backLede">With closeTabOnBack:true a back gesture closes the current tab — but only when it isn't dirty. Try the ← button on the phone, and toggle the "Clean/Dirty" chip.</p>
+          <table class="btbl" style="margin-top:14px">
+            <thead><tr><th data-i18n="thState">Active tab</th><th data-i18n="thResult">Back gesture result</th></tr></thead>
+            <tbody>
+              <tr><td data-i18n="rClean">not dirty</td><td><span class="tag ok" data-i18n="rCloses">tab is closed</span></td></tr>
+              <tr><td data-i18n="rDirty">dirty</td><td><span class="tag no" data-i18n="rStays">stays open · route pops</span></td></tr>
+              <tr><td data-i18n="rNone">none open</td><td><span class="tag no" data-i18n="rPops">route pops normally</span></td></tr>
+            </tbody>
+          </table>
+          <div class="hint"><span class="mi">info</span><span data-i18n="backHint">Implemented with PopScope — requires Flutter ≥ 3.16.</span></div>
+        </div>
+
+        <div class="removed">
+          <h4><span class="mi">keyboard_alt</span><span data-i18n="remTitle">Keyboard shortcuts removed in 2.1</span></h4>
+          <p data-i18n="remBody">The tab-navigation keys were removed — on mobile, compact mode replaces them. Only Escape survives, to dismiss an open overlay.</p>
+          <div class="keys">
+            <span class="kbd">Ctrl / Cmd + T</span>
+            <span class="kbd">Ctrl / Cmd + W</span>
+            <span class="kbd">← →</span>
+            <span class="kbd">Home / End</span>
+            <span class="kbd keep">Esc ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 4 · Feature grid ══ -->
+  <section class="block">
+    <div class="eyebrow">04 · At a glance</div>
+    <h2 class="title" data-i18n="s4title">Everything in the box</h2>
+    <div class="fgrid">
+      <div class="fcard"><div class="fi"><span class="mi">interests</span></div><h4 data-i18n="f1t">State-preserving pages</h4><p data-i18n="f1b">Switching tabs keeps each page's scroll, inputs and counters intact.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">preview</span></div><h4 data-i18n="f2t">Live mini-previews</h4><p data-i18n="f2b">Hovering a tab shows a scaled snapshot of its page in a popover.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">unfold_more</span></div><h4 data-i18n="f3t">Overflow dropdown</h4><p data-i18n="f3b">When tabs overflow, ▾ lists them all with quick select.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">translate</span></div><h4 data-i18n="f4t">Localization + RTL</h4><p data-i18n="f4b">All strings live in SuperTabBarLocalizations. Toggle AR above to mirror everything.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">accessibility_new</span></div><h4 data-i18n="f5t">Accessibility</h4><p data-i18n="f5b">Semantics on every chip, close button and menu row.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">palette</span></div><h4 data-i18n="f6t">Themeable</h4><p data-i18n="f6b">A single ThemeExtension drives dark/light and every surface token.</p></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="mi">code</span>
+    <span data-i18n="footNote">Framework-free preview of the Flutter package.</span>
+    <span>·</span>
+    <code>flutter/super_tab_bar</code>
+    <span>·</span>
+    <code>compact · closeTabOnBack · SuperTabSwitcher</code>
+  </footer>
+</div>
+
+<div class="toast" id="toast"><span class="mi">check_circle</span><span id="toastMsg"></span></div>
+
+<script>
+/* ============================================================
+   Model — a mini SuperTabBarController shared by both demos.
+   ============================================================ */
+const KIND = {
+  ledger:{icon:'menu_book',meta:'Accounting · Ledger'},
+  doc:{icon:'description',meta:'Journal · Document'},
+  store:{icon:'storefront',meta:'Branch · Storefront'},
+  chart:{icon:'bar_chart',meta:'Analytics · Dashboard'},
+  user:{icon:'groups',meta:'Directory · People'},
+  globe:{icon:'public',meta:'Workspace · Page'},
+};
+const CYCLE = ['globe','user','store','chart','doc'];
+
+/* i18n strings (subset that appears in UI) */
+const I18N = {
+  en:{
+    heroTitle:'A browser-style workspace tab bar for Flutter',
+    heroSub:"Every feature of the widget, recreated below as a live, framework-free demo — using the package's exact theme tokens. Try the desktop strip and the mobile compact switcher.",
+    pPin:'Pin / dirty / close',pDrag:'Drag-to-reorder',pPrev:'Live previews',pCompact:'Compact switcher',pBack:'Dirty-aware back',
+    s1title:'The full tab strip',
+    s1lede:'Click a tab to switch (pages preserve their state). Hover ~0.5 s for a mini-page preview. Right-click for the context menu. Drag an unpinned tab to reorder. Use ＋ to add and ▾ for the overflow list. Pinned tabs are icon-only and anchored to the start edge.',
+    events:'Event callbacks',clear:'Clear',
+    s2title:'Per-tab behavior types',
+    s2lede:'Each tab declares a SuperTabBehavior that governs which UI actions it exposes — right-click any tab above to see the menu adapt.',
+    bReq:'Always pinned. The UI hides close, unpin and duplicate — but controller.close(id) still works programmatically.',
+    bNorm:'The standard tab: close, duplicate, pin and unpin are all available.',
+    bUniq:'Like normal, but never duplicated. Re-adding with the same uniqueKey just re-selects the existing tab.',
+    s3title:'Compact mode & the tab switcher',
+    s3lede:'On phones, set compact:true to hide the strip. A FloatingActionButton opens a full-screen grid of tab thumbnails. Tap a thumbnail to switch, long-press-drag one onto another to reorder, and × to close (dirty tabs confirm first).',
+    swTitle:'Open tabs',reorder:'Drag to reorder',
+    backTitle:'Dirty-aware back navigation',
+    backLede:"With closeTabOnBack:true a back gesture closes the current tab — but only when it isn't dirty. Try the ← button on the phone, and toggle the “Clean/Dirty” chip.",
+    thState:'Active tab',thResult:'Back gesture result',
+    rClean:'not dirty',rCloses:'tab is closed',rDirty:'dirty',rStays:'stays open · route pops',rNone:'none open',rPops:'route pops normally',
+    backHint:'Implemented with PopScope — requires Flutter ≥ 3.16.',
+    remTitle:'Keyboard shortcuts removed in 2.1',
+    remBody:'The tab-navigation keys were removed — on mobile, compact mode replaces them. Only Escape survives, to dismiss an open overlay.',
+    s4title:'Everything in the box',
+    f1t:'State-preserving pages',f1b:"Switching tabs keeps each page's scroll, inputs and counters intact.",
+    f2t:'Live mini-previews',f2b:'Hovering a tab shows a scaled snapshot of its page in a popover.',
+    f3t:'Overflow dropdown',f3b:'When tabs overflow, ▾ lists them all with quick select.',
+    f4t:'Localization + RTL',f4b:'All strings live in SuperTabBarLocalizations. Toggle AR above to mirror everything.',
+    f5t:'Accessibility',f5b:'Semantics on every chip, close button and menu row.',
+    f6t:'Themeable',f6b:'A single ThemeExtension drives dark/light and every surface token.',
+    footNote:'Framework-free preview of the Flutter package.',
+    // menu
+    mNew:'New tab',mClose:'Close tab',mCloseOther:'Close others',mCloseAll:'Close all',mPin:'Pin tab',mUnpin:'Unpin tab',mDup:'Duplicate',
+    mOpenHd:'OPEN TABS · ',
+    // dialog
+    dTitle:'Discard unsaved changes?',dBody:'“{t}” has unsaved changes.',dDiscard:'Discard',dSave:'Save & close',dCancel:'Cancel',
+    swEmpty:'No open tabs',
+    // toasts / log verbs
+    tSwitch:'Switched to “{t}”',tReorder:'Reordered tabs',tBackClose:'Back closed “{t}” (not dirty)',tBackDirty:'Back ignored — “{t}” is dirty',
+    lActivated:'onTabActivated',lClosed:'onTabClosed',lAdded:'onTabAdded',lPin:'onTabPinChanged',lReorder:'onReorder',lDirty:'onDirtyChanged',
+  },
+  ar:{
+    heroTitle:'شريط تبويبات بأسلوب المتصفح لتطبيقات فلاتر',
+    heroSub:'كل ميزة في الأداة، معاد بناؤها بالأسفل كعرض حي بدون أطر برمجية — باستخدام ألوان الحزمة نفسها. جرّب الشريط للحاسوب ومبدّل التبويبات المدمج للجوال.',
+    pPin:'تثبيت / تعديل / إغلاق',pDrag:'إعادة الترتيب بالسحب',pPrev:'معاينات حية',pCompact:'مبدّل مدمج',pBack:'رجوع يراعي التعديلات',
+    s1title:'شريط التبويبات الكامل',
+    s1lede:'انقر تبويبًا للتبديل (الصفحات تحفظ حالتها). مرّر ~٠٫٥ ثانية لمعاينة مصغّرة. انقر بالزر الأيمن لقائمة السياق. اسحب تبويبًا غير مثبّت لإعادة ترتيبه. استخدم ＋ للإضافة و▾ لقائمة الفائض. التبويبات المثبّتة أيقونة فقط ومرتكزة على حافة البداية.',
+    events:'استدعاءات الأحداث',clear:'مسح',
+    s2title:'أنواع سلوك التبويب',
+    s2lede:'كل تبويب يحدّد SuperTabBehavior يتحكّم في الإجراءات المتاحة — انقر بالزر الأيمن على أي تبويب أعلاه لترى القائمة تتكيّف.',
+    bReq:'مثبّت دائمًا. تُخفي الواجهة الإغلاق وإلغاء التثبيت والنسخ — لكن controller.close(id) يعمل برمجيًا.',
+    bNorm:'التبويب القياسي: الإغلاق والنسخ والتثبيت وإلغاؤه كلها متاحة.',
+    bUniq:'مثل العادي لكن لا يُنسخ. إعادة الإضافة بنفس uniqueKey تعيد تحديد التبويب الموجود.',
+    s3title:'الوضع المدمج ومبدّل التبويبات',
+    s3lede:'على الجوّال اضبط compact:true لإخفاء الشريط. يفتح زر عائم شبكة بملء الشاشة من مصغّرات التبويبات. انقر مصغّرة للتبديل، اسحب واحدة فوق أخرى لإعادة الترتيب، و× للإغلاق (التبويبات المعدّلة تؤكّد أولًا).',
+    swTitle:'التبويبات المفتوحة',reorder:'اسحب لإعادة الترتيب',
+    backTitle:'رجوع يراعي التعديلات',
+    backLede:'مع closeTabOnBack:true يُغلق الرجوع التبويب الحالي — لكن فقط إذا لم يكن معدّلًا. جرّب زر → على الجوّال وبدّل شارة «نظيف/معدّل».',
+    thState:'التبويب النشط',thResult:'نتيجة الرجوع',
+    rClean:'غير معدّل',rCloses:'يُغلق التبويب',rDirty:'معدّل',rStays:'يبقى مفتوحًا · يخرج المسار',rNone:'لا تبويبات',rPops:'يخرج المسار عاديًا',
+    backHint:'مُنفّذ عبر PopScope — يتطلّب فلاتر ≥ ٣٫١٦.',
+    remTitle:'اختصارات لوحة المفاتيح مُزالة في 2.1',
+    remBody:'أُزيلت مفاتيح التنقّل بين التبويبات — على الجوّال يحلّ الوضع المدمج محلّها. يبقى Escape فقط لإغلاق طبقة مفتوحة.',
+    s4title:'كل شيء في الحزمة',
+    f1t:'صفحات تحفظ الحالة',f1b:'التبديل بين التبويبات يحفظ التمرير والحقول والعدّادات.',
+    f2t:'معاينات مصغّرة حية',f2b:'تمرير التبويب يُظهر لقطة مصغّرة لصفحته في نافذة منبثقة.',
+    f3t:'قائمة الفائض',f3b:'عند تجاوز التبويبات، يعرضها ▾ كلها للتحديد السريع.',
+    f4t:'الترجمة + RTL',f4b:'كل النصوص في SuperTabBarLocalizations. بدّل AR أعلاه لعكس كل شيء.',
+    f5t:'إتاحة الوصول',f5b:'دلالات على كل رقاقة وزر إغلاق وصف قائمة.',
+    f6t:'قابل للتنسيق',f6b:'امتداد سمة واحد يقود الوضع الداكن/الفاتح وكل الألوان.',
+    footNote:'معاينة بدون أطر برمجية لحزمة فلاتر.',
+    mNew:'تبويب جديد',mClose:'إغلاق التبويب',mCloseOther:'إغلاق الأخرى',mCloseAll:'إغلاق الكل',mPin:'تثبيت',mUnpin:'إلغاء التثبيت',mDup:'تكرار',
+    mOpenHd:'التبويبات المفتوحة · ',
+    dTitle:'تجاهل التغييرات غير المحفوظة؟',dBody:'«{t}» يحتوي تغييرات غير محفوظة.',dDiscard:'تجاهل',dSave:'حفظ وإغلاق',dCancel:'إلغاء',
+    swEmpty:'لا توجد تبويبات',
+    tSwitch:'تم التبديل إلى «{t}»',tReorder:'أُعيد ترتيب التبويبات',tBackClose:'أغلق الرجوع «{t}» (غير معدّل)',tBackDirty:'تجاهل الرجوع — «{t}» معدّل',
+    lActivated:'onTabActivated',lClosed:'onTabClosed',lAdded:'onTabAdded',lPin:'onTabPinChanged',lReorder:'onReorder',lDirty:'onDirtyChanged',
+  }
+};
+
+let LANG='en';
+const T=(k)=>I18N[LANG][k]??k;
+
+let uid=100;
+const state={
+  tabs:[
+    {id:1,title:'Overview',kind:'globe',pinned:true,dirty:false,behavior:'requiredPinned'},
+    {id:2,title:'General Ledger',kind:'ledger',pinned:false,dirty:false,behavior:'normal'},
+    {id:3,title:'Invoice INV-2043',kind:'doc',pinned:false,dirty:true,behavior:'normal'},
+    {id:4,title:'Downtown Store',kind:'store',pinned:false,dirty:false,behavior:'uniqueNormal'},
+    {id:5,title:'Sales Dashboard',kind:'chart',pinned:false,dirty:false,behavior:'normal'},
+    {id:6,title:'Team Directory',kind:'user',pinned:false,dirty:false,behavior:'normal'},
+  ],
+  activeId:2,
+};
+const pageState={}; // id -> {counter}
+function pstate(id){ return pageState[id] || (pageState[id]={counter:0}); }
+
+const byId=(id)=>state.tabs.find(t=>t.id===id);
+const ordered=()=>[...state.tabs.filter(t=>t.pinned),...state.tabs.filter(t=>!t.pinned)];
+
+/* ── DOM refs ── */
+const $=(s)=>document.querySelector(s);
+const pins=$('#pins'),scroller=$('#scroller'),surface=$('#surface'),logEl=$('#log');
+
+/* ============================================================
+   Event log + toast
+   ============================================================ */
+function logEvent(evKey,msg){
+  const now=new Date();
+  const t=now.toLocaleTimeString(LANG==='ar'?'ar':'en',{hour12:false});
+  const row=document.createElement('div');row.className='l';
+  row.innerHTML=`<span class="t">${t}</span><span class="e">${T(evKey)}</span><span class="m">${msg}</span>`;
+  logEl.prepend(row);
+  while(logEl.children.length>40) logEl.lastChild.remove();
+}
+let toastTimer;
+function toast(msg){
+  $('#toastMsg').textContent=msg;$('#toast').classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),1900);
+}
+
+/* ============================================================
+   Page rendering (state-preserving via cached nodes)
+   ============================================================ */
+function buildPage(tab){
+  const p=document.createElement('div');p.className='page';p.dataset.id=tab.id;
+  const k=KIND[tab.kind];
+  let body='';
+  if(tab.kind==='chart'){
+    body=`<div class="prow">
+      <div class="kpi"><div class="k">Revenue</div><div class="v">$284.6k</div><div class="d up">▲ 12.4%</div></div>
+      <div class="kpi"><div class="k">Orders</div><div class="v">3,912</div><div class="d up">▲ 4.1%</div></div>
+      <div class="kpi"><div class="k">Refunds</div><div class="v">$5.2k</div><div class="d dn">▼ 1.8%</div></div>
+    </div>
+    <div class="bars">${[42,68,55,80,62,95,74,88,60,100,72,84].map(h=>`<i style="height:${h}%"></i>`).join('')}</div>`;
+  } else if(tab.kind==='user'){
+    const ppl=[['AN','Ava Nguyen','Finance lead'],['MK','Marcus Kane','AP clerk'],['SR','Sara Rahman','Controller'],['JD','Jon Diaz','Auditor']];
+    body=`<div class="rows">${ppl.map(([i,n,r])=>`<div class="rr"><span class="av">${i}</span><b>${n}</b><span style="color:var(--fg3);margin-left:auto">${r}</span></div>`).join('')}</div>`;
+  } else if(tab.kind==='ledger'){
+    const rows=[['4000','Sales revenue','$284,600'],['5000','Cost of goods','$118,240'],['6000','Operating exp.','$52,110'],['2000','Accounts payable','$19,880']];
+    body=`<div class="rows">${rows.map(([c,n,v])=>`<div class="rr"><span style="font-family:var(--mono);color:var(--fg3)">${c}</span><b>${n}</b><span style="margin-left:auto;font-family:var(--mono)">${v}</span></div>`).join('')}</div>`;
+  } else if(tab.kind==='store'){
+    body=`<div class="prow">
+      <div class="kpi"><div class="k">Today</div><div class="v">$4,120</div><div class="d up">▲ 8%</div></div>
+      <div class="kpi"><div class="k">Footfall</div><div class="v">312</div><div class="d">people</div></div>
+      <div class="kpi"><div class="k">Staff on</div><div class="v">7</div><div class="d">of 9</div></div>
+    </div>`;
+  } else { // globe / doc
+    body=`<div class="prow">
+      <div class="kpi"><div class="k">Open items</div><div class="v">18</div><div class="d">3 overdue</div></div>
+      <div class="kpi"><div class="k">This week</div><div class="v">$62.4k</div><div class="d up">▲ 5.2%</div></div>
+    </div>`;
+  }
+  p.innerHTML=`
+    <h3><span class="mi">${k.icon}</span>${tab.title}</h3>
+    <div class="pmeta">${k.meta}</div>
+    ${body}
+    <div class="statenote"><span class="mi" style="font-size:17px;color:var(--accent)">interests</span>
+      <span data-i18n2>Page state is preserved — increment this counter, switch tabs, come back.</span></div>
+    <div class="counter">
+      <button data-act="dec">−</button>
+      <span class="n">${pstate(tab.id).counter}</span>
+      <button data-act="inc">+</button>
+    </div>
+    <div>
+      <button class="dirtybtn ${tab.dirty?'isdirty':''}" data-act="dirty">
+        <span class="mi" style="font-size:16px">${tab.dirty?'edit':'check_circle'}</span>
+        ${tab.dirty?'Dirty — unsaved':'Clean — mark dirty'}
+      </button>
+    </div>`;
+  // wire counter + dirty
+  p.querySelector('[data-act="inc"]').onclick=()=>{pstate(tab.id).counter++;p.querySelector('.n').textContent=pstate(tab.id).counter;};
+  p.querySelector('[data-act="dec"]').onclick=()=>{pstate(tab.id).counter--;p.querySelector('.n').textContent=pstate(tab.id).counter;};
+  p.querySelector('[data-act="dirty"]').onclick=()=>{setDirty(tab.id,!byId(tab.id).dirty);};
+  return p;
+}
+const pageCache={}; // id -> node (preserves DOM state)
+function getPage(tab){
+  if(!pageCache[tab.id]) pageCache[tab.id]=buildPage(tab);
+  return pageCache[tab.id];
+}
+function refreshPageHeader(tab){
+  const node=pageCache[tab.id];if(!node)return;
+  node.querySelector('h3').innerHTML=`<span class="mi">${KIND[tab.kind].icon}</span>${tab.title}`;
+  const db=node.querySelector('[data-act="dirty"]');
+  db.className='dirtybtn '+(tab.dirty?'isdirty':'');
+  db.innerHTML=`<span class="mi" style="font-size:16px">${tab.dirty?'edit':'check_circle'}</span>${tab.dirty?'Dirty — unsaved':'Clean — mark dirty'}`;
+}
+
+/* ============================================================
+   Render the strip
+   ============================================================ */
+let dragId=null;
+function render(){
+  // desktop strip
+  pins.innerHTML='';scroller.innerHTML='';
+  for(const tab of state.tabs.filter(t=>t.pinned)){
+    const el=document.createElement('div');
+    el.className='pin'+(tab.id===state.activeId?' active':'');
+    el.title=tab.title;
+    el.innerHTML=`<span class="mi">${KIND[tab.kind].icon}</span>${tab.behavior==='requiredPinned'?'<span class="mi lock">lock</span>':''}`;
+    el.onclick=()=>select(tab.id);
+    el.oncontextmenu=(e)=>{e.preventDefault();openMenu(e,tab);};
+    attachHover(el,tab);
+    pins.appendChild(el);
+  }
+  for(const tab of state.tabs.filter(t=>!t.pinned)){
+    const el=document.createElement('div');
+    el.className='tab'+(tab.id===state.activeId?' active':'');
+    el.dataset.id=tab.id;el.draggable=true;
+    el.innerHTML=`<span class="mi ti">${KIND[tab.kind].icon}</span>
+      <span class="label">${tab.title}</span>
+      <span class="end">${tab.dirty?'<span class="dot"></span>':''}<span class="mi x">close</span></span>`;
+    el.onclick=(e)=>{ if(e.target.closest('.end')){ requestClose(tab.id); } else { select(tab.id);} };
+    el.oncontextmenu=(e)=>{e.preventDefault();openMenu(e,tab);};
+    // drag reorder
+    el.ondragstart=(e)=>{dragId=tab.id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    el.ondragend=()=>{dragId=null;el.classList.remove('dragging');[...scroller.children].forEach(c=>c.classList.remove('dropbefore'));};
+    el.ondragover=(e)=>{e.preventDefault();[...scroller.children].forEach(c=>c.classList.remove('dropbefore'));el.classList.add('dropbefore');};
+    el.ondrop=(e)=>{e.preventDefault();reorder(dragId,tab.id);};
+    attachHover(el,tab);
+    scroller.appendChild(el);
+  }
+  // content
+  const active=byId(state.activeId);
+  surface.innerHTML='';
+  if(active){const node=getPage(active);node.classList.add('show');surface.appendChild(node);}
+  applyI18n2();
+  renderMobile();
+}
+
+/* ── Hover preview (~480ms) ── */
+let hoverTimer=null,previewEl=null;
+function attachHover(el,tab){
+  el.addEventListener('mouseenter',()=>{
+    clearTimeout(hoverTimer);
+    hoverTimer=setTimeout(()=>showPreview(el,tab),480);
+  });
+  el.addEventListener('mouseleave',()=>{clearTimeout(hoverTimer);hidePreview();});
+}
+function skeleton(kind){
+  if(kind==='chart'||kind==='store') return `<div class="skl"><div class="grid"><i></i><i></i><i></i></div><div class="mini-bars">${[40,70,55,85,60,95,72].map(h=>`<i style="height:${h}%"></i>`).join('')}</div></div>`;
+  if(kind==='user'||kind==='ledger') return `<div class="skl"><i class="w1"></i><i class="w2"></i><i class="w2"></i><i class="w3"></i><i class="w2"></i><i class="w1"></i></div>`;
+  return `<div class="skl"><i class="w1"></i><div class="grid"><i></i><i></i></div><i class="w2"></i><i class="w3"></i></div>`;
+}
+function showPreview(el,tab){
+  hidePreview();
+  const k=KIND[tab.kind];
+  previewEl=document.createElement('div');previewEl.className='preview';
+  previewEl.innerHTML=`<div class="phd"><span class="mi">${k.icon}</span><b>${tab.title}</b><span>${k.meta}</span></div><div class="pbody">${skeleton(tab.kind)}</div>`;
+  document.body.appendChild(previewEl);
+  const r=el.getBoundingClientRect();
+  let left=(LANG==='ar')? r.right-280 : r.left;
+  left=Math.max(10,Math.min(left,window.innerWidth-290));
+  previewEl.style.left=left+'px';
+  previewEl.style.top=(r.bottom+8)+'px';
+}
+function hidePreview(){if(previewEl){previewEl.remove();previewEl=null;}}
+
+/* ============================================================
+   Controller ops (fire "callbacks")
+   ============================================================ */
+function select(id){ if(state.activeId===id)return; state.activeId=id; logEvent('lActivated',`#${id} · ${byId(id).title}`); render(); }
+function setDirty(id,v){ const t=byId(id); if(!t||t.dirty===v)return; t.dirty=v; logEvent('lDirty',`#${id} → ${v}`); refreshPageHeader(t); render(); }
+function canCloseUi(t){ return t.behavior!=='requiredPinned'; }
+function requestClose(id){
+  const t=byId(id);if(!t||!canCloseUi(t))return;
+  if(t.dirty){ openDirtyDialog(t); return; }
+  close(id);
+}
+function close(id){
+  const idx=state.tabs.findIndex(t=>t.id===id);if(idx<0)return;
+  const wasActive=state.activeId===id;const title=state.tabs[idx].title;
+  state.tabs.splice(idx,1);delete pageCache[id];delete pageState[id];
+  if(wasActive){const o=ordered();state.activeId=o.length?o[Math.max(0,Math.min(idx,o.length-1))].id:null;}
+  logEvent('lClosed',`#${id} · ${title}`);render();
+}
+function addTab(){
+  const kind=CYCLE[(uid++)%CYCLE.length];
+  const id=uid;
+  const names={globe:'New Page',user:'People',store:'New Branch',chart:'Report',doc:'Untitled Doc'};
+  state.tabs.push({id,title:`${names[kind]} ${id}`,kind,pinned:false,dirty:false,behavior:'normal'});
+  state.activeId=id;logEvent('lAdded',`#${id} · ${kind}`);render();
+  scroller.scrollLeft=scroller.scrollWidth;
+}
+function togglePin(id){
+  const t=byId(id);if(!t||t.behavior==='requiredPinned')return;
+  t.pinned=!t.pinned;logEvent('lPin',`#${id} → ${t.pinned}`);render();
+}
+function duplicate(id){
+  const t=byId(id);if(!t||t.behavior!=='normal')return;
+  const nid=++uid;state.tabs.push({...t,id:nid,dirty:false,pinned:false});state.activeId=nid;
+  logEvent('lAdded',`#${nid} · copy of ${t.title}`);render();
+}
+function reorder(fromId,toId){
+  if(fromId==null||fromId===toId)return;
+  const arr=state.tabs;
+  const from=arr.findIndex(t=>t.id===fromId),to=arr.findIndex(t=>t.id===toId);
+  if(from<0||to<0)return;
+  const [m]=arr.splice(from,1);arr.splice(to,0,m);
+  logEvent('lReorder',`#${fromId} → position of #${toId}`);toast(T('tReorder'));render();
+}
+
+/* ============================================================
+   Context menu
+   ============================================================ */
+let popEl=null;
+function closePop(){if(popEl){popEl.remove();popEl=null;}}
+function openMenu(e,tab){
+  closePop();
+  const p=document.createElement('div');p.className='pop';popEl=p;
+  const canClose=canCloseUi(tab);
+  const canDup=tab.behavior==='normal';
+  const rows=[];
+  rows.push(mrow('add',T('mNew'),()=>addTab()));
+  rows.push('sep');
+  if(tab.behavior!=='requiredPinned') rows.push(mrow(tab.pinned?'keep_off':'push_pin',tab.pinned?T('mUnpin'):T('mPin'),()=>togglePin(tab.id)));
+  rows.push(mrow('content_copy',T('mDup'),canDup?()=>duplicate(tab.id):null,!canDup));
+  rows.push('sep');
+  rows.push(mrow('close',T('mClose'),canClose?()=>requestClose(tab.id):null,!canClose,true));
+  rows.push(mrow('clear_all',T('mCloseOther'),()=>{ordered().filter(x=>x.id!==tab.id&&canCloseUi(x)&&!x.dirty).forEach(x=>close(x.id));closePop();}));
+  p.append(...rows.map(r=>r==='sep'?sep():r));
+  document.body.appendChild(p);
+  positionPop(p,e.clientX,e.clientY);
+}
+function mrow(icon,label,fn,disabled=false,danger=false){
+  const d=document.createElement('div');
+  d.className='mrow'+(danger?' danger':'')+(disabled?' disabled':'');
+  d.innerHTML=`<span class="mi">${icon}</span>${label}`;
+  if(fn&&!disabled) d.onclick=()=>{fn();closePop();};
+  return d;
+}
+function sep(){const s=document.createElement('div');s.className='sep';return s;}
+function positionPop(p,x,y){
+  const w=p.offsetWidth,h=p.offsetHeight;
+  p.style.left=Math.min(x,window.innerWidth-w-10)+'px';
+  p.style.top=Math.min(y,window.innerHeight-h-10)+'px';
+}
+
+/* overflow dropdown */
+$('#btnList').onclick=(e)=>{
+  closePop();
+  const p=document.createElement('div');p.className='pop';popEl=p;
+  const hd=document.createElement('div');hd.className='hd';hd.textContent=T('mOpenHd')+ordered().length;p.appendChild(hd);
+  for(const t of ordered()){
+    const d=document.createElement('div');d.className='mrow listrow';
+    d.innerHTML=`<span class="mi">${KIND[t.kind].icon}</span>${t.title}
+      <span class="sw">${t.pinned?'pinned':''}${t.dirty?' •':''}</span>`;
+    if(t.id===state.activeId) d.style.color='var(--accent)';
+    d.onclick=()=>{select(t.id);closePop();};
+    p.appendChild(d);
+  }
+  document.body.appendChild(p);
+  const r=e.currentTarget.getBoundingClientRect();
+  p.style.top=(r.bottom+6)+'px';
+  let left=(LANG==='ar')?r.left:r.right-p.offsetWidth;
+  p.style.left=Math.max(10,left)+'px';
+};
+$('#btnAdd').onclick=addTab;
+$('#clrLog').onclick=()=>logEl.innerHTML='';
+
+/* ============================================================
+   Dirty-close dialog
+   ============================================================ */
+function openDirtyDialog(tab){
+  closePop();
+  const back=document.createElement('div');
+  back.style.cssText='position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.45);display:grid;place-items:center';
+  const card=document.createElement('div');
+  card.className='pop';card.style.cssText='position:relative;min-width:320px;max-width:360px;padding:20px';
+  card.innerHTML=`
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <span class="mi" style="font-size:26px;color:var(--warning)">warning</span>
+      <div><b style="font-family:var(--display);font-size:16px;display:block;margin-bottom:6px">${T('dTitle')}</b>
+      <span style="font-size:13px;color:var(--fg3)">${T('dBody').replace('{t}',tab.title)}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button data-a="cancel" style="font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r-md);border:1px solid var(--border);background:transparent;color:var(--fg2);cursor:pointer">${T('dCancel')}</button>
+      <button data-a="discard" style="font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r-md);border:0;background:var(--danger);color:#fff;cursor:pointer">${T('dDiscard')}</button>
+      <button data-a="save" style="font-size:13px;font-weight:600;padding:8px 14px;border-radius:var(--r-md);border:0;background:var(--accent);color:#fff;cursor:pointer">${T('dSave')}</button>
+    </div>`;
+  back.appendChild(card);document.body.appendChild(back);
+  back.onclick=(e)=>{if(e.target===back)back.remove();};
+  card.querySelector('[data-a="cancel"]').onclick=()=>back.remove();
+  card.querySelector('[data-a="discard"]').onclick=()=>{back.remove();close(tab.id);renderMobile();};
+  card.querySelector('[data-a="save"]').onclick=()=>{setDirty(tab.id,false);back.remove();close(tab.id);renderMobile();};
+}
+
+/* ============================================================
+   MOBILE — compact mode + switcher + back nav
+   ============================================================ */
+const mContent=$('#mContent');
+function renderMobile(){
+  const active=byId(state.activeId);
+  $('#mTitle').textContent=active?active.title:'—';
+  $('#mCount').textContent=ordered().length+(LANG==='ar'?' تبويب':' tabs');
+  const dc=$('#mDirty');
+  if(active){
+    dc.style.display='';
+    dc.className='chip'+(active.dirty?' dirty':'');
+    dc.textContent=active.dirty?(LANG==='ar'?'معدّل':'Dirty'):(LANG==='ar'?'نظيف':'Clean');
+  } else dc.style.display='none';
+  // content (reuse same cached page nodes → shared state with desktop)
+  mContent.querySelectorAll('.page').forEach(n=>n.remove());
+  if(active){const n=getPage(active);n.classList.add('show');mContent.appendChild(n);}
+  applyI18n2();
+}
+$('#mDirty').onclick=()=>{const a=byId(state.activeId);if(a)setDirty(a.id,!a.dirty);};
+$('#mBack').onclick=()=>{
+  const a=byId(state.activeId);
+  if(!a){toast('route pops');return;}
+  if(a.dirty){ toast(T('tBackDirty').replace('{t}',a.title)); logEvent('lActivated','back ignored (dirty)'); }
+  else { const ti=a.title; close(a.id); toast(T('tBackClose').replace('{t}',ti)); }
+};
+
+/* switcher */
+const switcher=$('#switcher'),swGrid=$('#swGrid');
+$('#fab').onclick=()=>openSwitcher();
+$('#swClose').onclick=()=>closeSwitcher();
+function openSwitcher(){renderSwitcher();switcher.classList.add('open');}
+function closeSwitcher(){switcher.classList.remove('open');}
+let swDrag=null;
+function renderSwitcher(){
+  $('#swCount').textContent=ordered().length+(LANG==='ar'?' مفتوحة':' open');
+  swGrid.innerHTML='';
+  const list=ordered();
+  if(!list.length){swGrid.innerHTML=`<div class="sw-empty" style="grid-column:1/-1">${T('swEmpty')}</div>`;return;}
+  for(const tab of list){
+    const c=document.createElement('div');
+    c.className='thumb'+(tab.id===state.activeId?' active':'');
+    c.dataset.id=tab.id;c.draggable=true;
+    const closable=canCloseUi(tab);
+    c.innerHTML=`
+      <div class="prev">
+        ${tab.id===state.activeId?`<span class="badge">ACTIVE</span>`:''}
+        ${closable?`<button class="cls" title="close"><span class="mi">close</span></button>`:''}
+        ${skeleton(tab.kind)}
+      </div>
+      <div class="foot">
+        <span class="mi">${KIND[tab.kind].icon}</span>
+        <span class="fl">${tab.title}</span>
+        ${tab.pinned?'<span class="mi fpin">push_pin</span>':''}
+        ${tab.dirty?'<span class="fdot"></span>':''}
+      </div>`;
+    c.onclick=(e)=>{
+      if(e.target.closest('.cls')){ e.stopPropagation();
+        if(tab.dirty){openDirtyDialog(tab);} else {close(tab.id);renderSwitcher();}
+        return;
+      }
+      select(tab.id);toast(T('tSwitch').replace('{t}',tab.title));closeSwitcher();
+    };
+    // drag reorder
+    c.ondragstart=(e)=>{swDrag=tab.id;c.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+    c.ondragend=()=>{swDrag=null;c.classList.remove('dragging');[...swGrid.children].forEach(x=>x.classList.remove('over'));};
+    c.ondragover=(e)=>{e.preventDefault();[...swGrid.children].forEach(x=>x.classList.remove('over'));if(swDrag!==tab.id)c.classList.add('over');};
+    c.ondrop=(e)=>{e.preventDefault();if(swDrag!=null&&swDrag!==tab.id){reorder(swDrag,tab.id);renderSwitcher();}};
+    swGrid.appendChild(c);
+  }
+}
+
+/* ============================================================
+   i18n application + theme/lang toggles
+   ============================================================ */
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k=el.getAttribute('data-i18n');if(I18N[LANG][k]!=null)el.textContent=I18N[LANG][k];
+  });
+}
+function applyI18n2(){
+  // the small "page state preserved" note inside pages
+  const note = LANG==='ar' ? 'حالة الصفحة محفوظة — زِد العدّاد، بدّل التبويبات، ثم عُد.' : 'Page state is preserved — increment this counter, switch tabs, come back.';
+  document.querySelectorAll('[data-i18n2]').forEach(el=>el.textContent=note);
+}
+document.getElementById('langSeg').addEventListener('click',(e)=>{
+  const b=e.target.closest('button');if(!b)return;
+  LANG=b.dataset.lang;
+  document.documentElement.lang=LANG;
+  document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
+  [...e.currentTarget.children].forEach(c=>c.classList.toggle('on',c===b));
+  applyI18n();render();
+});
+document.getElementById('themeSeg').addEventListener('click',(e)=>{
+  const b=e.target.closest('button');if(!b)return;
+  document.documentElement.setAttribute('data-theme',b.dataset.theme);
+  [...e.currentTarget.children].forEach(c=>c.classList.toggle('on',c===b));
+});
+
+/* global dismissers */
+document.addEventListener('click',(e)=>{
+  if(popEl && !e.target.closest('.pop') && !e.target.closest('#btnList')) closePop();
+});
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){closePop();hidePreview();} });
+window.addEventListener('scroll',()=>{closePop();hidePreview();},true);
+
+/* init */
+document.documentElement.setAttribute('data-theme','dark');
+applyI18n();render();
+logEvent('lActivated','#2 · General Ledger');
+</script>
+</body>
+</html>
