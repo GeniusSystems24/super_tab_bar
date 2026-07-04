@@ -174,6 +174,7 @@ SuperTabBar(
   compact: false,            // hide strip unconditionally
   allowAutoCompact: false,   // v2.2 · auto-hide strip when width <= compactWidth
   compactWidth: 600.0,       // v2.2 · breakpoint in logical pixels (phone default)
+  useCompactFloatingActionButton: false, // v2.3 · built-in FAB in compact mode
   closeTabOnBack: false,     // v2.1 · back closes active tab unless dirty
   fillContent: false,        // page fills all height (false → 440 px cap)
   scrollContent: true,       // wrap in SingleChildScrollView
@@ -252,6 +253,27 @@ const SuperTabBarPreviewOptions(
   fallback: PreviewFallback.blank,  // or .liveRender (default)
 )
 ```
+
+---
+
+## Built-in compact FAB (v2.3)
+
+Set `useCompactFloatingActionButton: true` and the widget renders its own FAB
+over the content area when in compact mode — no extra `Stack` or
+`Scaffold.floatingActionButton` needed:
+
+```dart
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,
+  useCompactFloatingActionButton: true,
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+`pageBuilder` and `onTabClosed` are forwarded to the switcher automatically.
+The FAB sits at the bottom-end corner (RTL-aware).
 
 ---
 

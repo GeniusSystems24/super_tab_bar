@@ -279,6 +279,45 @@ h2.title{font-family:var(--display);font-weight:800;font-size:26px;letter-spacin
   background:var(--surface2);color:var(--fg3);text-decoration:line-through;position:relative}
 .kbd.keep{text-decoration:none;color:var(--success);border-color:color-mix(in srgb,var(--success) 40%,transparent)}
 
+/* ── Auto-compact responsive demo (v2.2 / v2.3) ─────────── */
+.autowrap{margin-top:22px}
+.autobar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 16px}
+.autobar .rd{font-family:var(--mono);font-size:12.5px;color:var(--fg3);display:flex;align-items:center;gap:7px}
+.autobar .rd b{color:var(--fg1)}
+.autobar .rd .mi{font-size:16px;color:var(--fg4)}
+.autobar .modebadge{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;display:flex;align-items:center;gap:5px}
+.autobar .modebadge .mi{font-size:14px}
+.modebadge.full{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.modebadge.compact{color:var(--success);background:color-mix(in srgb,var(--success) 14%,transparent);border:1px solid color-mix(in srgb,var(--success) 35%,transparent)}
+.autobar .rng{flex:1;min-width:200px;display:flex;align-items:center;gap:10px}
+.autobar input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
+.framehost{position:relative;display:flex;justify-content:flex-start}
+[dir="rtl"] .framehost{justify-content:flex-end}
+.frame{position:relative;border:1px solid var(--border-strong);border-radius:var(--r-lg);overflow:hidden;
+  background:var(--bg);box-shadow:var(--card-shadow);min-width:300px;height:392px;display:flex;flex-direction:column}
+.frame .fstrip{display:flex;align-items:stretch;background:var(--strip-grad);border-bottom:1px solid var(--border);
+  padding:8px 8px 0;min-height:52px;gap:4px;overflow:hidden}
+.frame .fscroll{flex:1;display:flex;align-items:flex-end;gap:4px;overflow-x:auto;scrollbar-width:none}
+.frame .fscroll::-webkit-scrollbar{display:none}
+.frame .fcontent{flex:1;overflow-y:auto;background:var(--surface);position:relative}
+.frame .page{padding:16px 18px}
+.frame.iscompact .fstrip{display:none}
+.autofab{position:absolute;bottom:16px;right:16px;width:52px;height:52px;border-radius:16px;border:0;cursor:pointer;
+  background:var(--accent);color:#fff;display:none;place-items:center;box-shadow:0 10px 24px -8px rgba(74,124,255,.8);z-index:7}
+[dir="rtl"] .autofab{right:auto;left:16px}
+.frame.iscompact .autofab{display:grid;animation:pop .18s var(--ease)}
+.autofab .mi{font-size:24px}
+.autofab:active{transform:scale(.94)}
+.rz{position:absolute;top:0;bottom:0;right:0;width:16px;cursor:ew-resize;z-index:8;display:grid;place-items:center;touch-action:none}
+[dir="rtl"] .rz{right:auto;left:0}
+.rz::before{content:"";width:5px;height:54px;border-radius:3px;background:var(--border-strong);transition:background var(--dur)}
+.rz:hover::before{background:var(--accent)}
+.fsw{position:absolute;inset:0;background:var(--bg);z-index:9;display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .28s var(--ease);pointer-events:none}
+.fsw.open{transform:none;pointer-events:auto}
+.fsw .swgrid{grid-template-columns:1fr 1fr}
+
 footer.foot{margin-top:60px;border-top:1px solid var(--border);padding-top:24px;color:var(--fg3);font-size:12.5px;
   display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
 footer.foot .mi{font-size:15px}
@@ -307,7 +346,7 @@ footer.foot code{font-family:var(--mono);color:var(--fg2)}
       <span class="logo"><span class="mi">tab</span></span>
       super_tab_bar
     </div>
-    <span class="ver">v2.2.0</span>
+    <span class="ver">v2.3.0</span>
     <div class="spacer"></div>
     <div class="seg" id="langSeg">
       <button data-lang="en" class="on">EN</button>
@@ -332,6 +371,7 @@ footer.foot code{font-family:var(--mono);color:var(--fg2)}
       <span class="pill"><span class="mi">preview</span><span data-i18n="pPrev">Live previews</span></span>
       <span class="pill"><span class="mi">grid_view</span><span data-i18n="pCompact">Compact switcher</span></span>
       <span class="pill"><span class="mi">arrow_back</span><span data-i18n="pBack">Dirty-aware back</span></span>
+      <span class="pill"><span class="mi">aspect_ratio</span><span data-i18n="pAuto">Auto-compact</span></span>
       <span class="pill"><span class="mi">translate</span>RTL · i18n</span>
     </div>
   </div>
@@ -449,9 +489,42 @@ footer.foot code{font-family:var(--mono);color:var(--fg2)}
     </div>
   </section>
 
-  <!-- ══ 4 · Feature grid ══ -->
+  <!-- ══ 4 · Auto-compact (responsive) ══ -->
   <section class="block">
-    <div class="eyebrow">04 · At a glance</div>
+    <div class="eyebrow">04 · Responsive · New in 2.2 &amp; 2.3</div>
+    <h2 class="title" data-i18n="s5title">Auto-compact breakpoint &amp; built-in FAB</h2>
+    <p class="lede" data-i18n="s5lede">Drag the handle or slider to resize the frame. With allowAutoCompact:true the strip collapses on its own once the width reaches compactWidth (600 px). useCompactFloatingActionButton:true then shows a built-in FAB that opens the switcher — no extra scaffolding.</p>
+
+    <div class="autowrap">
+      <div class="autobar">
+        <span class="rd"><span class="mi">straighten</span><span data-i18n="acWidth">width</span> <b><span id="acW">720</span>px</b></span>
+        <span class="rd"><span class="mi">flag</span>compactWidth <b>600px</b></span>
+        <span class="modebadge full" id="acMode"><span class="mi">tab</span><span>strip</span></span>
+        <span class="rng"><span class="mi" style="font-size:15px;color:var(--fg3)">phone_iphone</span>
+          <input type="range" id="acRange" min="300" max="900" value="720" aria-label="Frame width" />
+          <span class="mi" style="font-size:18px;color:var(--fg3)">desktop_windows</span></span>
+      </div>
+      <div class="framehost" id="acHost">
+        <div class="frame" id="acFrame" style="width:720px">
+          <div class="fstrip"><div class="fscroll" id="acStrip"></div></div>
+          <div class="fcontent" id="acContent"></div>
+          <button class="autofab" id="acFab" title="Open switcher"><span class="mi">grid_view</span></button>
+          <div class="fsw" id="acSw">
+            <div class="swhd">
+              <div class="tt"><b data-i18n="swTitle">Open tabs</b><small><span id="acSwCount">0</span> · <span data-i18n="reorder">Drag to reorder</span></small></div>
+              <button class="iconbtn" id="acSwClose"><span class="mi">close</span></button>
+            </div>
+            <div class="swgrid" id="acSwGrid"></div>
+          </div>
+          <div class="rz" id="acRz" title="Drag to resize"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5 · Feature grid ══ -->
+  <section class="block">
+    <div class="eyebrow">05 · At a glance</div>
     <h2 class="title" data-i18n="s4title">Everything in the box</h2>
     <div class="fgrid">
       <div class="fcard"><div class="fi"><span class="mi">interests</span></div><h4 data-i18n="f1t">State-preserving pages</h4><p data-i18n="f1b">Switching tabs keeps each page's scroll, inputs and counters intact.</p></div>
@@ -460,6 +533,8 @@ footer.foot code{font-family:var(--mono);color:var(--fg2)}
       <div class="fcard"><div class="fi"><span class="mi">translate</span></div><h4 data-i18n="f4t">Localization + RTL</h4><p data-i18n="f4b">All strings live in SuperTabBarLocalizations. Toggle AR above to mirror everything.</p></div>
       <div class="fcard"><div class="fi"><span class="mi">accessibility_new</span></div><h4 data-i18n="f5t">Accessibility</h4><p data-i18n="f5b">Semantics on every chip, close button and menu row.</p></div>
       <div class="fcard"><div class="fi"><span class="mi">palette</span></div><h4 data-i18n="f6t">Themeable</h4><p data-i18n="f6b">A single ThemeExtension drives dark/light and every surface token.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">aspect_ratio</span></div><h4 data-i18n="f7t">Auto-compact breakpoint</h4><p data-i18n="f7b">allowAutoCompact + compactWidth hide the strip automatically at your chosen width.</p></div>
+      <div class="fcard"><div class="fi"><span class="mi">add_circle</span></div><h4 data-i18n="f8t">Built-in compact FAB</h4><p data-i18n="f8b">useCompactFloatingActionButton renders a FAB that opens the switcher — zero scaffolding.</p></div>
     </div>
   </section>
 
@@ -469,7 +544,7 @@ footer.foot code{font-family:var(--mono);color:var(--fg2)}
     <span>·</span>
     <code>flutter/super_tab_bar</code>
     <span>·</span>
-    <code>compact · closeTabOnBack · SuperTabSwitcher</code>
+    <code>compact · allowAutoCompact · useCompactFloatingActionButton</code>
   </footer>
 </div>
 
@@ -494,7 +569,7 @@ const I18N = {
   en:{
     heroTitle:'A browser-style workspace tab bar for Flutter',
     heroSub:"Every feature of the widget, recreated below as a live, framework-free demo — using the package's exact theme tokens. Try the desktop strip and the mobile compact switcher.",
-    pPin:'Pin / dirty / close',pDrag:'Drag-to-reorder',pPrev:'Live previews',pCompact:'Compact switcher',pBack:'Dirty-aware back',
+    pPin:'Pin / dirty / close',pDrag:'Drag-to-reorder',pPrev:'Live previews',pCompact:'Compact switcher',pBack:'Dirty-aware back',pAuto:'Auto-compact',
     s1title:'The full tab strip',
     s1lede:'Click a tab to switch (pages preserve their state). Hover ~0.5 s for a mini-page preview. Right-click for the context menu. Drag an unpinned tab to reorder. Use ＋ to add and ▾ for the overflow list. Pinned tabs are icon-only and anchored to the start edge.',
     events:'Event callbacks',clear:'Clear',
@@ -505,6 +580,9 @@ const I18N = {
     bUniq:'Like normal, but never duplicated. Re-adding with the same uniqueKey just re-selects the existing tab.',
     s3title:'Compact mode & the tab switcher',
     s3lede:'On phones, set compact:true to hide the strip. A FloatingActionButton opens a full-screen grid of tab thumbnails. Tap a thumbnail to switch, long-press-drag one onto another to reorder, and × to close (dirty tabs confirm first).',
+    s5title:'Auto-compact breakpoint & built-in FAB',
+    s5lede:'Drag the handle or slider to resize the frame. With allowAutoCompact:true the strip collapses on its own once the width reaches compactWidth (600 px). useCompactFloatingActionButton:true then shows a built-in FAB that opens the switcher — no extra scaffolding.',
+    acWidth:'width',
     swTitle:'Open tabs',reorder:'Drag to reorder',
     backTitle:'Dirty-aware back navigation',
     backLede:"With closeTabOnBack:true a back gesture closes the current tab — but only when it isn't dirty. Try the ← button on the phone, and toggle the “Clean/Dirty” chip.",
@@ -520,6 +598,8 @@ const I18N = {
     f4t:'Localization + RTL',f4b:'All strings live in SuperTabBarLocalizations. Toggle AR above to mirror everything.',
     f5t:'Accessibility',f5b:'Semantics on every chip, close button and menu row.',
     f6t:'Themeable',f6b:'A single ThemeExtension drives dark/light and every surface token.',
+    f7t:'Auto-compact breakpoint',f7b:'allowAutoCompact + compactWidth hide the strip automatically at your chosen width.',
+    f8t:'Built-in compact FAB',f8b:'useCompactFloatingActionButton renders a FAB that opens the switcher — zero scaffolding.',
     footNote:'Framework-free preview of the Flutter package.',
     // menu
     mNew:'New tab',mClose:'Close tab',mCloseOther:'Close others',mCloseAll:'Close all',mPin:'Pin tab',mUnpin:'Unpin tab',mDup:'Duplicate',
@@ -534,7 +614,7 @@ const I18N = {
   ar:{
     heroTitle:'شريط تبويبات بأسلوب المتصفح لتطبيقات فلاتر',
     heroSub:'كل ميزة في الأداة، معاد بناؤها بالأسفل كعرض حي بدون أطر برمجية — باستخدام ألوان الحزمة نفسها. جرّب الشريط للحاسوب ومبدّل التبويبات المدمج للجوال.',
-    pPin:'تثبيت / تعديل / إغلاق',pDrag:'إعادة الترتيب بالسحب',pPrev:'معاينات حية',pCompact:'مبدّل مدمج',pBack:'رجوع يراعي التعديلات',
+    pPin:'تثبيت / تعديل / إغلاق',pDrag:'إعادة الترتيب بالسحب',pPrev:'معاينات حية',pCompact:'مبدّل مدمج',pBack:'رجوع يراعي التعديلات',pAuto:'مدمج تلقائي',
     s1title:'شريط التبويبات الكامل',
     s1lede:'انقر تبويبًا للتبديل (الصفحات تحفظ حالتها). مرّر ~٠٫٥ ثانية لمعاينة مصغّرة. انقر بالزر الأيمن لقائمة السياق. اسحب تبويبًا غير مثبّت لإعادة ترتيبه. استخدم ＋ للإضافة و▾ لقائمة الفائض. التبويبات المثبّتة أيقونة فقط ومرتكزة على حافة البداية.',
     events:'استدعاءات الأحداث',clear:'مسح',
@@ -545,6 +625,9 @@ const I18N = {
     bUniq:'مثل العادي لكن لا يُنسخ. إعادة الإضافة بنفس uniqueKey تعيد تحديد التبويب الموجود.',
     s3title:'الوضع المدمج ومبدّل التبويبات',
     s3lede:'على الجوّال اضبط compact:true لإخفاء الشريط. يفتح زر عائم شبكة بملء الشاشة من مصغّرات التبويبات. انقر مصغّرة للتبديل، اسحب واحدة فوق أخرى لإعادة الترتيب، و× للإغلاق (التبويبات المعدّلة تؤكّد أولًا).',
+    s5title:'نقطة التبديل التلقائي وزر عائم مدمج',
+    s5lede:'اسحب المقبض أو الشريط لتغيير عرض الإطار. مع allowAutoCompact:true ينطوي الشريط تلقائيًا عندما يصل العرض إلى compactWidth (٦٠٠ بكسل). ثم يُظهر useCompactFloatingActionButton:true زرًا عائمًا مدمجًا يفتح المبدّل — دون أي إعداد إضافي.',
+    acWidth:'العرض',
     swTitle:'التبويبات المفتوحة',reorder:'اسحب لإعادة الترتيب',
     backTitle:'رجوع يراعي التعديلات',
     backLede:'مع closeTabOnBack:true يُغلق الرجوع التبويب الحالي — لكن فقط إذا لم يكن معدّلًا. جرّب زر → على الجوّال وبدّل شارة «نظيف/معدّل».',
@@ -560,6 +643,8 @@ const I18N = {
     f4t:'الترجمة + RTL',f4b:'كل النصوص في SuperTabBarLocalizations. بدّل AR أعلاه لعكس كل شيء.',
     f5t:'إتاحة الوصول',f5b:'دلالات على كل رقاقة وزر إغلاق وصف قائمة.',
     f6t:'قابل للتنسيق',f6b:'امتداد سمة واحد يقود الوضع الداكن/الفاتح وكل الألوان.',
+    f7t:'نقطة التبديل التلقائي',f7b:'allowAutoCompact + compactWidth يُخفيان الشريط تلقائيًا عند العرض المحدّد.',
+    f8t:'زر عائم مدمج',f8b:'useCompactFloatingActionButton يعرض زرًا يفتح المبدّل — دون إعداد.',
     footNote:'معاينة بدون أطر برمجية لحزمة فلاتر.',
     mNew:'تبويب جديد',mClose:'إغلاق التبويب',mCloseOther:'إغلاق الأخرى',mCloseAll:'إغلاق الكل',mPin:'تثبيت',mUnpin:'إلغاء التثبيت',mDup:'تكرار',
     mOpenHd:'التبويبات المفتوحة · ',
@@ -667,17 +752,11 @@ function buildPage(tab){
   p.querySelector('[data-act="dirty"]').onclick=()=>{setDirty(tab.id,!byId(tab.id).dirty);};
   return p;
 }
-const pageCache={}; // id -> node (preserves DOM state)
-function getPage(tab){
-  if(!pageCache[tab.id]) pageCache[tab.id]=buildPage(tab);
-  return pageCache[tab.id];
-}
-function refreshPageHeader(tab){
-  const node=pageCache[tab.id];if(!node)return;
-  node.querySelector('h3').innerHTML=`<span class="mi">${KIND[tab.kind].icon}</span>${tab.title}`;
-  const db=node.querySelector('[data-act="dirty"]');
-  db.className='dirtybtn '+(tab.dirty?'isdirty':'');
-  db.innerHTML=`<span class="mi" style="font-size:16px">${tab.dirty?'edit':'check_circle'}</span>${tab.dirty?'Dirty — unsaved':'Clean — mark dirty'}`;
+const pageCache={}; // (removed) pages are now rebuilt per mount from pageState
+function mountActive(container){
+  container.querySelectorAll('.page').forEach(n=>n.remove());
+  const active=byId(state.activeId);
+  if(active){const n=buildPage(active);n.classList.add('show');container.appendChild(n);}
 }
 
 /* ============================================================
@@ -714,12 +793,11 @@ function render(){
     attachHover(el,tab);
     scroller.appendChild(el);
   }
-  // content
-  const active=byId(state.activeId);
-  surface.innerHTML='';
-  if(active){const node=getPage(active);node.classList.add('show');surface.appendChild(node);}
+  // content (rebuilt per surface; state lives in pageState so all mounts agree)
+  mountActive(surface);
   applyI18n2();
   renderMobile();
+  renderAuto();
 }
 
 /* ── Hover preview (~480ms) ── */
@@ -754,7 +832,7 @@ function hidePreview(){if(previewEl){previewEl.remove();previewEl=null;}}
    Controller ops (fire "callbacks")
    ============================================================ */
 function select(id){ if(state.activeId===id)return; state.activeId=id; logEvent('lActivated',`#${id} · ${byId(id).title}`); render(); }
-function setDirty(id,v){ const t=byId(id); if(!t||t.dirty===v)return; t.dirty=v; logEvent('lDirty',`#${id} → ${v}`); refreshPageHeader(t); render(); }
+function setDirty(id,v){ const t=byId(id); if(!t||t.dirty===v)return; t.dirty=v; logEvent('lDirty',`#${id} → ${v}`); render(); }
 function canCloseUi(t){ return t.behavior!=='requiredPinned'; }
 function requestClose(id){
   const t=byId(id);if(!t||!canCloseUi(t))return;
@@ -764,7 +842,7 @@ function requestClose(id){
 function close(id){
   const idx=state.tabs.findIndex(t=>t.id===id);if(idx<0)return;
   const wasActive=state.activeId===id;const title=state.tabs[idx].title;
-  state.tabs.splice(idx,1);delete pageCache[id];delete pageState[id];
+  state.tabs.splice(idx,1);delete pageState[id];
   if(wasActive){const o=ordered();state.activeId=o.length?o[Math.max(0,Math.min(idx,o.length-1))].id:null;}
   logEvent('lClosed',`#${id} · ${title}`);render();
 }
@@ -893,9 +971,8 @@ function renderMobile(){
     dc.className='chip'+(active.dirty?' dirty':'');
     dc.textContent=active.dirty?(LANG==='ar'?'معدّل':'Dirty'):(LANG==='ar'?'نظيف':'Clean');
   } else dc.style.display='none';
-  // content (reuse same cached page nodes → shared state with desktop)
-  mContent.querySelectorAll('.page').forEach(n=>n.remove());
-  if(active){const n=getPage(active);n.classList.add('show');mContent.appendChild(n);}
+  // content
+  mountActive(mContent);
   applyI18n2();
 }
 $('#mDirty').onclick=()=>{const a=byId(state.activeId);if(a)setDirty(a.id,!a.dirty);};
@@ -906,18 +983,12 @@ $('#mBack').onclick=()=>{
   else { const ti=a.title; close(a.id); toast(T('tBackClose').replace('{t}',ti)); }
 };
 
-/* switcher */
-const switcher=$('#switcher'),swGrid=$('#swGrid');
-$('#fab').onclick=()=>openSwitcher();
-$('#swClose').onclick=()=>closeSwitcher();
-function openSwitcher(){renderSwitcher();switcher.classList.add('open');}
-function closeSwitcher(){switcher.classList.remove('open');}
+/* switcher — shared grid used by the phone (03) and the auto-frame (04) */
 let swDrag=null;
-function renderSwitcher(){
-  $('#swCount').textContent=ordered().length+(LANG==='ar'?' مفتوحة':' open');
-  swGrid.innerHTML='';
+function fillSwitcherGrid(gridEl,{onSelected,onChanged}){
+  gridEl.innerHTML='';
   const list=ordered();
-  if(!list.length){swGrid.innerHTML=`<div class="sw-empty" style="grid-column:1/-1">${T('swEmpty')}</div>`;return;}
+  if(!list.length){gridEl.innerHTML=`<div class="sw-empty" style="grid-column:1/-1">${T('swEmpty')}</div>`;return;}
   for(const tab of list){
     const c=document.createElement('div');
     c.className='thumb'+(tab.id===state.activeId?' active':'');
@@ -937,19 +1008,97 @@ function renderSwitcher(){
       </div>`;
     c.onclick=(e)=>{
       if(e.target.closest('.cls')){ e.stopPropagation();
-        if(tab.dirty){openDirtyDialog(tab);} else {close(tab.id);renderSwitcher();}
+        if(tab.dirty){openDirtyDialog(tab);} else {close(tab.id);onChanged&&onChanged();}
         return;
       }
-      select(tab.id);toast(T('tSwitch').replace('{t}',tab.title));closeSwitcher();
+      select(tab.id);toast(T('tSwitch').replace('{t}',tab.title));onSelected&&onSelected();
     };
-    // drag reorder
     c.ondragstart=(e)=>{swDrag=tab.id;c.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
-    c.ondragend=()=>{swDrag=null;c.classList.remove('dragging');[...swGrid.children].forEach(x=>x.classList.remove('over'));};
-    c.ondragover=(e)=>{e.preventDefault();[...swGrid.children].forEach(x=>x.classList.remove('over'));if(swDrag!==tab.id)c.classList.add('over');};
-    c.ondrop=(e)=>{e.preventDefault();if(swDrag!=null&&swDrag!==tab.id){reorder(swDrag,tab.id);renderSwitcher();}};
-    swGrid.appendChild(c);
+    c.ondragend=()=>{swDrag=null;c.classList.remove('dragging');[...gridEl.children].forEach(x=>x.classList.remove('over'));};
+    c.ondragover=(e)=>{e.preventDefault();[...gridEl.children].forEach(x=>x.classList.remove('over'));if(swDrag!==tab.id)c.classList.add('over');};
+    c.ondrop=(e)=>{e.preventDefault();if(swDrag!=null&&swDrag!==tab.id){reorder(swDrag,tab.id);onChanged&&onChanged();}};
+    gridEl.appendChild(c);
   }
 }
+
+/* phone switcher (03) */
+const switcher=$('#switcher'),swGrid=$('#swGrid');
+$('#fab').onclick=()=>openSwitcher();
+$('#swClose').onclick=()=>closeSwitcher();
+function openSwitcher(){renderSwitcher();switcher.classList.add('open');}
+function closeSwitcher(){switcher.classList.remove('open');}
+function renderSwitcher(){
+  $('#swCount').textContent=ordered().length+(LANG==='ar'?' مفتوحة':' open');
+  fillSwitcherGrid(swGrid,{onSelected:closeSwitcher,onChanged:renderSwitcher});
+}
+
+/* ============================================================
+   AUTO-COMPACT (04) — allowAutoCompact + compactWidth + built-in FAB
+   ============================================================ */
+const COMPACT_W=600;                 // compactWidth default (logical px)
+let frameW=720;                      // current frame width (drag / slider driven)
+const acFrame=$('#acFrame'),acStrip=$('#acStrip'),acContent=$('#acContent'),
+      acFab=$('#acFab'),acSw=$('#acSw'),acSwGrid=$('#acSwGrid');
+function renderAuto(){
+  if(!acFrame)return;
+  frameW=Math.round(Math.max(300,Math.min(900,frameW)));
+  acFrame.style.width=frameW+'px';
+  $('#acW').textContent=frameW;
+  const rng=$('#acRange'); if(rng&&+rng.value!==frameW) rng.value=frameW;
+  const compact=frameW<=COMPACT_W;   // allowAutoCompact: maxWidth <= compactWidth
+  acFrame.classList.toggle('iscompact',compact);
+  const badge=$('#acMode');
+  badge.className='modebadge '+(compact?'compact':'full');
+  badge.innerHTML=compact
+    ? `<span class="mi">grid_view</span><span>${LANG==='ar'?'مدمج':'compact'}</span>`
+    : `<span class="mi">tab</span><span>${LANG==='ar'?'شريط':'strip'}</span>`;
+  mountActive(acContent);
+  acStrip.innerHTML='';
+  if(!compact){
+    for(const tab of ordered()){
+      const el=document.createElement('div');
+      el.className='tab'+(tab.id===state.activeId?' active':'');
+      el.style.minWidth='118px';
+      el.innerHTML=`<span class="mi ti">${KIND[tab.kind].icon}</span>`+
+        (tab.pinned?'<span class="mi" style="font-size:13px;color:var(--fg3);flex:0 0 auto">push_pin</span>':'')+
+        `<span class="label">${tab.title}</span>`+
+        `<span class="end">${tab.dirty?'<span class="dot"></span>':''}${canCloseUi(tab)?'<span class="mi x">close</span>':''}</span>`;
+      el.onclick=(e)=>{ if(e.target.closest('.end')&&canCloseUi(tab)){requestClose(tab.id);} else {select(tab.id);} };
+      el.oncontextmenu=(e)=>{e.preventDefault();openMenu(e,tab);};
+      if(!tab.pinned){
+        el.draggable=true;
+        el.ondragstart=(e)=>{dragId=tab.id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';};
+        el.ondragend=()=>{dragId=null;el.classList.remove('dragging');[...acStrip.children].forEach(c=>c.classList.remove('dropbefore'));};
+        el.ondragover=(e)=>{e.preventDefault();[...acStrip.children].forEach(c=>c.classList.remove('dropbefore'));el.classList.add('dropbefore');};
+        el.ondrop=(e)=>{e.preventDefault();reorder(dragId,tab.id);};
+      }
+      acStrip.appendChild(el);
+    }
+  }
+}
+function refreshAcSw(){
+  $('#acSwCount').textContent=ordered().length+(LANG==='ar'?' مفتوحة':' open');
+  fillSwitcherGrid(acSwGrid,{onSelected:closeAcSw,onChanged:refreshAcSw});
+}
+function openAcSw(){refreshAcSw();acSw.classList.add('open');}
+function closeAcSw(){acSw.classList.remove('open');}
+if(acFab)acFab.onclick=openAcSw;
+{ const b=$('#acSwClose'); if(b)b.onclick=closeAcSw; }
+{ const rng=$('#acRange'); if(rng)rng.addEventListener('input',(e)=>{frameW=+e.target.value;renderAuto();}); }
+(function(){
+  const rz=$('#acRz'); if(!rz)return;
+  let startX=0,startW=0,dragging=false;
+  const rtl=()=>document.documentElement.dir==='rtl';
+  const down=(x)=>{dragging=true;startX=x;startW=frameW;document.body.style.userSelect='none';};
+  const move=(x)=>{if(!dragging)return;let d=x-startX;if(rtl())d=-d;frameW=startW+d;renderAuto();};
+  const up=()=>{if(dragging){dragging=false;document.body.style.userSelect='';}};
+  rz.addEventListener('mousedown',(e)=>{down(e.clientX);e.preventDefault();});
+  window.addEventListener('mousemove',(e)=>move(e.clientX));
+  window.addEventListener('mouseup',up);
+  rz.addEventListener('touchstart',(e)=>down(e.touches[0].clientX),{passive:true});
+  window.addEventListener('touchmove',(e)=>{if(dragging)move(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchend',up);
+})();
 
 /* ============================================================
    i18n application + theme/lang toggles

@@ -1,6 +1,6 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.2.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
+[![pub package](https://img.shields.io/badge/pub-v2.3.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
 [![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.16-1DB88A.svg)](https://flutter.dev)
 [![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
 
@@ -57,7 +57,7 @@ RTL throughout. Zero third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.2.0
+  super_tab_bar: ^2.3.0
 ```
 
 ```bash
@@ -356,6 +356,7 @@ Both return `null` when called outside a `SuperTabBar`.
 | `compact` | `bool` | `false` | Hide the strip unconditionally. |
 | `allowAutoCompact` | `bool` | `false` | v2.2 · Auto-hide strip when widget width ≤ `compactWidth`. |
 | `compactWidth` | `double` | `600.0` | v2.2 · Breakpoint (logical px) for `allowAutoCompact`. |
+| `useCompactFloatingActionButton` | `bool` | `false` | v2.3 · Built-in FAB in compact mode; opens the switcher. |
 | `closeTabOnBack` | `bool` | `false` | Back closes the active tab unless it is dirty. |
 | `fillContent` | `bool` | `false` | Page fills all height (`Expanded`). |
 | `scrollContent` | `bool` | `true` | Wrap page in `SingleChildScrollView`. |
@@ -365,6 +366,27 @@ Both return `null` when called outside a `SuperTabBar`.
 | `lazyPages` | `bool` | `false` | Rebuild-on-revisit instead of `IndexedStack`. |
 | `localizations` | `SuperTabBarLocalizations?` | `.en` | Translatable strings. |
 | `previewOptions` | `SuperTabBarPreviewOptions?` | defaults | Hover-preview configuration. |
+
+---
+
+## Built-in compact FAB (v2.3)
+
+Set `useCompactFloatingActionButton: true` and the widget renders its own FAB
+over the content area when in compact mode — no extra `Stack` or
+`Scaffold.floatingActionButton` needed:
+
+```dart
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,
+  useCompactFloatingActionButton: true,
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+`pageBuilder` and `onTabClosed` are forwarded to the switcher automatically.
+The FAB sits at the bottom-end corner (RTL-aware).
 
 ---
 

@@ -105,6 +105,7 @@ UI-behavior guards (used internally; expose in your own UI if needed):
 | `compact` | `false` | Hide the strip unconditionally. |
 | `allowAutoCompact` | `false` | v2.2 · Auto-hide strip when widget width ≤ `compactWidth`. |
 | `compactWidth` | `600.0` | v2.2 · Breakpoint (logical px). Phone default. |
+| `useCompactFloatingActionButton` | `false` | v2.3 · Built-in FAB in compact mode; opens the switcher. |
 | `closeTabOnBack` | `false` | v2.1 · Back closes the active tab — unless it is dirty. |
 | `fillContent` | `false` | Page fills all height. |
 | `scrollContent` | `true` | Wrap in `SingleChildScrollView`. |
@@ -256,6 +257,22 @@ Directionality(textDirection: TextDirection.rtl, child: SuperTabBar(...))
 Mirrors: pinned anchor, chevrons, drag indicator, `▾` dropdown, compact switcher.
 
 ---
+
+## Built-in compact FAB (v2.3)
+
+```dart
+// Zero boilerplate — the FAB appears automatically in compact mode.
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,
+  useCompactFloatingActionButton: true,
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+The FAB is rendered over the content area at the bottom-end corner (RTL-aware).
+`pageBuilder` and `onTabClosed` are forwarded to the switcher it opens.
 
 ## Auto-compact breakpoint (v2.2)
 

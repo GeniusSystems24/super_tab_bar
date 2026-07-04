@@ -6,7 +6,34 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
-## [2.2.0] — 2026-07-02
+## [2.3.0] — 2026-07-02
+
+### Added — Built-in compact FAB
+
+- **`SuperTabBar(useCompactFloatingActionButton: true)`** — when the widget is
+  in compact mode (via `compact` or `allowAutoCompact`), a built-in
+  `FloatingActionButton` is rendered over the content area. Tapping it opens
+  `showSuperTabSwitcher` automatically. No extra `Stack` or
+  `Scaffold.floatingActionButton` needed.
+
+```dart
+// Fully self-contained mobile workspace — no extra scaffolding required.
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,
+  useCompactFloatingActionButton: true,  // built-in FAB appears in compact mode
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+  The FAB is positioned at the bottom-end corner of the content area
+  (bottom-right in LTR, bottom-left in RTL). `pageBuilder` and `onTabClosed`
+  are forwarded automatically to the switcher it opens.
+
+---
+
+
 
 ### Added — Automatic compact breakpoint
 
@@ -37,6 +64,9 @@ SuperTabBar(
 
 - `build()` now wraps the inner widget tree in a `LayoutBuilder` to support
   `allowAutoCompact`. No visual change when both flags are `false`.
+- When compact mode is active and `useCompactFloatingActionButton` is `true`,
+  a `FloatingActionButton` is rendered over the content area by the widget
+  itself — no extra `Stack` or `Scaffold.floatingActionButton` needed.
 
 ---
 

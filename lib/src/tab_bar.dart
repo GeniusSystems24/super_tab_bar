@@ -38,6 +38,7 @@ import 'pages.dart';
 import 'overlays.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
+import 'compact.dart';
 
 // ════════════════════════════════════════════════════════════
 // PUBLIC WIDGET
@@ -88,6 +89,21 @@ class SuperTabBar extends StatefulWidget {
   /// | Phone + small tablet| 768             |
   /// | Any mobile device   | 900             |
   final double compactWidth;
+
+  /// When `true` **and** the widget is in compact mode (either via [compact]
+  /// or [allowAutoCompact]), a built-in [FloatingActionButton] is rendered
+  /// over the active page. Tapping it opens [showSuperTabSwitcher], giving
+  /// users a one-tap path to the thumbnail switcher without any extra
+  /// scaffolding in the calling widget.
+  ///
+  /// The FAB is positioned at the bottom-end corner of the content area
+  /// (bottom-right in LTR, bottom-left in RTL).
+  ///
+  /// Pass [onTabClosed] and [pageBuilder] as usual — they are forwarded
+  /// automatically to the switcher that the FAB opens.
+  ///
+  /// Defaults to `false`.
+  final bool useCompactFloatingActionButton;
 
   /// When `true`, a system back gesture / button closes the active tab instead
   /// of popping the route — but only when that tab is **not** dirty. A dirty
@@ -162,9 +178,10 @@ class SuperTabBar extends StatefulWidget {
     this.pageBuilder,
     this.showChrome = true,
     this.compact = false,
-    this.allowAutoCompact = true,
+    this.allowAutoCompact = false,
     this.compactWidth = 600.0,
     this.closeTabOnBack = false,
+    this.useCompactFloatingActionButton = true,
     this.fillContent = false,
     this.lazyPages = false,
     this.contentPadding = const EdgeInsets.all(24),
@@ -582,7 +599,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
     Widget shell = LayoutBuilder(
       builder: (ctx, constraints) {
         final compact = _isCompact(constraints.maxWidth);
-        return SuperTabBarScope(
+        Widget inner = SuperTabBarScope(
           controller: _ctrl,
           child: Focus(
             focusNode: _focusNode,
@@ -616,6 +633,37 @@ class _SuperTabBarState extends State<SuperTabBar> {
             ),
           ),
         );
+
+        // Built-in compact FAB — overlays the content and opens the switcher.
+        if (compact && widget.useCompactFloatingActionButton) {
+          inner = Stack(
+            children: [
+              Positioned.fill(child: inner),
+              Positioned(
+                bottom: 16,
+                right: Directionality.of(ctx) == TextDirection.rtl ? null : 16,
+                left: Directionality.of(ctx) == TextDirection.rtl ? 16 : null,
+                child: FloatingActionButton(
+                  heroTag: 'super_tab_bar_compact_fab_${hashCode}',
+                  backgroundColor: SuperTabBarThemeData.accent,
+                  foregroundColor: Colors.white,
+                  tooltip: 'Open tab switcher',
+                  onPressed: () => showSuperTabSwitcher(
+                    ctx,
+                    controller: _ctrl,
+                    pageBuilder: widget.pageBuilder,
+                    onCloseTab: widget.onTabClosed != null
+                        ? (id) => widget.onTabClosed!(id)
+                        : null,
+                  ),
+                  child: const Icon(Icons.grid_view_rounded),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return inner;
       },
     );
 
