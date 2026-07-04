@@ -1,6 +1,6 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.1.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
+[![pub package](https://img.shields.io/badge/pub-v2.2.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
 [![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.16-1DB88A.svg)](https://flutter.dev)
 [![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
 
@@ -39,6 +39,9 @@ RTL throughout. Zero third-party dependencies.
 - 📱 **Compact mode** — hide the strip on phones and switch tabs from a
   full-screen grid of thumbnail previews (`SuperTabSwitcher` /
   `showSuperTabSwitcher`). Tap to switch, **drag a thumbnail to reorder**.
+- 📐 **Auto-compact breakpoint** — `allowAutoCompact: true` + `compactWidth`
+  switch the widget into compact mode automatically based on its layout width.
+  No `MediaQuery` boilerplate needed.
 - 🔙 **Dirty-aware back** — `closeTabOnBack` closes the current tab on a back
   gesture, but never a dirty one.
 - 🌐 **Localization** — all user-facing strings in `SuperTabBarLocalizations`;
@@ -54,7 +57,7 @@ RTL throughout. Zero third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.1.0
+  super_tab_bar: ^2.2.0
 ```
 
 ```bash
@@ -350,7 +353,9 @@ Both return `null` when called outside a `SuperTabBar`.
 | Property | Type | Default | Description |
 |---|---|---|---|
 | `showChrome` | `bool` | `true` | Bordered rounded card. `false` = edge-to-edge. |
-| `compact` | `bool` | `false` | Hide the strip (mobile); switch via `SuperTabSwitcher`. |
+| `compact` | `bool` | `false` | Hide the strip unconditionally. |
+| `allowAutoCompact` | `bool` | `false` | v2.2 · Auto-hide strip when widget width ≤ `compactWidth`. |
+| `compactWidth` | `double` | `600.0` | v2.2 · Breakpoint (logical px) for `allowAutoCompact`. |
 | `closeTabOnBack` | `bool` | `false` | Back closes the active tab unless it is dirty. |
 | `fillContent` | `bool` | `false` | Page fills all height (`Expanded`). |
 | `scrollContent` | `bool` | `true` | Wrap page in `SingleChildScrollView`. |
@@ -360,6 +365,34 @@ Both return `null` when called outside a `SuperTabBar`.
 | `lazyPages` | `bool` | `false` | Rebuild-on-revisit instead of `IndexedStack`. |
 | `localizations` | `SuperTabBarLocalizations?` | `.en` | Translatable strings. |
 | `previewOptions` | `SuperTabBarPreviewOptions?` | defaults | Hover-preview configuration. |
+
+---
+
+## Auto-compact breakpoint (v2.2)
+
+`allowAutoCompact` removes the need to manage `MediaQuery` yourself — the
+widget watches its own layout width via `LayoutBuilder` and enters compact mode
+automatically:
+
+```dart
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,   // auto-switch at compactWidth
+  compactWidth: 600,        // default — phones only
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+| `compactWidth` | Covers |
+|---|---|
+| `600` (default) | All phones |
+| `768` | Phones + small tablets |
+| `900` | Any mobile device |
+
+The manual `compact: true` flag still works and always takes priority.
+`LayoutBuilder` measures the widget's own available width, so it responds
+correctly in split-view and multi-window layouts.
 
 ---
 

@@ -1,17 +1,18 @@
 ---
 name: super-tab-bar
 description: >
-  How to use the super_tab_bar Flutter package (v2.1) — a browser-style workspace
+  How to use the super_tab_bar Flutter package (v2.2) — a browser-style workspace
   tab strip with pinned/closable/dirty tabs, configurable behavior types
   (requiredPinned · normal · uniqueNormal), drag-reorder, context menu, overflow
   dropdown, live mini-page previews, state-preserving pages, localization,
   direct event callbacks, a mobile compact-mode thumbnail switcher
-  (SuperTabSwitcher), dirty-aware back navigation, and accessibility semantics.
+  (SuperTabSwitcher), automatic compact breakpoint (allowAutoCompact +
+  compactWidth), dirty-aware back navigation, and accessibility semantics.
   Use when building or modifying a Flutter multi-tab workspace UI with the
   `super_tab_bar` package.
 ---
 
-# super_tab_bar · SuperTabBar — v2.1
+# super_tab_bar · SuperTabBar — v2.2
 
 A browser-style workspace tab strip. Renders the strip **and** the active page
 below it. By default keeps every page's state alive across tab switches via
@@ -170,7 +171,9 @@ SuperTabBar(
 
   // ── Shell ───────────────────────────────────────────────────────
   showChrome: true,          // bordered card (false = edge-to-edge)
-  compact: false,            // v2.1 · hide the strip (mobile) — see below
+  compact: false,            // hide strip unconditionally
+  allowAutoCompact: false,   // v2.2 · auto-hide strip when width <= compactWidth
+  compactWidth: 600.0,       // v2.2 · breakpoint in logical pixels (phone default)
   closeTabOnBack: false,     // v2.1 · back closes active tab unless dirty
   fillContent: false,        // page fills all height (false → 440 px cap)
   scrollContent: true,       // wrap in SingleChildScrollView
@@ -249,6 +252,31 @@ const SuperTabBarPreviewOptions(
   fallback: PreviewFallback.blank,  // or .liveRender (default)
 )
 ```
+
+---
+
+## Auto-compact breakpoint (v2.2)
+
+`allowAutoCompact` + `compactWidth` let the widget switch itself into compact
+mode without any `MediaQuery` boilerplate:
+
+```dart
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true, // watches own layout width via LayoutBuilder
+  compactWidth: 600,      // phone default; raise to 768 for small tablets
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+| `compactWidth` | Covers |
+|---|---|
+| `600` (default) | All phones |
+| `768` | Phones + small tablets |
+| `900` | Any mobile device |
+
+`compact: true` still works and always takes priority.
 
 ---
 

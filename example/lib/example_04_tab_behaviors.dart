@@ -30,6 +30,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
   void initState() {
     super.initState();
     _ctrl = SuperTabBarController(
+      
       tabs: [
         // requiredPinned — always visible, cannot be closed/unpinned from UI
         const BrowserTab(
@@ -189,6 +190,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
             flex: 3,
             child: SuperTabBar(
               controller: _ctrl,
+              allowAutoCompact: true,
               fillContent: true,
               scrollContent: false,
               showChrome: false,

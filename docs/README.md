@@ -42,6 +42,7 @@ Legend
 | **Overflow** | `⟩` chevrons appear on the sides that have hidden tabs; scroll by 220 px per click. |
 | **Preview** | Hover for ≈ 480 ms triggers the popover; dismisses when the pointer leaves the tab chip. |
 | **Compact** | `compact: true` hides the whole strip; switch tabs from the `SuperTabSwitcher` thumbnail grid. |
+| **Auto-compact** | `allowAutoCompact: true` + `compactWidth` enter compact automatically when widget width ≤ `compactWidth` (default 600 px). |
 
 ---
 

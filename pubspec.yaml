@@ -1,12 +1,13 @@
 name: super_tab_bar
 description: >
-  A browser-style workspace tab bar for Flutter — pinned / dirty / closable
-  tabs with configurable behavior types (requiredPinned, normal, uniqueNormal),
-  drag-to-reorder, context menu, overflow dropdown, live mini-page previews on
-  hover, state-preserving pages, localization support, direct event callbacks,
-  accessibility semantics, a mobile compact-mode tab switcher with draggable
-  thumbnail previews, dirty-aware back navigation, and RTL. Zero third-party deps.
-version: 2.1.0
+  A browser-style Flutter tab bar with pinned, dirty, and closable tabs;
+  configurable behaviors (requiredPinned, normal, uniqueNormal); drag-to-reorder;
+  context menus; overflow handling; live hover previews; state-preserving pages; 
+  localization; event callbacks; accessibility; mobile compact switching with draggable thumbnails; 
+  dirty-aware back navigation; auto compact breakpoints (allowAutoCompact, compactWidth); RTL; and zero third-party dependencies.
+
+version: 2.2.0
+
 homepage: https://github.com/GeniusSystems24/super_tab_bar
 repository: https://github.com/GeniusSystems24/super_tab_bar
 issue_tracker: https://github.com/GeniusSystems24/super_tab_bar/issues

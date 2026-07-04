@@ -6,6 +6,40 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.2.0] — 2026-07-02
+
+### Added — Automatic compact breakpoint
+
+- **`SuperTabBar(allowAutoCompact: true)`** — the widget watches its own layout
+  constraints (via `LayoutBuilder`) and enters compact mode automatically
+  whenever the available width is ≤ `compactWidth`. No `MediaQuery` boilerplate
+  needed.
+- **`SuperTabBar(compactWidth: 600.0)`** — the width threshold in logical pixels.
+  Defaults to **600**, which covers all common phone form-factors. Raise to 768
+  to include small tablets, or 900 for any mobile device.
+
+```dart
+// Strip hides automatically on phones; stays visible on tablets/desktops.
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,   // auto-switch at compactWidth
+  compactWidth: 600,        // default — phones only
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+  The manual `compact: true` flag still works and takes priority. The two
+  approaches can coexist: `compact` forces compact unconditionally while
+  `allowAutoCompact` makes it responsive.
+
+### Changed
+
+- `build()` now wraps the inner widget tree in a `LayoutBuilder` to support
+  `allowAutoCompact`. No visual change when both flags are `false`.
+
+---
+
 ## [2.1.0] — 2026-07-01
 
 Mobile-focused release: a compact tab-switching experience, dirty-aware back

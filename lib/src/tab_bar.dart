@@ -18,6 +18,12 @@
 //   • Removed the tab-navigation keyboard shortcuts (Ctrl/Cmd+T, Ctrl/Cmd+W,
 //     ← → Home End). Escape still dismisses open overlays.
 //
+// New in v2.2:
+//   • [SuperTabBar.allowAutoCompact] + [SuperTabBar.compactWidth] — the strip
+//     switches to compact mode automatically whenever the widget's available
+//     width drops at or below [compactWidth] (default 600 px, covering all
+//     phone form-factors). No manual MediaQuery boilerplate required.
+//
 //   File: lib/src/tab_bar.dart
 // ============================================================
 
@@ -59,7 +65,29 @@ class SuperTabBar extends StatefulWidget {
   /// wide. Pair it with [SuperTabSwitcher] (see `showSuperTabSwitcher`) to give
   /// users a thumbnail grid for switching and reordering tabs. Defaults to
   /// `false`.
+  ///
+  /// See also [allowAutoCompact] for automatic breakpoint-driven switching.
   final bool compact;
+
+  /// Automatically enter compact mode when the widget's available width is at
+  /// or below [compactWidth]. When `true`, no manual [MediaQuery] boilerplate
+  /// is needed — the widget reacts to its own layout constraints.
+  ///
+  /// Has no effect when [compact] is already `true`. Defaults to `false`.
+  final bool allowAutoCompact;
+
+  /// The width threshold (in logical pixels) used by [allowAutoCompact].
+  /// The strip is hidden whenever `constraints.maxWidth <= compactWidth`.
+  ///
+  /// Defaults to **600.0**, which covers all common phone form-factors
+  /// (up to large-phone landscape). Typical values:
+  ///
+  /// | Form-factor         | Suggested value |
+  /// |---------------------|-----------------|
+  /// | Phone only          | 600 (default)   |
+  /// | Phone + small tablet| 768             |
+  /// | Any mobile device   | 900             |
+  final double compactWidth;
 
   /// When `true`, a system back gesture / button closes the active tab instead
   /// of popping the route — but only when that tab is **not** dirty. A dirty
@@ -134,6 +162,8 @@ class SuperTabBar extends StatefulWidget {
     this.pageBuilder,
     this.showChrome = true,
     this.compact = false,
+    this.allowAutoCompact = true,
+    this.compactWidth = 600.0,
     this.closeTabOnBack = false,
     this.fillContent = false,
     this.lazyPages = false,
@@ -532,46 +562,61 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   // ════════ BUILD ═══════════════════════════════════════════
+
+  /// Returns `true` when compact layout should be active, considering both the
+  /// manual [SuperTabBar.compact] flag and the [SuperTabBar.allowAutoCompact]
+  /// breakpoint evaluated against the widget's current layout width.
+  bool _isCompact(double availableWidth) =>
+      widget.compact ||
+      (widget.allowAutoCompact && availableWidth <= widget.compactWidth);
+
   @override
   Widget build(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     final activeTab = _ctrl.activeTab;
     final content = _buildContent(s, activeTab);
 
-    Widget shell = SuperTabBarScope(
-      controller: _ctrl,
-      child: Focus(
-        focusNode: _focusNode,
-        onKeyEvent: _onKey,
-        child: GestureDetector(
-          onTap: () => _focusNode.requestFocus(),
-          child: Container(
-            decoration: widget.showChrome
-                ? BoxDecoration(
-                    color: s.bg,
-                    border: Border.all(color: s.border),
-                    borderRadius:
-                        BorderRadius.circular(SuperTabBarThemeData.radiusLg),
-                  )
-                : BoxDecoration(color: s.bg),
-            clipBehavior:
-                widget.showChrome ? Clip.antiAlias : Clip.none,
-            child: Column(
-              mainAxisSize:
-                  widget.fillContent ? MainAxisSize.max : MainAxisSize.min,
-              children: [
-                // Compact mode hides the strip; the SuperTabSwitcher is the
-                // intended way to change/reorder tabs on small screens.
-                if (!widget.compact) _buildStrip(s),
-                if (widget.fillContent)
-                  Expanded(child: content)
-                else
-                  content,
-              ],
+    // LayoutBuilder lets us react to the widget's own available width so that
+    // allowAutoCompact works correctly whether the widget is full-screen or
+    // embedded inside a smaller parent.
+    Widget shell = LayoutBuilder(
+      builder: (ctx, constraints) {
+        final compact = _isCompact(constraints.maxWidth);
+        return SuperTabBarScope(
+          controller: _ctrl,
+          child: Focus(
+            focusNode: _focusNode,
+            onKeyEvent: _onKey,
+            child: GestureDetector(
+              onTap: () => _focusNode.requestFocus(),
+              child: Container(
+                decoration: widget.showChrome
+                    ? BoxDecoration(
+                        color: s.bg,
+                        border: Border.all(color: s.border),
+                        borderRadius: BorderRadius.circular(
+                            SuperTabBarThemeData.radiusLg),
+                      )
+                    : BoxDecoration(color: s.bg),
+                clipBehavior:
+                    widget.showChrome ? Clip.antiAlias : Clip.none,
+                child: Column(
+                  mainAxisSize:
+                      widget.fillContent ? MainAxisSize.max : MainAxisSize.min,
+                  children: [
+                    // Compact mode hides the strip; pair with SuperTabSwitcher.
+                    if (!compact) _buildStrip(s),
+                    if (widget.fillContent)
+                      Expanded(child: content)
+                    else
+                      content,
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
 
     if (widget.closeTabOnBack) {

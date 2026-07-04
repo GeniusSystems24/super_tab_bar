@@ -1,4 +1,4 @@
-# super_tab_bar — comprehensive examples (v2.1)
+# super_tab_bar — comprehensive examples (v2.2)
 
 Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
 registration from `SKILL.md`.
@@ -398,7 +398,58 @@ Scaffold(
 
 ---
 
-## 13 · Compact mode — mobile tab switcher (v2.1)
+## 15 · Auto-compact breakpoint (v2.2)
+
+No `MediaQuery` needed — the widget watches its own layout width.
+
+```dart
+// Adapts to phone, tablet and desktop in the same tree.
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,   // strip hides automatically
+  compactWidth: 600,        // ≤ 600 px → compact; > 600 px → full strip
+  closeTabOnBack: true,
+  showChrome: false,
+  fillContent: true,
+  pageBuilder: (ctx, tab) => MyPage(tab: tab),
+)
+
+// FAB for the switcher (only needed in compact)
+if (MediaQuery.of(context).size.width <= 600)
+  FloatingActionButton(
+    child: const Icon(Icons.grid_view_rounded),
+    onPressed: () => showSuperTabSwitcher(context, controller: ctrl),
+  )
+```
+
+Or let a single `ValueNotifier` drive the FAB visibility from the same
+breakpoint, so it only appears when the strip is actually hidden:
+
+```dart
+LayoutBuilder(
+  builder: (ctx, c) {
+    final isCompact = c.maxWidth <= 600;
+    return Stack(
+      children: [
+        SuperTabBar(
+          controller: ctrl,
+          allowAutoCompact: true,
+          compactWidth: 600,
+          fillContent: true,
+        ),
+        if (isCompact)
+          Positioned(
+            right: 16, bottom: 16,
+            child: FloatingActionButton(
+              onPressed: () => showSuperTabSwitcher(ctx, controller: ctrl),
+              child: const Icon(Icons.grid_view_rounded),
+            ),
+          ),
+      ],
+    );
+  },
+)
+``` — mobile tab switcher (v2.1)
 
 On phones, hide the strip and switch tabs from a full-screen thumbnail grid
 opened by a `FloatingActionButton`. `closeTabOnBack` makes the system back

@@ -1,4 +1,4 @@
-# super_tab_bar — ChatGPT / Codex agent instructions (v2.1)
+# super_tab_bar — ChatGPT / Codex agent instructions (v2.2)
 
 Use these instructions when asked to build or modify a Flutter UI that needs a
 **browser-style workspace tab bar** using the `super_tab_bar` package.
@@ -32,7 +32,7 @@ Apply this skill when the user asks for:
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.1.0
+  super_tab_bar: ^2.2.0
 ```
 
 ### 2 · Register theme extension
@@ -102,7 +102,9 @@ UI-behavior guards (used internally; expose in your own UI if needed):
 | `controller` | — | External controller. Provide one OR `tabsState`. |
 | `pageBuilder` | `null` | Custom page per tab; falls back to `GLTabPage`. |
 | `showChrome` | `true` | Bordered card (`false` = edge-to-edge). |
-| `compact` | `false` | v2.1 · Hide the strip (mobile); switch via `SuperTabSwitcher`. |
+| `compact` | `false` | Hide the strip unconditionally. |
+| `allowAutoCompact` | `false` | v2.2 · Auto-hide strip when widget width ≤ `compactWidth`. |
+| `compactWidth` | `600.0` | v2.2 · Breakpoint (logical px). Phone default. |
 | `closeTabOnBack` | `false` | v2.1 · Back closes the active tab — unless it is dirty. |
 | `fillContent` | `false` | Page fills all height. |
 | `scrollContent` | `true` | Wrap in `SingleChildScrollView`. |
@@ -254,6 +256,22 @@ Directionality(textDirection: TextDirection.rtl, child: SuperTabBar(...))
 Mirrors: pinned anchor, chevrons, drag indicator, `▾` dropdown, compact switcher.
 
 ---
+
+## Auto-compact breakpoint (v2.2)
+
+```dart
+// Strip disappears automatically on phones; stays on tablet/desktop.
+SuperTabBar(
+  controller: ctrl,
+  allowAutoCompact: true,  // no MediaQuery needed
+  compactWidth: 600,       // phone default; 768 for small tablets
+  closeTabOnBack: true,
+  fillContent: true,
+)
+```
+
+`compact: true` always wins. `allowAutoCompact` uses `LayoutBuilder` (widget
+width, not screen width) — correct inside split-view.
 
 ## Compact mode (v2.1)
 
