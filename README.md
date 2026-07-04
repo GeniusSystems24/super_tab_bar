@@ -1,6 +1,6 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.3.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
+[![pub package](https://img.shields.io/badge/pub-v 2.3.1-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
 [![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.16-1DB88A.svg)](https://flutter.dev)
 [![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
 
@@ -57,7 +57,7 @@ RTL throughout. Zero third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.3.0
+  super_tab_bar: ^ 2.3.1
 ```
 
 ```bash
