@@ -3,7 +3,6 @@
 //   File: lib/src/models.dart
 // ============================================================
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Builds the content shown for a tab — both in the active content surface

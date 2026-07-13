@@ -28,7 +28,6 @@ import 'models.dart';
 import 'theme.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
-import 'pages.dart';
 
 // ════════════════════════════════════════════════════════════
 // PUBLIC ENTRY POINT
@@ -472,12 +471,12 @@ class _TabThumbnail extends StatelessWidget {
                       ),
                     ),
                     if (active)
-                      Positioned(
+                      const Positioned(
                         top: 8,
                         left: 8,
                         child: _Badge(
                           color: SuperTabBarThemeData.accent,
-                          child: const Text('ACTIVE'),
+                          child: Text('ACTIVE'),
                         ),
                       ),
                     if (showClose)

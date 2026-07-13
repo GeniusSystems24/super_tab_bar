@@ -16,7 +16,7 @@ void main() {
   // ════════════════════════════════════════════════════════
   group('BrowserTab — immutability', () {
     test('all fields are final — copyWith produces a new instance', () {
-      final tab = BrowserTab(
+      const tab = BrowserTab(
         id: 1,
         title: 'Test',
         pageBuilder: _dummyPage,
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('copyWith preserves untouched fields', () {
-      final tab = BrowserTab(
+      const tab = BrowserTab(
         id: 1,
         title: 'T',
         icon: Icons.public,
@@ -51,15 +51,15 @@ void main() {
     });
 
     test('value equality holds for identical data', () {
-      final a = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
-      final b = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
+      const a = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
+      const b = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
     });
 
     test('value equality fails for different data', () {
-      final a = BrowserTab(id: 1, title: 'A', pageBuilder: _dummyPage);
-      final b = BrowserTab(id: 2, title: 'A', pageBuilder: _dummyPage);
+      const a = BrowserTab(id: 1, title: 'A', pageBuilder: _dummyPage);
+      const b = BrowserTab(id: 2, title: 'A', pageBuilder: _dummyPage);
       expect(a, isNot(equals(b)));
     });
 
@@ -81,14 +81,14 @@ void main() {
     });
 
     test('icon defaults to null when not provided', () {
-      final tab = BrowserTab(id: 1, title: 'No icon', pageBuilder: _dummyPage);
+      const tab = BrowserTab(id: 1, title: 'No icon', pageBuilder: _dummyPage);
       expect(tab.icon, isNull);
     });
 
     test('has no `kind` field anymore (v2.5 — removed)', () {
       // Sanity: BrowserTab no longer accepts `kind`. This is a compile-time
       // guarantee; the test existing & compiling is the assertion.
-      final tab = BrowserTab(id: 1, title: 'No kind', pageBuilder: _dummyPage);
+      const tab = BrowserTab(id: 1, title: 'No kind', pageBuilder: _dummyPage);
       expect(tab.title, 'No kind');
     });
   });
@@ -101,7 +101,7 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        const BrowserTab(
           id: 1,
           title: 'Home',
           icon: Icons.public,
@@ -109,7 +109,7 @@ void main() {
           behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: _dummyPage,
         ),
-        BrowserTab(id: 2, title: 'Normal', pageBuilder: _dummyPage),
+        const BrowserTab(id: 2, title: 'Normal', pageBuilder: _dummyPage),
       ], activeId: 2);
     });
 
@@ -158,7 +158,7 @@ void main() {
     test('_normalize enforces pinned: true on requiredPinned tabs', () {
       // Construct with pinned: false — controller must normalise to true.
       final c = SuperTabBarController(tabs: [
-        BrowserTab(
+        const BrowserTab(
           id: 99,
           title: 'X',
           pinned: false, // intentionally wrong
@@ -179,8 +179,8 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'Normal', pageBuilder: _dummyPage),
-        BrowserTab(
+        const BrowserTab(id: 1, title: 'Normal', pageBuilder: _dummyPage),
+        const BrowserTab(
           id: 2,
           title: 'Settings',
           behavior: SuperTabBehavior.uniqueNormal,
@@ -264,9 +264,9 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-        BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
-        BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
+        const BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
       ], activeId: 1);
     });
 
@@ -505,8 +505,8 @@ void main() {
 
     testWidgets('onTabSelected fires when a tab is tapped', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-        BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -527,7 +527,7 @@ void main() {
     testWidgets('tapping + calls onAddTab (v2.5 — no auto-add)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -550,7 +550,7 @@ void main() {
     testWidgets('onTabAdded is not fired from the + button (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -573,7 +573,7 @@ void main() {
     testWidgets('+ button is hidden when onAddTab is null (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -590,7 +590,7 @@ void main() {
 
     testWidgets('requiredPinned tab appears in pinned region', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        const BrowserTab(
           id: 1,
           title: 'Home',
           icon: Icons.public,
@@ -598,7 +598,7 @@ void main() {
           behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: _dummyPage,
         ),
-        BrowserTab(id: 2, title: 'Doc', pageBuilder: _dummyPage),
+        const BrowserTab(id: 2, title: 'Doc', pageBuilder: _dummyPage),
       ], activeId: 2);
       addTearDown(ctrl.dispose);
 
@@ -614,7 +614,7 @@ void main() {
 
     testWidgets('custom localizations are used', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -649,7 +649,7 @@ void main() {
 
     testWidgets('preview disabled prevents capture', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
+        const BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -803,9 +803,9 @@ void main() {
 
     SuperTabBarController three() => SuperTabBarController(
           tabs: [
-            BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-            BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
-            BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
+            const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+            const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
+            const BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
           ],
           activeId: 1,
         );
