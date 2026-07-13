@@ -855,12 +855,23 @@ class _PageGeneric extends StatelessWidget {
 }
 
 /// Full-size page for a tab. Fluid width — fills its container.
+///
+/// Since v2.5 [BrowserTab] no longer carries a `kind` field, so [GLTabPage]
+/// takes the [kind] explicitly. Use it inside your [TabPageBuilder]:
+///
+/// ```dart
+/// BrowserTab(
+///   id: 1, title: 'Ledger', icon: glTabIcon(GLTabKind.ledger),
+///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
+/// )
+/// ```
 class GLTabPage extends StatelessWidget {
   final BrowserTab tab;
-  const GLTabPage({super.key, required this.tab});
+  final GLTabKind kind;
+  const GLTabPage({super.key, required this.tab, required this.kind});
   @override
   Widget build(BuildContext context) {
-    switch (tab.kind) {
+    switch (kind) {
       case GLTabKind.ledger:
         return _PageLedger(tab);
       case GLTabKind.doc:

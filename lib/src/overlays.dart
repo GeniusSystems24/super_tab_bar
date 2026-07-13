@@ -319,12 +319,14 @@ class _ListRowState extends State<_ListRow> {
             ),
             child: Row(
               children: [
-                Icon(
-                  glTabIcon(t.kind),
-                  size: 15,
-                  color: widget.active ? SuperTabBarThemeData.accent : s.fg3,
-                ),
-                const SizedBox(width: 10),
+                if (t.icon != null) ...[
+                  Icon(
+                    t.icon,
+                    size: 15,
+                    color: widget.active ? SuperTabBarThemeData.accent : s.fg3,
+                  ),
+                  const SizedBox(width: 10),
+                ],
                 Expanded(
                   child: Text(
                     t.title,
@@ -369,7 +371,6 @@ class _ListRowState extends State<_ListRow> {
 class MiniPagePreview extends StatefulWidget {
   final BrowserTab tab;
   final Rect anchor;
-  final TabPageBuilder? pageBuilder;
   final ui.Image? snapshot;
   final ScopeWrapper? scope;
   final PreviewFallback fallback;
@@ -378,7 +379,6 @@ class MiniPagePreview extends StatefulWidget {
     super.key,
     required this.tab,
     required this.anchor,
-    this.pageBuilder,
     this.snapshot,
     this.scope,
     this.fallback = PreviewFallback.liveRender,
@@ -455,12 +455,14 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                   border: Border(bottom: BorderSide(color: s.border))),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    glTabIcon(tab.kind),
-                                    size: 15,
-                                    color: SuperTabBarThemeData.accent,
-                                  ),
-                                  const SizedBox(width: 8),
+                                  if (tab.icon != null) ...[
+                                    Icon(
+                                      tab.icon,
+                                      size: 15,
+                                      color: SuperTabBarThemeData.accent,
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -474,17 +476,6 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
                                             color: s.fg1,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 1),
-                                        Text(
-                                          glPreviewMeta(tab.kind),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontFamily: SuperTabBarThemeData.monoFont,
-                                            fontSize: 10.5,
-                                            color: s.fg3,
                                           ),
                                         ),
                                       ],
@@ -515,7 +506,6 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                               width: _w,
                               height: _thumbH,
                               surface: s.surface,
-                              pageBuilder: widget.pageBuilder,
                               snapshot: widget.snapshot,
                               scope: widget.scope,
                               fallback: widget.fallback,
@@ -570,7 +560,6 @@ class _Thumbnail extends StatelessWidget {
   final bool rtl;
   final double width, height;
   final Color surface;
-  final TabPageBuilder? pageBuilder;
   final ui.Image? snapshot;
   final ScopeWrapper? scope;
   final PreviewFallback fallback;
@@ -581,7 +570,6 @@ class _Thumbnail extends StatelessWidget {
     required this.width,
     required this.height,
     required this.surface,
-    this.pageBuilder,
     this.snapshot,
     this.scope,
     this.fallback = PreviewFallback.liveRender,
@@ -635,7 +623,7 @@ class _Thumbnail extends StatelessWidget {
       width: designW,
       color: surface,
       padding: const EdgeInsets.all(20),
-      child: pageBuilder?.call(context, tab) ?? GLTabPage(tab: tab),
+      child: tab.pageBuilder.call(context, tab),
     );
     if (scope != null) page = scope!(page);
     return OverflowBox(

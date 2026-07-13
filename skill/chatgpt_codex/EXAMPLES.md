@@ -1,7 +1,9 @@
-# super_tab_bar — comprehensive examples (v2)
+# super_tab_bar — comprehensive examples (v2.5)
 
 Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
-registration from `AGENTS.md`.
+registration from `AGENTS.md`. **Since v2.5 each `BrowserTab` carries its own
+required `pageBuilder` and an optional `icon`** — the shared
+`SuperTabBar.pageBuilder` field has been removed.
 
 ---
 
@@ -17,19 +19,42 @@ class ErpWorkspace extends StatefulWidget {
 class _ErpWorkspaceState extends State<ErpWorkspace> {
   late final SuperTabBarController _ctrl;
 
+  Widget _page(BuildContext ctx, BrowserTab tab) {
+    // Route on the tab's icon (we set it via glTabIcon(kind) at construction).
+    final kindFor = {
+      glTabIcon(GLTabKind.ledger): GLTabKind.ledger,
+      glTabIcon(GLTabKind.doc):    GLTabKind.doc,
+      glTabIcon(GLTabKind.chart):  GLTabKind.chart,
+    };
+    switch (kindFor[tab.icon]) {
+      case GLTabKind.ledger: return const ChartOfAccountsPage();
+      case GLTabKind.doc:    return JournalEntryPage(tabId: tab.id);
+      case GLTabKind.chart:  return const DashboardPage();
+      default:                return Center(child: Text(tab.title));
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _ctrl = SuperTabBarController(
-      tabs: const [
+      tabs: [
         // requiredPinned: UI hides close / unpin / duplicate.
         // ctrl.forceClose(id) still works programmatically.
         BrowserTab(
-          id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger,
+          id: 1, title: 'Chart of Accounts', icon: glTabIcon(GLTabKind.ledger),
           pinned: true, behavior: SuperTabBehavior.requiredPinned,
+          pageBuilder: _page,
         ),
-        BrowserTab(id: 2, title: 'Journal Entry — Draft', kind: GLTabKind.doc, dirty: true),
-        BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+        BrowserTab(
+          id: 2, title: 'Journal Entry — Draft',
+          icon: glTabIcon(GLTabKind.doc), dirty: true,
+          pageBuilder: _page,
+        ),
+        BrowserTab(
+          id: 3, title: 'Dashboard', icon: glTabIcon(GLTabKind.chart),
+          pageBuilder: _page,
+        ),
       ],
       activeId: 2,
     );
@@ -41,23 +66,24 @@ class _ErpWorkspaceState extends State<ErpWorkspace> {
   void _log(String event, int id, Object value) =>
       debugPrint('[$event] tab $id → $value');
 
-  Widget _page(BuildContext ctx, BrowserTab tab) => switch (tab.kind) {
-    GLTabKind.ledger => const ChartOfAccountsPage(),
-    GLTabKind.doc    => JournalEntryPage(tabId: tab.id),
-    GLTabKind.chart  => const DashboardPage(),
-    _                => Center(child: Text(tab.title)),
-  };
+  void _onAddTab() {
+    // The (+) button only shows because onAddTab is provided (v2.5).
+    _ctrl.add(
+      title: 'New Tab ${_ctrl.length + 1}',
+      icon: glTabIcon(GLTabKind.doc),
+      pageBuilder: _page,
+    );
+  }
 
   @override
   Widget build(BuildContext context) => SuperTabBar(
     controller: _ctrl,
-    pageBuilder: _page,
+    onAddTab: _onAddTab,          // v2.5 — (+) button visible
     showChrome: false,
     fillContent: true,
     scrollContent: false,
     // Direct widget callbacks — fire for UI-initiated events:
     onTabSelected:    (id)       => _log('selected', id, ''),
-    onTabAdded:       (id)       => _log('added', id, ''),
     onTabClosed:      (id)       => _log('closed', id, ''),
     onTabDuplicated:  (newId)    => _log('duplicated', newId, ''),
     onTabPinChanged:  (id, pin)  => _log('pin', id, pin),
@@ -83,10 +109,16 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   final _ctrl = SuperTabBarController(
-    tabs: const [
-      BrowserTab(id: 1, title: 'Home', kind: GLTabKind.globe,
-          pinned: true, behavior: SuperTabBehavior.requiredPinned),
-      BrowserTab(id: 2, title: 'Dashboard', kind: GLTabKind.chart),
+    tabs: [
+      BrowserTab(
+        id: 1, title: 'Home', icon: glTabIcon(GLTabKind.globe),
+        pinned: true, behavior: SuperTabBehavior.requiredPinned,
+        pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+      ),
+      BrowserTab(
+        id: 2, title: 'Dashboard', icon: glTabIcon(GLTabKind.chart),
+        pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.chart),
+      ),
     ],
     activeId: 2,
   );
@@ -94,16 +126,20 @@ class _AppShellState extends State<AppShell> {
   // Second call with same uniqueKey selects existing — no duplicate:
   void openSettings() => _ctrl.add(
     title: 'Settings',
-    kind: GLTabKind.user,
+    icon: glTabIcon(GLTabKind.user),
     behavior: SuperTabBehavior.uniqueNormal,
     uniqueKey: 'settings',
+    pageBuilder: (ctx, tab) => SettingsPage(tab: tab),
   );
 
   @override
   Widget build(BuildContext context) => Column(children: [
     TextButton(onPressed: openSettings, child: const Text('Open Settings')),
     Expanded(
-      child: SuperTabBar(controller: _ctrl, fillContent: true, showChrome: false),
+      child: SuperTabBar(
+        controller: _ctrl, fillContent: true, showChrome: false,
+        onAddTab: () {}, // v2.5 — (+) button visible
+      ),
     ),
   ]);
 
@@ -164,8 +200,11 @@ class AccountRow extends StatelessWidget {
     title: Text(account.name),
     onTap: () {
       // of() returns null outside SuperTabBar — always guard:
-      SuperTabBarController.of(context)
-          ?.add(title: account.name, kind: GLTabKind.doc);
+      SuperTabBarController.of(context)?.add(
+        title: account.name,
+        icon: glTabIcon(GLTabKind.doc),
+        pageBuilder: (ctx, tab) => DetailPage(tab: tab, account: account),
+      );
     },
   );
 }
@@ -249,14 +288,24 @@ class ArabicWorkspace extends StatelessWidget {
     textDirection: TextDirection.rtl,
     child: SuperTabBar(
       localizations: SuperTabBarLocalizations.ar,
-      tabsState: const [
+      tabsState: [
         BrowserTab(
-          id: 1, title: 'دليل الحسابات', kind: GLTabKind.ledger,
+          id: 1, title: 'دليل الحسابات', icon: glTabIcon(GLTabKind.ledger),
           pinned: true, behavior: SuperTabBehavior.requiredPinned,
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
         ),
-        BrowserTab(id: 2, title: 'قيد يومية', kind: GLTabKind.doc, dirty: true),
-        BrowserTab(id: 3, title: 'لوحة التحكم', kind: GLTabKind.chart),
-        BrowserTab(id: 4, title: 'الفروع', kind: GLTabKind.store),
+        BrowserTab(
+          id: 2, title: 'قيد يومية', icon: glTabIcon(GLTabKind.doc), dirty: true,
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.doc),
+        ),
+        BrowserTab(
+          id: 3, title: 'لوحة التحكم', icon: glTabIcon(GLTabKind.chart),
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.chart),
+        ),
+        BrowserTab(
+          id: 4, title: 'الفروع', icon: glTabIcon(GLTabKind.store),
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.store),
+        ),
       ],
     ),
   );
@@ -322,7 +371,7 @@ Scaffold(
       Expanded(
         child: SuperTabBar(
           controller: _ctrl,
-          pageBuilder: _page,
+          onAddTab: _addTab,     // v2.5 — (+) button visible
           showChrome: false,
           fillContent: true,
           scrollContent: false,
@@ -348,8 +397,14 @@ Scaffold(
 // Perform multiple ops; listeners notified once on completion:
 ctrl.mutate(() {
   ctrl.close(staleId);
-  ctrl.add(title: 'Monthly Report', kind: GLTabKind.doc);
-  ctrl.add(title: 'Q3 Variance',    kind: GLTabKind.chart);
+  ctrl.add(
+    title: 'Monthly Report', icon: glTabIcon(GLTabKind.doc),
+    pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.doc),
+  );
+  ctrl.add(
+    title: 'Q3 Variance', icon: glTabIcon(GLTabKind.chart),
+    pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.chart),
+  );
   ctrl.setDirty(draftId, false);
 });
 ```
@@ -374,4 +429,103 @@ Row(children: [
     child: const Text('Close to right'),
   ),
 ])
+```
+
+---
+
+## 13 · Compact mode — mobile tab switcher (v2.1)
+
+```dart
+class MobileWorkspace extends StatefulWidget {
+  const MobileWorkspace({super.key});
+  @override
+  State<MobileWorkspace> createState() => _MobileWorkspaceState();
+}
+
+class _MobileWorkspaceState extends State<MobileWorkspace> {
+  final _ctrl = SuperTabBarController(
+    tabs: [
+      BrowserTab(
+        id: 1, title: 'Inbox', icon: glTabIcon(GLTabKind.doc),
+        pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.doc),
+      ),
+      BrowserTab(
+        id: 2, title: 'Invoice INV-2043', icon: glTabIcon(GLTabKind.ledger),
+        dirty: true,
+        pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
+      ),
+      BrowserTab(
+        id: 3, title: 'Dashboard', icon: glTabIcon(GLTabKind.chart),
+        pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.chart),
+      ),
+    ],
+    activeId: 1,
+  );
+
+  // Dirty-aware close, reused by the switcher's × button.
+  Future<void> _close(int id) async {
+    final tab = _ctrl.tabById(id);
+    if (tab == null) return;
+    if (tab.dirty) {
+      final r = await showSuperTabDirtyCloseDialog(context, tab);
+      if (r == 'discard') _ctrl.close(id);
+      else if (r == 'save') { _ctrl.setDirty(id, false); _ctrl.close(id); }
+    } else {
+      _ctrl.close(id);
+    }
+  }
+
+  Future<void> _openSwitcher() => showSuperTabSwitcher(
+    context,
+    controller: _ctrl,
+    onCloseTab: _close,
+  );
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    floatingActionButton: FloatingActionButton(
+      onPressed: _openSwitcher,
+      child: const Icon(Icons.grid_view_rounded),
+    ),
+    body: SuperTabBar(
+      controller: _ctrl,
+      compact: true,          // strip hidden
+      closeTabOnBack: true,   // back closes non-dirty active tab
+      showChrome: false,
+      fillContent: true,
+    ),
+  );
+
+  @override
+  void dispose() { _ctrl.dispose(); super.dispose(); }
+}
+```
+
+---
+
+## 14 · Embed the switcher directly (bottom sheet, v2.5)
+
+`showSuperTabSwitcher` is a full-screen modal; mount `SuperTabSwitcher`
+yourself when you want a different presentation.
+
+```dart
+void openSwitcherSheet(BuildContext context, SuperTabBarController ctrl) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => SizedBox(
+      height: MediaQuery.of(ctx).size.height * 0.7,
+      child: SuperTabSwitcher(
+        controller: ctrl,
+        onSelect: (id) {
+          ctrl.select(id);
+          Navigator.of(ctx).pop();
+        },
+        onDismiss: () => Navigator.of(ctx).pop(),
+        // v2.5: no pageBuilder param — thumbnails use each tab's
+        // BrowserTab.pageBuilder.
+      ),
+    ),
+  );
+}
 ```

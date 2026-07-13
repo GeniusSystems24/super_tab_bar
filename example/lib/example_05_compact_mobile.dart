@@ -27,12 +27,36 @@ class CompactMobileExample extends StatefulWidget {
 
 class _CompactMobileExampleState extends State<CompactMobileExample> {
   final _ctrl = SuperTabBarController(
-    tabs: const [
-      BrowserTab(id: 1, title: 'Inbox', kind: GLTabKind.doc),
-      BrowserTab(id: 2, title: 'Invoice INV-2043', kind: GLTabKind.ledger, dirty: true),
-      BrowserTab(id: 3, title: 'Downtown Store', kind: GLTabKind.store),
-      BrowserTab(id: 4, title: 'Sales Dashboard', kind: GLTabKind.chart),
-      BrowserTab(id: 5, title: 'Team Directory', kind: GLTabKind.user),
+    tabs: [
+      BrowserTab(
+          id: 1,
+          title: 'Inbox',
+          icon: glTabIcon(GLTabKind.doc),
+          pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.doc)),
+      BrowserTab(
+          id: 2,
+          title: 'Invoice INV-2043',
+          icon: glTabIcon(GLTabKind.ledger),
+          dirty: true,
+          pageBuilder: (ctx, t) =>
+              GLTabPage(tab: t, kind: GLTabKind.ledger)),
+      BrowserTab(
+          id: 3,
+          title: 'Downtown Store',
+          icon: glTabIcon(GLTabKind.store),
+          pageBuilder: (ctx, t) =>
+              GLTabPage(tab: t, kind: GLTabKind.store)),
+      BrowserTab(
+          id: 4,
+          title: 'Sales Dashboard',
+          icon: glTabIcon(GLTabKind.chart),
+          pageBuilder: (ctx, t) =>
+              GLTabPage(tab: t, kind: GLTabKind.chart)),
+      BrowserTab(
+          id: 5,
+          title: 'Team Directory',
+          icon: glTabIcon(GLTabKind.user),
+          pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.user)),
     ],
     activeId: 1,
   );

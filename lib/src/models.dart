@@ -8,11 +8,27 @@ import 'package:flutter/material.dart';
 
 /// Builds the content shown for a tab — both in the active content surface
 /// and (scaled down) inside the hover preview.
+///
+/// Since v2.5 the builder lives on each [BrowserTab] via [BrowserTab.pageBuilder]
+/// and is **required**. Use the built-in [GLTabPage] when you want the default
+/// demo content:
+///
+/// ```dart
+/// BrowserTab(
+///   id: 1, title: 'Home', icon: Icons.public,
+///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+/// )
+/// ```
 typedef TabPageBuilder = Widget Function(BuildContext context, BrowserTab tab);
 
 // ── Tab-kind enum ──────────────────────────────────────────
-/// The page-type of a workspace tab. Drives the leading icon, mini-page
-/// preview layout and the full content surface.
+/// The page-type of a workspace tab. Used by the built-in [GLTabPage] demo
+/// content and by the [glTabIcon] / [glPreviewMeta] helpers.
+///
+/// Since v2.5 this enum is **no longer a field on [BrowserTab]** — a tab
+/// carries its [BrowserTab.icon] and its [BrowserTab.pageBuilder] directly.
+/// [GLTabKind] is kept for callers who want to use the built-in [GLTabPage]
+/// or the icon/meta helpers inside their own [TabPageBuilder].
 enum GLTabKind { ledger, doc, store, chart, user, globe }
 
 // ── Tab-behavior enum ──────────────────────────────────────
@@ -49,7 +65,8 @@ class BrowserTab {
   const BrowserTab({
     required this.id,
     required this.title,
-    required this.kind,
+    required this.pageBuilder,
+    this.icon,
     this.dirty = false,
     this.pinned = false,
     this.behavior = SuperTabBehavior.normal,
@@ -62,8 +79,10 @@ class BrowserTab {
   /// Display text (truncated with a tooltip at 200 px).
   final String title;
 
-  /// Drives the leading icon and the built-in page content.
-  final GLTabKind kind;
+  /// Leading icon shown in the tab chip. When `null` the chip renders
+  /// without an icon. Use the [glTabIcon] helper to map a [GLTabKind] to
+  /// an [IconData] when you want the legacy icon set.
+  final IconData? icon;
 
   /// Unsaved-changes indicator. Shows an amber dot; closing triggers a
   /// confirmation dialog.
@@ -82,24 +101,41 @@ class BrowserTab {
   /// is activated rather than a new one created.
   final String? uniqueKey;
 
+  /// Builds the page content for this tab — rendered both in the active
+  /// content surface and (scaled down) inside the hover preview and the
+  /// compact-mode tab switcher thumbnail.
+  ///
+  /// **Required since v2.5.** Every tab must carry its own page factory.
+  /// Use the built-in [GLTabPage] when you want the default demo content:
+  ///
+  /// ```dart
+  /// BrowserTab(
+  ///   id: 1, title: 'Home', icon: Icons.public,
+  ///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+  /// )
+  /// ```
+  final TabPageBuilder pageBuilder;
+
   /// Returns a copy with the given fields replaced.
   BrowserTab copyWith({
     int? id,
     String? title,
-    GLTabKind? kind,
+    IconData? icon,
     bool? dirty,
     bool? pinned,
     SuperTabBehavior? behavior,
     String? uniqueKey,
+    TabPageBuilder? pageBuilder,
   }) {
     return BrowserTab(
       id: id ?? this.id,
       title: title ?? this.title,
-      kind: kind ?? this.kind,
+      icon: icon ?? this.icon,
       dirty: dirty ?? this.dirty,
       pinned: pinned ?? this.pinned,
       behavior: behavior ?? this.behavior,
       uniqueKey: uniqueKey ?? this.uniqueKey,
+      pageBuilder: pageBuilder ?? this.pageBuilder,
     );
   }
 
@@ -109,7 +145,7 @@ class BrowserTab {
       (other is BrowserTab &&
           other.id == id &&
           other.title == title &&
-          other.kind == kind &&
+          other.icon == icon &&
           other.dirty == dirty &&
           other.pinned == pinned &&
           other.behavior == behavior &&
@@ -117,16 +153,24 @@ class BrowserTab {
 
   @override
   int get hashCode =>
-      Object.hash(id, title, kind, dirty, pinned, behavior, uniqueKey);
+      Object.hash(id, title, icon, dirty, pinned, behavior, uniqueKey);
 
   @override
   String toString() =>
-      'BrowserTab(id: $id, title: "$title", kind: $kind, '
+      'BrowserTab(id: $id, title: "$title", '
       'dirty: $dirty, pinned: $pinned, behavior: $behavior)';
 }
 
 // ── Helpers ────────────────────────────────────────────────
-/// Material icon for each [GLTabKind].
+/// Material icon for each [GLTabKind]. Use this inside your [TabPageBuilder]
+/// or when constructing a [BrowserTab] to map a kind to its leading icon:
+///
+/// ```dart
+/// BrowserTab(
+///   id: 1, title: 'Ledger', icon: glTabIcon(GLTabKind.ledger),
+///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
+/// )
+/// ```
 IconData glTabIcon(GLTabKind kind) {
   switch (kind) {
     case GLTabKind.ledger:
@@ -144,7 +188,8 @@ IconData glTabIcon(GLTabKind kind) {
   }
 }
 
-/// Type label shown in the hover-preview header.
+/// Type label shown in the hover-preview header. Use inside your
+/// [TabPageBuilder] when you want the legacy per-kind meta caption.
 String glPreviewMeta(GLTabKind kind) {
   switch (kind) {
     case GLTabKind.ledger:
@@ -162,7 +207,8 @@ String glPreviewMeta(GLTabKind kind) {
   }
 }
 
-/// Rotating [GLTabKind]s for the "New Tab" (+) button.
+/// Rotating [GLTabKind]s for the "New Tab" (+) button. Use inside your
+/// [SuperTabBar.onAddTab] handler when you want the legacy cycling behaviour.
 const List<GLTabKind> kNewTabCycle = [
   GLTabKind.globe,
   GLTabKind.user,

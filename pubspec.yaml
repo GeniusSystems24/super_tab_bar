@@ -5,10 +5,11 @@ description: >
   overflow dropdowns, hover previews, state-preserving pages, localization,
   callbacks, accessibility, RTL, dirty-aware back navigation, responsive
   compact mode, draggable mobile thumbnail previews, optional compact FAB,
-  and automatic breakpoint switching. Zero third-party dependencies.
+  and automatic breakpoint switching. Each tab carries its own page builder.
+  Zero third-party dependencies.
 
 
-version: 2.3.1
+version: 2.5.0
 
 homepage: https://github.com/GeniusSystems24/super_tab_bar
 repository: https://github.com/GeniusSystems24/super_tab_bar

@@ -6,6 +6,59 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.5.0] — 2026-07-13
+
+### Changed (breaking)
+
+- **`SuperTabBar.pageBuilder` removed.** Page construction moved to each
+  `BrowserTab` via `BrowserTab.pageBuilder` (required since v2.5). The widget
+  no longer builds pages from a single shared builder — each tab carries its
+  own page factory. `showSuperTabSwitcher` and `SuperTabSwitcher` no longer
+  take a `pageBuilder` parameter either; thumbnails render from each tab's own
+  builder. `GLTabPage` now takes an explicit `kind` parameter.
+
+  ```dart
+  // v2.5
+  BrowserTab(
+    id: 1, title: 'Home', icon: glTabIcon(GLTabKind.globe),
+    pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+  )
+  ```
+
+- **`BrowserTab.kind` removed.** The tab now carries its own `icon`
+  (`IconData?`, optional) and `pageBuilder` (required) directly. `GLTabKind`
+  is kept as a helper enum for callers who want the built-in `GLTabPage`
+  content or the `glTabIcon` / `glPreviewMeta` / `kNewTabCycle` helpers —
+  pass them explicitly inside your `pageBuilder`.
+
+- **`SuperTabBarController.add` — `pageBuilder` now required, `kind` removed,
+  `icon` added.**
+
+  ```dart
+  ctrl.add(
+    title: 'New', icon: glTabIcon(GLTabKind.doc),
+    pageBuilder: (ctx, tab) => MyDocPage(tab: tab),
+  );
+  ```
+
+  The legacy `kNewTabCycle`-driven title/icon cycling for new tabs is removed;
+  use `kNewTabCycle` / `glTabIcon` inside your `onAddTab` handler if you want
+  that behaviour.
+
+- **Add (+) strip button only renders when `onAddTab` is provided.** The widget
+  no longer auto-creates tabs itself, so `onTabAdded` is no longer fired from
+  the strip (+) button (the callback is retained on the constructor for
+  backward compatibility but will not be invoked). Supply `onAddTab` to show
+  the (+) button and create tabs yourself via the controller.
+
+### Fixed
+
+- **`_SuperTabBarState.dispose` setState crash.** `_hideList` could call
+  `setState` during `dispose()`, asserting on a defunct element on recent
+  Flutter versions. A `_disposed` flag now guards that call.
+
+---
+
 ## [2.3.0] — 2026-07-02
 
 ### Added — Built-in compact FAB

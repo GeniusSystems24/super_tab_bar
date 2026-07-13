@@ -32,24 +32,34 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
     _ctrl = SuperTabBarController(
       tabs: [
         // requiredPinned — always visible, cannot be closed/unpinned from UI
-        const BrowserTab(
+        BrowserTab(
           id: 1,
           title: 'Home',
-          kind: GLTabKind.globe,
+          icon: glTabIcon(GLTabKind.globe),
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
+          pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
         ),
         // uniqueNormal — deduplicates on re-open
-        const BrowserTab(
+        BrowserTab(
           id: 2,
           title: 'Settings',
-          kind: GLTabKind.user,
+          icon: glTabIcon(GLTabKind.user),
           behavior: SuperTabBehavior.uniqueNormal,
           uniqueKey: _settingsKey,
+          pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
         ),
         // normal — standard behavior
-        const BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
-        const BrowserTab(id: 4, title: 'Accounts', kind: GLTabKind.ledger),
+        BrowserTab(
+            id: 3,
+            title: 'Dashboard',
+            icon: glTabIcon(GLTabKind.chart),
+            pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
+        BrowserTab(
+            id: 4,
+            title: 'Accounts',
+            icon: glTabIcon(GLTabKind.ledger),
+            pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
       ],
       activeId: 3,
     );
@@ -78,15 +88,20 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
     // add() with uniqueKey will select the existing tab if one exists.
     _ctrl.add(
       title: 'Settings',
-      kind: GLTabKind.user,
+      icon: glTabIcon(GLTabKind.user),
       behavior: SuperTabBehavior.uniqueNormal,
       uniqueKey: _settingsKey,
+      pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
     );
   }
 
   void _addNormalTab() {
     _nextId++;
-    _ctrl.add(title: 'Doc #$_nextId', kind: GLTabKind.doc);
+    _ctrl.add(
+      title: 'Doc #$_nextId',
+      icon: glTabIcon(GLTabKind.doc),
+      pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
+    );
   }
 
   void _markDirty() {
@@ -192,7 +207,9 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
               fillContent: true,
               scrollContent: false,
               showChrome: false,
-              pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
+              // v2.5: + button visible via onAddTab; pageBuilder lives on
+              // each BrowserTab now.
+              onAddTab: _addNormalTab,
               // ── Direct callbacks ─────────────────────────
               onTabSelected: (id) =>
                   _addLog('onTabSelected', 'id=$id'),

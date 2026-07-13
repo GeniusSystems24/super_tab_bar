@@ -40,12 +40,36 @@ class _ThemeRtlOverflowExampleState
   void initState() {
     super.initState();
     _ctrl = SuperTabBarController(
-      tabs: const [
-        BrowserTab(id: 1, title: 'Accounts', kind: GLTabKind.ledger, pinned: true),
-        BrowserTab(id: 2, title: 'Journal Entry', kind: GLTabKind.doc),
-        BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
-        BrowserTab(id: 4, title: 'Team', kind: GLTabKind.user),
-        BrowserTab(id: 5, title: 'Store', kind: GLTabKind.store),
+      tabs: [
+        BrowserTab(
+            id: 1,
+            title: 'Accounts',
+            icon: glTabIcon(GLTabKind.ledger),
+            pinned: true,
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.ledger)),
+        BrowserTab(
+            id: 2,
+            title: 'Journal Entry',
+            icon: glTabIcon(GLTabKind.doc),
+            pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.doc)),
+        BrowserTab(
+            id: 3,
+            title: 'Dashboard',
+            icon: glTabIcon(GLTabKind.chart),
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.chart)),
+        BrowserTab(
+            id: 4,
+            title: 'Team',
+            icon: glTabIcon(GLTabKind.user),
+            pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.user)),
+        BrowserTab(
+            id: 5,
+            title: 'Store',
+            icon: glTabIcon(GLTabKind.store),
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.store)),
       ],
       activeId: 3,
     );
@@ -99,9 +123,11 @@ class _ThemeRtlOverflowExampleState
   void _addTab() {
     if (_ctrl.length >= 20) return;
     final kinds = GLTabKind.values;
+    final kind = kinds[_nextId % kinds.length];
     _ctrl.add(
       title: 'Tab ${_nextId}',
-      kind: kinds[_nextId % kinds.length],
+      icon: glTabIcon(kind),
+      pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: kind),
     );
     _nextId++;
   }
@@ -268,6 +294,8 @@ class _ThemeRtlOverflowExampleState
                   showChrome: _showChrome,
                   fillContent: true,
                   scrollContent: false,
+                  // v2.5: + button only renders when onAddTab is provided.
+                  onAddTab: _addTab,
                   // v2: localizations
                   localizations: _arabic
                       ? SuperTabBarLocalizations.ar

@@ -1,22 +1,38 @@
 ---
 name: super-tab-bar
 description: >
-  How to use the super_tab_bar Flutter package (v2.2) — a browser-style workspace
+  How to use the super_tab_bar Flutter package (v2.5) — a browser-style workspace
   tab strip with pinned/closable/dirty tabs, configurable behavior types
-  (requiredPinned · normal · uniqueNormal), drag-reorder, context menu, overflow
-  dropdown, live mini-page previews, state-preserving pages, localization,
-  direct event callbacks, a mobile compact-mode thumbnail switcher
-  (SuperTabSwitcher), automatic compact breakpoint (allowAutoCompact +
-  compactWidth), dirty-aware back navigation, and accessibility semantics.
-  Use when building or modifying a Flutter multi-tab workspace UI with the
-  `super_tab_bar` package.
+  (requiredPinned · normal · uniqueNormal), per-tab pageBuilder + optional icon,
+  drag-reorder, context menu, overflow dropdown, live mini-page previews,
+  state-preserving pages, localization, direct event callbacks, a mobile
+  compact-mode thumbnail switcher (SuperTabSwitcher), automatic compact
+  breakpoint (allowAutoCompact + compactWidth), dirty-aware back navigation,
+  and accessibility semantics. The Add (+) strip button only renders when
+  onAddTab is provided. Use when building or modifying a Flutter multi-tab
+  workspace UI with the `super_tab_bar` package.
 ---
 
-# super_tab_bar · SuperTabBar — v2.2
+# super_tab_bar · SuperTabBar — v2.5
 
 A browser-style workspace tab strip. Renders the strip **and** the active page
 below it. By default keeps every page's state alive across tab switches via
 `IndexedStack`.
+
+## Breaking changes in v2.5 (migration summary)
+
+1. **`SuperTabBar.pageBuilder` removed.** Each `BrowserTab` carries its own
+   required `pageBuilder` (and an optional `icon`).
+2. **`BrowserTab.kind` removed.** Use `icon` (`IconData?`) + `pageBuilder`
+   directly. `GLTabKind` is kept as a helper enum for the built-in `GLTabPage`
+   and the `glTabIcon` / `glPreviewMeta` / `kNewTabCycle` helpers.
+3. **`GLTabPage` takes an explicit `kind` parameter** —
+   `GLTabPage(tab: tab, kind: GLTabKind.ledger)`.
+4. **`SuperTabBarController.add` — `pageBuilder`required, `kind` removed,
+   `icon` added.**
+5. **`SuperTabBar.onAddTab` controls the (+) button.** When `onAddTab` is
+   `null` the (+) button is not rendered and the widget no longer auto-creates
+   tabs. `onTabAdded` is no longer fired from the (+) button.
 
 ---
 
@@ -40,37 +56,67 @@ MaterialApp(
 // zero-config — private controller, built-in demo tabs:
 const SuperTabBar();
 
-// seed your own tabs:
-SuperTabBar(tabsState: const [
-  BrowserTab(id: 1, title: 'Accounts', kind: GLTabKind.ledger, pinned: true),
-  BrowserTab(id: 2, title: 'Journal',  kind: GLTabKind.doc,    dirty: true),
-  BrowserTab(id: 3, title: 'Dashboard',kind: GLTabKind.chart),
+// seed your own tabs (each tab carries its own pageBuilder + icon, v2.5):
+SuperTabBar(tabsState: [
+  BrowserTab(
+    id: 1, title: 'Accounts',
+    icon: glTabIcon(GLTabKind.ledger), pinned: true,
+    pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
+  ),
+  BrowserTab(
+    id: 2, title: 'Journal', icon: glTabIcon(GLTabKind.doc), dirty: true,
+    pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.doc),
+  ),
+  BrowserTab(
+    id: 3, title: 'Dashboard', icon: glTabIcon(GLTabKind.chart),
+    pageBuilder: (ctx, tab) => MyDashboardPage(tab: tab),
+  ),
 ]);
 
-// external controller + custom pages:
-SuperTabBar(controller: myCtrl, pageBuilder: (ctx, tab) => MyPage(tab: tab));
+// external controller + per-tab pageBuilder (v2.5):
+SuperTabBar(controller: myCtrl, onAddTab: () => myCtrl.add(/* … */));
 ```
 
 Provide `tabsState` **or** `controller` — not both.
 
+> The shared `SuperTabBar.pageBuilder` field is gone. Page construction lives
+> on each `BrowserTab.pageBuilder` (required).
+
 ---
 
-## `BrowserTab` model  *(immutable since v2)*
+## `BrowserTab` model  *(immutable — never mutate fields directly; v2.5)*
 
 ```dart
-const BrowserTab({
-  required int id,              // stable unique identity — never reuse
+BrowserTab({
+  required int id,                  // stable unique identity — never reuse
   required String title,
-  required GLTabKind kind,      // ledger·doc·store·chart·user·globe
-  bool dirty    = false,        // unsaved dot + confirm on close
-  bool pinned   = false,        // icon-only, anchored start edge
+  required TabPageBuilder pageBuilder, // builds the page content (v2.5 — required)
+  IconData? icon,                   // leading chip icon (null = no icon)
+  bool dirty    = false,            // unsaved dot + confirm on close
+  bool pinned   = false,            // icon-only, anchored start edge
   SuperTabBehavior behavior = SuperTabBehavior.normal,
-  String? uniqueKey,            // dedup key for uniqueNormal tabs
+  String? uniqueKey,               // dedup key for uniqueNormal tabs
 });
 ```
 
 `BrowserTab` is `@immutable` — **never mutate fields directly**. Use the
 controller's mutation methods (`setDirty`, `rename`, `setPinned`).
+
+> `pageBuilder` is excluded from `==`/`hashCode` (functions compared by
+> identity), so two tabs with different builders but matching data fields are
+> considered equal.
+
+### Use the helpers for the legacy icon set
+
+```dart
+BrowserTab(
+  id: 1, title: 'Home', icon: glTabIcon(GLTabKind.globe),
+  pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+)
+```
+
+`GLTabKind`, `GLTabPage`, `glTabIcon`, `glPreviewMeta`, `kNewTabCycle` are
+kept as helpers — pass them explicitly inside your `pageBuilder`.
 
 ---
 
@@ -84,15 +130,17 @@ controller's mutation methods (`setDirty`, `rename`, `setPinned`).
 
 ```dart
 // Always-pinned tab — UI hides close / unpin / duplicate:
-const BrowserTab(
-  id: 1, title: 'Home', kind: GLTabKind.globe,
+BrowserTab(
+  id: 1, title: 'Home', icon: glTabIcon(GLTabKind.globe),
   pinned: true, behavior: SuperTabBehavior.requiredPinned,
+  pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
 )
 
 // Deduplicating tab — add() with same key selects existing:
-const BrowserTab(
-  id: 2, title: 'Settings', kind: GLTabKind.user,
+BrowserTab(
+  id: 2, title: 'Settings', icon: glTabIcon(GLTabKind.user),
   behavior: SuperTabBehavior.uniqueNormal, uniqueKey: 'settings',
+  pageBuilder: (ctx, tab) => SettingsPage(tab: tab),
 )
 ```
 
@@ -106,12 +154,13 @@ final ctrl = SuperTabBarController(tabs: [...], activeId: 2);
 // ── Activate ──────────────────────────────────────────────────────
 ctrl.select(id);
 
-// ── Add ───────────────────────────────────────────────────────────
+// ── Add (v2.5 — pageBuilder required, kind removed, icon added) ──
 // Returns the new tab's id.
 // For uniqueNormal + matching uniqueKey: returns existing id, no new tab.
 ctrl.add(
+  pageBuilder: (ctx, tab) => MyPage(tab: tab),   // required
   title: 'New report',
-  kind: GLTabKind.chart,
+  icon: glTabIcon(GLTabKind.chart),              // null = iconless chip
   activate: true,             // default true
   pinned: false,
   at: null,                   // insertion index (null = append)
@@ -127,6 +176,7 @@ ctrl.closeToRight(id);        // guard: ctrl.canCloseRight(id)
 
 // ── Mutate ────────────────────────────────────────────────────────
 ctrl.duplicate(id);           // returns new id; -1 if disallowed by behavior
+                              // duplicate() copies icon + pageBuilder (v2.5)
 ctrl.togglePin(id);           // no-op for requiredPinned
 ctrl.setPinned(id, true);
 ctrl.reorder(fromId, toId);
@@ -160,14 +210,14 @@ SuperTabBarController.read(context);  // non-listening (callbacks/initState)
 
 ---
 
-## `SuperTabBar` widget properties
+## `SuperTabBar` widget properties (v2.5)
 
 ```dart
 SuperTabBar(
   // ── State ──────────────────────────────────────────────────────
   tabsState: [...],          // seed tabs (widget owns controller)
   controller: ctrl,          // external controller — provide one OR tabsState
-  pageBuilder: (ctx, tab) => MyPage(tab: tab), // null → GLTabPage fallback
+  // NOTE: pageBuilder is gone — each BrowserTab carries its own (v2.5).
 
   // ── Shell ───────────────────────────────────────────────────────
   showChrome: true,          // bordered card (false = edge-to-edge)
@@ -181,7 +231,7 @@ SuperTabBar(
   contentPadding: EdgeInsets.all(24),
   contentBackground: null,   // null → theme surface
   lazyPages: false,          // rebuild-on-revisit (disables IndexedStack)
-  onAddTab: null,            // intercept + button (onTabAdded won't fire)
+  onAddTab: null,            // v2.5 · + button only shows when provided
 
   // ── Localizations (v2) ──────────────────────────────────────────
   localizations: SuperTabBarLocalizations.en,  // .ar built-in, or custom
@@ -193,12 +243,12 @@ SuperTabBar(
 
   // ── Direct event callbacks (v2) ─────────────────────────────────
   onTabSelected:    (id)        { },
-  onTabAdded:       (id)        { },
-  onTabClosed:      (id)        { },
-  onTabDuplicated:  (newId)     { },
-  onTabPinChanged:  (id, pin)   { },
-  onTabDirtyChanged:(id, dirty) { }, // fires from save-and-close dialog
-  onTabReordered:   (from, to)  { },
+  onTabAdded:       (id)       { },  // deprecated — not fired by (+) since v2.5
+  onTabClosed:      (id)       { },
+  onTabDuplicated:  (newId)    { },
+  onTabPinChanged:  (id, pin)  { },
+  onTabDirtyChanged:(id, dirty){ }, // fires from save-and-close dialog
+  onTabReordered:   (from, to) { },
 )
 ```
 
@@ -272,8 +322,9 @@ SuperTabBar(
 )
 ```
 
-`pageBuilder` and `onTabClosed` are forwarded to the switcher automatically.
-The FAB sits at the bottom-end corner (RTL-aware).
+`onTabClosed` is forwarded to the switcher automatically; thumbnail content
+comes from each tab's `BrowserTab.pageBuilder` (v2.5). The FAB sits at the
+bottom-end corner (RTL-aware).
 
 ---
 
@@ -320,7 +371,6 @@ SuperTabBar(
 final picked = await showSuperTabSwitcher(
   context,
   controller: ctrl,
-  pageBuilder: (ctx, tab) => MyPage(tab: tab),  // live thumbnail fallback
   onCloseTab: (id) => myDirtyAwareClose(id),    // optional close routing
 );
 // picked == tapped tab id (already selected on ctrl), or null if dismissed.
@@ -330,9 +380,14 @@ Inside the switcher: **tap** a thumbnail to switch · **long-press-drag** one
 onto another to reorder (`ctrl.reorder`) · **close (×)** removes a tab. Embed
 `SuperTabSwitcher` directly for custom presentation (bottom sheet, etc.).
 
-`showSuperTabSwitcher` params: `controller` (required), `pageBuilder`,
-`localizations`, `previewOptions`, `crossAxisCount` (null = responsive),
-`showCloseButtons` (default true), `onCloseTab`.
+> **v2.5.** `showSuperTabSwitcher` and `SuperTabSwitcher` no longer take a
+> `pageBuilder` parameter. Thumbnail content comes from each tab's
+> `BrowserTab.pageBuilder` (the live snapshot fallback); use `glTabIcon` /
+> each tab's `icon` for the blank (non-live) fallback.
+
+`showSuperTabSwitcher` params: `controller` (required), `localizations`,
+`previewOptions`, `crossAxisCount` (null = responsive), `showCloseButtons`
+(default true), `onCloseTab`.
 
 ## Back navigation (v2.1)
 
@@ -392,20 +447,35 @@ v1 names are live `typedef` aliases — existing code compiles unchanged:
 | `BrowserStyleTabBarScope` | `SuperTabBarScope` |
 | `showGLDirtyCloseDialog` | `showSuperTabDirtyCloseDialog` |
 
-**Only breaking change:** direct field mutation on `BrowserTab`
+**v1 → v2 breaking change:** direct field mutation on `BrowserTab`
 (`tab.dirty = true`) no longer compiles. Use `ctrl.setDirty(id, true)`.
+
+**v2.x → v2.5 breaking changes:**
+1. `SuperTabBar.pageBuilder` removed — moved to `BrowserTab.pageBuilder` (required).
+2. `BrowserTab.kind` removed — use `icon` + `pageBuilder` directly.
+3. `SuperTabBarController.add(kind:)` removed; `pageBuilder` required, `icon` added.
+4. The (+) strip button only renders when `SuperTabBar.onAddTab` is provided;
+   the widget no longer auto-creates tabs, and `onTabAdded` is no longer fired
+   from the (+) button.
 
 ---
 
 ## Gotchas
 
 1. **Stable IDs** — Never reuse a tab id after closing.
-2. **`pageBuilder` renders twice** — full surface + scaled hover preview. Keep it pure.
-3. **State-preservation is the default** — use `lazyPages: true` only when pages should reset on revisit.
+2. **`pageBuilder` renders twice** — full surface + scaled hover preview. Keep
+   it pure; the same builder is also used for the compact-mode switcher thumbnail.
+3. **State-preservation is the default** — use `lazyPages: true` only when pages
+   should reset on revisit.
 4. **`of(context)` returns null outside a tab bar** — guard every call.
 5. **Register the theme extension** — one line in `ThemeData.extensions`.
-6. **`onAddTab` suppresses `onTabAdded`** — when set, the widget doesn't know the new id.
-7. **`BrowserTab` is immutable** — use controller methods, never direct field assignment.
+6. **`+` button requires `onAddTab` (v2.5)** — supply the callback to show the
+   button; the widget no longer auto-creates tabs.
+7. **`BrowserTab` is immutable** — use controller methods, never direct field
+   assignment.
+8. **`BrowserTab.pageBuilder` excluded from `==`/`hashCode`** — functions are
+   compared by identity, so two tabs with different builders but matching data
+   fields are considered equal.
 
 ## Reference
 

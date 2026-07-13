@@ -33,6 +33,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'models.dart';
+import 'pages.dart';
 
 class SuperTabBarController extends ChangeNotifier {
   SuperTabBarController({List<BrowserTab>? tabs, int? activeId})
@@ -43,22 +44,43 @@ class SuperTabBarController extends ChangeNotifier {
   }
 
   // ── Default seed tabs ──────────────────────────────────────
+  // Since v2.5 a BrowserTab carries its own icon + pageBuilder (no `kind`
+  // field). The defaults use GLTabPage with the legacy GLTabKind set so the
+  // zero-config demo still renders the rich built-in pages.
   static List<BrowserTab> _defaults() => [
-        const BrowserTab(
+        BrowserTab(
             id: 1,
             title: 'Chart of Accounts',
-            kind: GLTabKind.ledger,
+            icon: glTabIcon(GLTabKind.ledger),
             pinned: true,
-            behavior: SuperTabBehavior.requiredPinned),
-        const BrowserTab(
+            behavior: SuperTabBehavior.requiredPinned,
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.ledger)),
+        BrowserTab(
             id: 2,
             title: 'Opening Journal Entry — JV-2024-0042',
-            kind: GLTabKind.doc,
-            dirty: true),
-        const BrowserTab(id: 3, title: 'Downtown Central Store', kind: GLTabKind.store),
-        const BrowserTab(id: 4, title: 'Dashboard', kind: GLTabKind.chart),
-        const BrowserTab(
-            id: 5, title: 'Trial Balance — FY2024 Q3', kind: GLTabKind.ledger),
+            icon: glTabIcon(GLTabKind.doc),
+            dirty: true,
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.doc)),
+        BrowserTab(
+            id: 3,
+            title: 'Downtown Central Store',
+            icon: glTabIcon(GLTabKind.store),
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.store)),
+        BrowserTab(
+            id: 4,
+            title: 'Dashboard',
+            icon: glTabIcon(GLTabKind.chart),
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.chart)),
+        BrowserTab(
+            id: 5,
+            title: 'Trial Balance — FY2024 Q3',
+            icon: glTabIcon(GLTabKind.ledger),
+            pageBuilder: (ctx, t) =>
+                GLTabPage(tab: t, kind: GLTabKind.ledger)),
       ];
 
   /// Ensures requiredPinned tabs always have pinned: true.
@@ -161,6 +183,12 @@ class SuperTabBarController extends ChangeNotifier {
   /// Adds a tab and (by default) activates it. Returns the id of the
   /// affected tab.
   ///
+  /// [pageBuilder] is **required** since v2.5 — every tab carries its own
+  /// page factory. Pass [icon] to set the leading tab-chip icon (or `null`
+  /// for an iconless chip). The legacy [GLTabKind] cycling fallback for the
+  /// title/icon was removed; use [kNewTabCycle] / [glTabIcon] inside your
+  /// [SuperTabBar.onAddTab] handler if you want that behaviour.
+  ///
   /// For [SuperTabBehavior.uniqueNormal] tabs with a non-null [uniqueKey]:
   /// if a tab with the same key already exists it is activated and its id
   /// returned — no new tab is created.
@@ -168,8 +196,9 @@ class SuperTabBarController extends ChangeNotifier {
   /// [SuperTabBehavior.requiredPinned] tabs are always created with
   /// `pinned: true` regardless of the [pinned] argument.
   int add({
+    required TabPageBuilder pageBuilder,
     String? title,
-    GLTabKind? kind,
+    IconData? icon,
     bool activate = true,
     bool pinned = false,
     int? at,
@@ -189,10 +218,11 @@ class SuperTabBarController extends ChangeNotifier {
     final tab = BrowserTab(
       id: id,
       title: title ?? 'New Tab',
-      kind: kind ?? kNewTabCycle[id % kNewTabCycle.length],
+      icon: icon,
       pinned: behavior == SuperTabBehavior.requiredPinned ? true : pinned,
       behavior: behavior,
       uniqueKey: uniqueKey,
+      pageBuilder: pageBuilder,
     );
 
     if (at != null && at >= 0 && at <= _tabs.length) {

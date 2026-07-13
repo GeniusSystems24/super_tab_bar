@@ -10,7 +10,8 @@
 // SuperTabBarThemeData     — ThemeExtension (alias: BrowserStyleTabBarThemeData)
 //
 // ── Models ────────────────────────────────────────────────────────
-// BrowserTab               — immutable tab data model
+// BrowserTab               — immutable tab data model (carries its own
+//                            pageBuilder since v2.5)
 // SuperTabBehavior         — requiredPinned · normal · uniqueNormal
 // GLTabKind                — ledger · doc · store · chart · user · globe
 // TabPageBuilder           — Widget Function(BuildContext, BrowserTab)
@@ -42,6 +43,11 @@
 // The tab-navigation keyboard shortcuts and the `horizontalStep` /
 // `arrowGoesInto` helpers were removed. Compact mode replaces keyboard
 // switching on mobile; see SuperTabSwitcher.
+//
+// ── Changed in v2.5 ───────────────────────────────────────────────
+// `SuperTabBar.pageBuilder` was removed — page construction now lives on
+// each `BrowserTab` via `BrowserTab.pageBuilder`. The strip's Add (+)
+// button is only shown when `SuperTabBar.onAddTab` is provided.
 
 export 'src/models.dart';
 export 'src/localizations.dart';

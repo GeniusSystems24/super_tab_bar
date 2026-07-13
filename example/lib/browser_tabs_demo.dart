@@ -31,11 +31,33 @@ class _BrowserTabsDemoState extends State<BrowserTabsDemo> {
   // One external controller so the live demo + readouts stay in sync.
   late final BrowserStyleTabBarController _ctrl = BrowserStyleTabBarController(
     tabs: [
-      BrowserTab(id: 1, title: 'Chart of Accounts', kind: GLTabKind.ledger, pinned: true),
-      BrowserTab(id: 2, title: 'Journal Entry — JV-0042', kind: GLTabKind.doc, dirty: true),
-      BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
-      BrowserTab(id: 4, title: 'Trial Balance — Q3', kind: GLTabKind.ledger),
-      BrowserTab(id: 5, title: 'Customers', kind: GLTabKind.user),
+      BrowserTab(
+          id: 1,
+          title: 'Chart of Accounts',
+          icon: glTabIcon(GLTabKind.ledger),
+          pinned: true,
+          pageBuilder: _pageBuilder),
+      BrowserTab(
+          id: 2,
+          title: 'Journal Entry — JV-0042',
+          icon: glTabIcon(GLTabKind.doc),
+          dirty: true,
+          pageBuilder: _pageBuilder),
+      BrowserTab(
+          id: 3,
+          title: 'Dashboard',
+          icon: glTabIcon(GLTabKind.chart),
+          pageBuilder: _pageBuilder),
+      BrowserTab(
+          id: 4,
+          title: 'Trial Balance — Q3',
+          icon: glTabIcon(GLTabKind.ledger),
+          pageBuilder: _pageBuilder),
+      BrowserTab(
+          id: 5,
+          title: 'Customers',
+          icon: glTabIcon(GLTabKind.user),
+          pageBuilder: _pageBuilder),
     ],
     activeId: 1,
   );
@@ -93,7 +115,7 @@ class _BrowserTabsDemoState extends State<BrowserTabsDemo> {
                   height: 520,
                   child: BrowserStyleTabBar(
                     controller: _ctrl,
-                    pageBuilder: _pageBuilder,
+                    
                     lazyPages: _lazy,
                     fillContent: true,
                     scrollContent: false,
@@ -163,7 +185,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                   color: BrowserStyleTabBarThemeData.accent.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
                 ),
-                child: Icon(_iconFor(widget.tab.kind), size: 19, color: BrowserStyleTabBarThemeData.accent),
+                child: Icon(widget.tab.icon, size: 19, color: BrowserStyleTabBarThemeData.accent),
               ),
               const SizedBox(width: 12),
               Expanded(

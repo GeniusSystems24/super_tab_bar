@@ -16,7 +16,7 @@
 // The thumbnails reuse the live page snapshots the controller already
 // captures for hover previews. Tabs without a fresh snapshot fall back to a
 // scaled live render of their page (or a plain icon card when previews are
-// disabled).
+// disabled). Page content comes from each tab's [BrowserTab.pageBuilder].
 //
 //   File: lib/src/compact.dart
 // ============================================================
@@ -50,15 +50,13 @@ import 'pages.dart';
 /// )
 /// ```
 ///
-/// Pass [pageBuilder] so thumbnails without a cached snapshot can render a
-/// live fallback that matches your real pages. Pass [onCloseTab] to route the
-/// per-thumbnail close button through your own dirty-confirmation logic; when
-/// omitted, close falls back to [SuperTabBarController.close] for tabs the UI
-/// permits closing.
+/// Thumbnail content comes from each tab's [BrowserTab.pageBuilder]. Pass
+/// [onCloseTab] to route the per-thumbnail close button through your own
+/// dirty-confirmation logic; when omitted, close falls back to
+/// [SuperTabBarController.close] for tabs the UI permits closing.
 Future<int?> showSuperTabSwitcher(
   BuildContext context, {
   required SuperTabBarController controller,
-  TabPageBuilder? pageBuilder,
   SuperTabBarLocalizations? localizations,
   SuperTabBarPreviewOptions? previewOptions,
   int? crossAxisCount,
@@ -75,7 +73,6 @@ Future<int?> showSuperTabSwitcher(
       reverseTransitionDuration: SuperTabBarThemeData.durBase,
       pageBuilder: (ctx, anim, _) => SuperTabSwitcher(
         controller: controller,
-        pageBuilder: pageBuilder,
         localizations: loc,
         previewOptions: prev,
         crossAxisCount: crossAxisCount,
@@ -119,10 +116,6 @@ class SuperTabSwitcher extends StatefulWidget {
   /// notifies.
   final SuperTabBarController controller;
 
-  /// Builds the page content used for the live thumbnail fallback (a tab with
-  /// no cached snapshot). Falls back to the built-in [GLTabPage] when null.
-  final TabPageBuilder? pageBuilder;
-
   /// User-facing strings. Defaults to [SuperTabBarLocalizations.en].
   final SuperTabBarLocalizations? localizations;
 
@@ -152,7 +145,6 @@ class SuperTabSwitcher extends StatefulWidget {
   const SuperTabSwitcher({
     super.key,
     required this.controller,
-    this.pageBuilder,
     this.localizations,
     this.previewOptions,
     this.crossAxisCount,
@@ -333,7 +325,6 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
       isOver: isOver,
       dragging: _dragId == tab.id,
       snapshot: widget.controller.snapshot(tab.id),
-      pageBuilder: widget.pageBuilder,
       scope: _scope,
       fallback: _fallback,
       localizations: _loc,
@@ -377,7 +368,6 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
                 dragging: false,
                 elevated: true,
                 snapshot: widget.controller.snapshot(tab.id),
-                pageBuilder: widget.pageBuilder,
                 scope: _scope,
                 fallback: _fallback,
                 localizations: _loc,
@@ -406,7 +396,6 @@ class _TabThumbnail extends StatelessWidget {
   final bool dragging;
   final bool elevated;
   final ui.Image? snapshot;
-  final TabPageBuilder? pageBuilder;
   final Widget Function(Widget) scope;
   final PreviewFallback fallback;
   final SuperTabBarLocalizations localizations;
@@ -420,7 +409,6 @@ class _TabThumbnail extends StatelessWidget {
     required this.isOver,
     required this.dragging,
     required this.snapshot,
-    required this.pageBuilder,
     required this.scope,
     required this.fallback,
     required this.localizations,
@@ -479,7 +467,6 @@ class _TabThumbnail extends StatelessWidget {
                         tab: tab,
                         surface: s.surface,
                         snapshot: snapshot,
-                        pageBuilder: pageBuilder,
                         scope: scope,
                         fallback: fallback,
                       ),
@@ -528,12 +515,14 @@ class _TabThumbnail extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(glTabIcon(tab.kind),
-                        size: 15,
-                        color: active
-                            ? SuperTabBarThemeData.accent
-                            : s.fg3),
-                    const SizedBox(width: 8),
+                    if (tab.icon != null) ...[
+                      Icon(tab.icon,
+                          size: 15,
+                          color: active
+                              ? SuperTabBarThemeData.accent
+                              : s.fg3),
+                      const SizedBox(width: 8),
+                    ],
                     Expanded(
                       child: Text(
                         tab.title,
@@ -579,7 +568,6 @@ class _PreviewArea extends StatelessWidget {
   final BrowserTab tab;
   final Color surface;
   final ui.Image? snapshot;
-  final TabPageBuilder? pageBuilder;
   final Widget Function(Widget) scope;
   final PreviewFallback fallback;
 
@@ -587,7 +575,6 @@ class _PreviewArea extends StatelessWidget {
     required this.tab,
     required this.surface,
     required this.snapshot,
-    required this.pageBuilder,
     required this.scope,
     required this.fallback,
   });
@@ -628,7 +615,7 @@ class _PreviewArea extends StatelessWidget {
           width: designW,
           color: surface,
           padding: const EdgeInsets.all(20),
-          child: pageBuilder?.call(ctx, tab) ?? GLTabPage(tab: tab),
+          child: tab.pageBuilder.call(ctx, tab),
         );
         page = scope(page);
         return OverflowBox(
@@ -653,7 +640,9 @@ class _PreviewArea extends StatelessWidget {
   Widget _blank(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     return Center(
-      child: Icon(glTabIcon(tab.kind), size: 34, color: s.fg4),
+      child: tab.icon != null
+          ? Icon(tab.icon, size: 34, color: s.fg4)
+          : const SizedBox.shrink(),
     );
   }
 }

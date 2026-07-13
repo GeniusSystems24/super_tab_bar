@@ -30,20 +30,27 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
   void initState() {
     super.initState();
     _tabs = SuperTabBarController(
-      tabs: const [
+      tabs: [
         // requiredPinned — always pinned; close / unpin / duplicate
         // are hidden in the UI. Programmatic close() still works.
         BrowserTab(
             id: 1,
             title: 'Chart of Accounts',
-            kind: GLTabKind.ledger,
+            icon: glTabIcon(GLTabKind.ledger),
             pinned: true,
-            behavior: SuperTabBehavior.requiredPinned),
+            behavior: SuperTabBehavior.requiredPinned,
+            pageBuilder: (ctx, tab) => _CoAPage(tab: tab)),
+        // Journal Entry — built via _buildPage in the pageBuilder below.
         BrowserTab(
             id: 2,
             title: 'New Journal Entry',
-            kind: GLTabKind.doc),
-        BrowserTab(id: 3, title: 'Dashboard', kind: GLTabKind.chart),
+            icon: glTabIcon(GLTabKind.doc),
+            pageBuilder: _buildPage),
+        BrowserTab(
+            id: 3,
+            title: 'Dashboard',
+            icon: glTabIcon(GLTabKind.chart),
+            pageBuilder: _buildPage),
       ],
       activeId: 1,
     );
@@ -64,7 +71,8 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
     if (kind != null) {
       _tabs.add(
         title: _labelFor(kind),
-        kind: kind,
+        icon: glTabIcon(kind),
+        pageBuilder: _buildPage,
       );
     }
   }
@@ -176,7 +184,6 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
           Expanded(
             child: SuperTabBar(
               controller: _tabs,
-              pageBuilder: _buildPage,
               showChrome: false,
               fillContent: true,
               scrollContent: false,
@@ -195,7 +202,18 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
   }
 
   Widget _buildPage(BuildContext context, BrowserTab tab) {
-    switch (tab.kind) {
+    // Route on the tab's icon (we set it via glTabIcon(kind) at construction
+    // time, so matching the icon recovers the original kind).
+    final iconFor = {
+      glTabIcon(GLTabKind.ledger): GLTabKind.ledger,
+      glTabIcon(GLTabKind.doc): GLTabKind.doc,
+      glTabIcon(GLTabKind.store): GLTabKind.store,
+      glTabIcon(GLTabKind.chart): GLTabKind.chart,
+      glTabIcon(GLTabKind.user): GLTabKind.user,
+      glTabIcon(GLTabKind.globe): GLTabKind.globe,
+    };
+    final kind = iconFor[tab.icon];
+    switch (kind) {
       case GLTabKind.ledger:
         // Chart of Accounts list — rows open new ledger tabs via of(context)
         return _CoAPage(tab: tab);
@@ -290,7 +308,9 @@ class _CoAPage extends StatelessWidget {
                       //   inside page content using the scope accessor.
                       SuperTabBarController.of(ctx)?.add(
                         title: '${a.$2} — Ledger',
-                        kind: GLTabKind.ledger,
+                        icon: glTabIcon(GLTabKind.ledger),
+                        pageBuilder: (c, t) =>
+                            GLTabPage(tab: t, kind: GLTabKind.ledger),
                       );
                     },
                     child: const Text('Open ledger'),
@@ -422,7 +442,7 @@ class _PlaceholderPage extends StatelessWidget {
     final s = SuperTabBarThemeData.of(context);
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(glTabIcon(tab.kind),
+        Icon(tab.icon ?? Icons.tab_rounded,
             size: 40, color: SuperTabBarThemeData.accent),
         const SizedBox(height: 12),
         Text(tab.title,
