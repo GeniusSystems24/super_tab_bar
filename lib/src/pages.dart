@@ -511,7 +511,7 @@ class _PageStore extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [const HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(), const HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor()],
+              colors: [HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(), HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor()],
             ),
           ),
           child: Stack(
@@ -535,7 +535,7 @@ class _PageStore extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        const Row(children: [
+        Row(children: const [
           _Stat(label: "Today's sales", value: 'SAR 18,420', delta: '6.2% vs avg', up: true),
           SizedBox(width: 12),
           _Stat(label: 'Transactions', value: '142', delta: '12 in last hour', up: true),
@@ -638,7 +638,7 @@ class _PageDashboard extends StatelessWidget {
           actions: const [_Btn('Last 7 months ▾'), _Btn('Export report', primary: true)],
         ),
         const SizedBox(height: 20),
-        const Row(children: [
+        Row(children: const [
           _Stat(label: 'Revenue MTD', value: 'SAR 512,660', delta: '8.4%', up: true),
           SizedBox(width: 12),
           _Stat(label: 'Expenses MTD', value: 'SAR 329,410', delta: '3.1%', up: false),
@@ -855,35 +855,9 @@ class _PageGeneric extends StatelessWidget {
 }
 
 /// Full-size page for a tab. Fluid width — fills its container.
-///
-/// Since v2.5 [BrowserTab] no longer carries a `kind` field, so [GLTabPage]
-/// takes the [kind] explicitly. Use it inside your [TabPageBuilder]:
-///
-/// ```dart
-/// BrowserTab(
-///   id: 1, title: 'Ledger', icon: glTabIcon(GLTabKind.ledger),
-///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
-/// )
-/// ```
 class GLTabPage extends StatelessWidget {
   final BrowserTab tab;
-  final GLTabKind kind;
-  const GLTabPage({super.key, required this.tab, required this.kind});
+  const GLTabPage({super.key, required this.tab});
   @override
-  Widget build(BuildContext context) {
-    switch (kind) {
-      case GLTabKind.ledger:
-        return _PageLedger(tab);
-      case GLTabKind.doc:
-        return _PageDoc(tab);
-      case GLTabKind.store:
-        return _PageStore(tab);
-      case GLTabKind.chart:
-        return _PageDashboard(tab);
-      case GLTabKind.user:
-        return _PagePeople(tab);
-      case GLTabKind.globe:
-        return _PageGeneric(tab);
-    }
-  }
+  Widget build(BuildContext context) => _PageGeneric(tab);
 }

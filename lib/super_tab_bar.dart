@@ -10,11 +10,13 @@
 // SuperTabBarThemeData     — ThemeExtension (alias: BrowserStyleTabBarThemeData)
 //
 // ── Models ────────────────────────────────────────────────────────
-// BrowserTab               — immutable tab data model (carries its own
-//                            pageBuilder since v2.5)
+// BrowserTab               — immutable tab data model
+//   .leading               — optional Widget before the title (replaces default icon)
+//   .trailing              — optional Widget after the title, before close indicator
+//   .pageBuilder           — required TabPageBuilder (v2.5)
+// TabPageBuilder           — Widget Function(BuildContext context, BrowserTab tab)
 // SuperTabBehavior         — requiredPinned · normal · uniqueNormal
-// GLTabKind                — ledger · doc · store · chart · user · globe
-// TabPageBuilder           — Widget Function(BuildContext, BrowserTab)
+// GLTabKind                — enum kept for helpers (not stored on BrowserTab)
 // glTabIcon · glPreviewMeta · kNewTabCycle
 //
 // ── Localizations ────────────────────────────────────────────────
@@ -44,10 +46,9 @@
 // `arrowGoesInto` helpers were removed. Compact mode replaces keyboard
 // switching on mobile; see SuperTabSwitcher.
 //
-// ── Changed in v2.5 ───────────────────────────────────────────────
-// `SuperTabBar.pageBuilder` was removed — page construction now lives on
-// each `BrowserTab` via `BrowserTab.pageBuilder`. The strip's Add (+)
-// button is only shown when `SuperTabBar.onAddTab` is provided.
+// ── Removed in v2.5 ───────────────────────────────────────────────
+// BrowserTab.kind          — removed; store kind in the pageBuilder closure.
+// SuperTabBar.pageBuilder  — removed; every tab supplies its own pageBuilder.
 
 export 'src/models.dart';
 export 'src/localizations.dart';

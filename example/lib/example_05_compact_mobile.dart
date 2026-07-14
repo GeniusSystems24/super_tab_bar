@@ -1,4 +1,4 @@
-// super_tab_bar · Example 05 — Compact mode (mobile tab switcher)
+// super_tab_bar · Example 05 — Compact mode (mobile tab switcher) (v2.5)
 // ─────────────────────────────────────────────────────────────────
 // Goal: show the phone-friendly compact workflow added in v2.1.
 //
@@ -28,35 +28,17 @@ class CompactMobileExample extends StatefulWidget {
 class _CompactMobileExampleState extends State<CompactMobileExample> {
   final _ctrl = SuperTabBarController(
     tabs: [
-      BrowserTab(
-          id: 1,
-          title: 'Inbox',
-          icon: glTabIcon(GLTabKind.doc),
-          pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.doc)),
-      BrowserTab(
-          id: 2,
-          title: 'Invoice INV-2043',
-          icon: glTabIcon(GLTabKind.ledger),
-          dirty: true,
-          pageBuilder: (ctx, t) =>
-              GLTabPage(tab: t, kind: GLTabKind.ledger)),
-      BrowserTab(
-          id: 3,
-          title: 'Downtown Store',
-          icon: glTabIcon(GLTabKind.store),
-          pageBuilder: (ctx, t) =>
-              GLTabPage(tab: t, kind: GLTabKind.store)),
-      BrowserTab(
-          id: 4,
-          title: 'Sales Dashboard',
-          icon: glTabIcon(GLTabKind.chart),
-          pageBuilder: (ctx, t) =>
-              GLTabPage(tab: t, kind: GLTabKind.chart)),
-      BrowserTab(
-          id: 5,
-          title: 'Team Directory',
-          icon: glTabIcon(GLTabKind.user),
-          pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.user)),
+      // v2.5: per-tab pageBuilder; falls back to GLTabPage when null.
+      BrowserTab(id: 1, title: 'Inbox',
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+      BrowserTab(id: 2, title: 'Invoice INV-2043', dirty: true,
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+      BrowserTab(id: 3, title: 'Downtown Store',
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+      BrowserTab(id: 4, title: 'Sales Dashboard',
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+      BrowserTab(id: 5, title: 'Team Directory',
+          pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
     ],
     activeId: 1,
   );

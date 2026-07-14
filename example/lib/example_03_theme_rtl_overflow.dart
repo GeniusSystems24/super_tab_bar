@@ -1,4 +1,4 @@
-// super_tab_bar · Example 03 — Custom theme + RTL + overflow + previews + l10n
+// super_tab_bar · Example 03 — Custom theme + RTL + overflow + previews + l10n (v2.5)
 // ─────────────────────────────────────────────────────────────────
 // Goal: demonstrate v2 configuration surface:
 //
@@ -41,35 +41,16 @@ class _ThemeRtlOverflowExampleState
     super.initState();
     _ctrl = SuperTabBarController(
       tabs: [
-        BrowserTab(
-            id: 1,
-            title: 'Accounts',
-            icon: glTabIcon(GLTabKind.ledger),
-            pinned: true,
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.ledger)),
-        BrowserTab(
-            id: 2,
-            title: 'Journal Entry',
-            icon: glTabIcon(GLTabKind.doc),
-            pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.doc)),
-        BrowserTab(
-            id: 3,
-            title: 'Dashboard',
-            icon: glTabIcon(GLTabKind.chart),
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.chart)),
-        BrowserTab(
-            id: 4,
-            title: 'Team',
-            icon: glTabIcon(GLTabKind.user),
-            pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: GLTabKind.user)),
-        BrowserTab(
-            id: 5,
-            title: 'Store',
-            icon: glTabIcon(GLTabKind.store),
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.store)),
+        BrowserTab(id: 1, title: 'Accounts', pinned: true,
+            pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+        BrowserTab(id: 2, title: 'Journal Entry',
+            pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+        BrowserTab(id: 3, title: 'Dashboard',
+            pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+        BrowserTab(id: 4, title: 'Team',
+            pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
+        BrowserTab(id: 5, title: 'Store',
+            pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
       ],
       activeId: 3,
     );
@@ -122,12 +103,10 @@ class _ThemeRtlOverflowExampleState
 
   void _addTab() {
     if (_ctrl.length >= 20) return;
-    final kinds = GLTabKind.values;
-    final kind = kinds[_nextId % kinds.length];
+    final title = 'Tab $_nextId';
     _ctrl.add(
-      title: 'Tab ${_nextId}',
-      icon: glTabIcon(kind),
-      pageBuilder: (ctx, t) => GLTabPage(tab: t, kind: kind),
+      title: title,
+      pageBuilder: (ctx, tab) => GLTabPage(tab: tab),
     );
     _nextId++;
   }
@@ -294,13 +273,13 @@ class _ThemeRtlOverflowExampleState
                   showChrome: _showChrome,
                   fillContent: true,
                   scrollContent: false,
-                  // v2.5: + button only renders when onAddTab is provided.
-                  onAddTab: _addTab,
                   // v2: localizations
                   localizations: _arabic
                       ? SuperTabBarLocalizations.ar
                       : SuperTabBarLocalizations.en,
                   // v2: preview options
+                  // v2.5: show + button by wiring onAddTab.
+                  onAddTab: _addTab,
                   previewOptions: !_previewEnabled
                       ? SuperTabBarPreviewOptions.disabled
                       : _previewInstant

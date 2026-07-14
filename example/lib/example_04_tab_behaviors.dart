@@ -1,4 +1,4 @@
-// super_tab_bar · Example 04 — Tab behavior types + event callbacks
+// super_tab_bar · Example 04 — Tab behavior types + event callbacks (v2.5)
 // ─────────────────────────────────────────────────────────────────
 // Demonstrates the three [SuperTabBehavior] variants introduced in v2:
 //
@@ -35,7 +35,6 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
         BrowserTab(
           id: 1,
           title: 'Home',
-          icon: glTabIcon(GLTabKind.globe),
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
@@ -44,21 +43,15 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
         BrowserTab(
           id: 2,
           title: 'Settings',
-          icon: glTabIcon(GLTabKind.user),
           behavior: SuperTabBehavior.uniqueNormal,
           uniqueKey: _settingsKey,
+          leading: const Icon(Icons.settings_outlined, size: 14),
           pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
         ),
         // normal — standard behavior
-        BrowserTab(
-            id: 3,
-            title: 'Dashboard',
-            icon: glTabIcon(GLTabKind.chart),
+        BrowserTab(id: 3, title: 'Dashboard',
             pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
-        BrowserTab(
-            id: 4,
-            title: 'Accounts',
-            icon: glTabIcon(GLTabKind.ledger),
+        BrowserTab(id: 4, title: 'Accounts',
             pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
       ],
       activeId: 3,
@@ -88,9 +81,9 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
     // add() with uniqueKey will select the existing tab if one exists.
     _ctrl.add(
       title: 'Settings',
-      icon: glTabIcon(GLTabKind.user),
       behavior: SuperTabBehavior.uniqueNormal,
       uniqueKey: _settingsKey,
+      leading: const Icon(Icons.settings_outlined, size: 14),
       pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
     );
   }
@@ -99,7 +92,6 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
     _nextId++;
     _ctrl.add(
       title: 'Doc #$_nextId',
-      icon: glTabIcon(GLTabKind.doc),
       pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
     );
   }
@@ -207,8 +199,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
               fillContent: true,
               scrollContent: false,
               showChrome: false,
-              // v2.5: + button visible via onAddTab; pageBuilder lives on
-              // each BrowserTab now.
+              // v2.5: the + button is only shown when onAddTab is non-null.
               onAddTab: _addNormalTab,
               // ── Direct callbacks ─────────────────────────
               onTabSelected: (id) =>

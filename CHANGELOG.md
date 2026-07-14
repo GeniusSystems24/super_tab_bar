@@ -6,6 +6,96 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.6.0] — 2026-07-13
+
+### Breaking changes
+
+- **`BrowserTab.kind` removed.** The `kind` field no longer exists on
+  `BrowserTab`. If your code referenced `tab.kind`, capture kind in your
+  `pageBuilder` closure instead:
+
+  ```dart
+  // ── before (v2.3) ────────────────────────────────────────────────
+  BrowserTab(id: 1, title: 'Accounts', kind: GLTabKind.ledger)
+  // ... SuperTabBar(pageBuilder: (ctx, tab) => page(tab.kind))
+
+  // ── after (v2.5) ─────────────────────────────────────────────────
+  BrowserTab(
+    id: 1, title: 'Accounts',
+    pageBuilder: (ctx, tab) => const AccountsPage(),
+  )
+  ```
+
+- **`SuperTabBar.pageBuilder` removed.** The shared `pageBuilder`
+  parameter no longer exists on `SuperTabBar`. Each `BrowserTab` must
+  supply its own `pageBuilder` (see below).
+
+### Added — Required per-tab `pageBuilder`
+
+- **`BrowserTab.pageBuilder`** is now a **required** field of type
+  `TabPageBuilder` (`Widget Function(BuildContext context, BrowserTab tab)`).
+  Every tab must declare its own builder:
+
+  ```dart
+  SuperTabBarController(tabs: [
+    BrowserTab(
+      id: 1, title: 'Accounts',
+      pageBuilder: (ctx, tab) => const AccountsPage(),
+    ),
+    BrowserTab(
+      id: 2, title: 'Journal — Draft', dirty: true,
+      pageBuilder: (ctx, tab) => JournalPage(tabId: tab.id),
+    ),
+  ])
+  ```
+
+  The builder receives the **live `BrowserTab`** from the controller at
+  build time (reflecting current `dirty` / `title` state) — no need to
+  close over a stale snapshot.
+
+- **`SuperTabBarController.add()` gains a required `pageBuilder`
+  parameter** — dynamically created tabs supply their page builder at
+  creation time:
+
+  ```dart
+  ctrl.add(
+    title: 'Report',
+    pageBuilder: (ctx, tab) => const ReportPage(),
+  );
+  ```
+
+- **`SuperTabBarController.setPageBuilder(id, builder)`** — update a
+  tab's `pageBuilder` after `add()` returns (useful when the tab's
+  id is only known after creation):
+
+  ```dart
+  final id = ctrl.add(title: 'Report',
+      pageBuilder: (ctx, tab) => const SizedBox()); // placeholder
+  ctrl.setPageBuilder(id, (ctx, tab) => ReportPage(tabId: id));
+  ```
+
+### Changed — Action button visibility
+
+- **The Add (`+`) button is only shown when `onAddTab` is non-null.**
+  Supply the callback to display it:
+
+  ```dart
+  SuperTabBar(
+    controller: ctrl,
+    onAddTab: () => ctrl.add(
+      title: 'New tab',
+      pageBuilder: (ctx, tab) => const MyPage(),
+    ),
+  )
+  ```
+
+### Notes
+
+- `BrowserTab.pageBuilder` is excluded from `operator ==` and `hashCode`.
+- `GLTabKind` enum and its helpers (`glTabIcon`, `glPreviewMeta`) are
+  kept for callers that want to use them in their own page builders.
+- `kNewTabCycle` is kept for convenience.
+
 ## [2.5.0] — 2026-07-13
 
 ### Changed (breaking)
@@ -85,8 +175,6 @@ SuperTabBar(
   are forwarded automatically to the switcher it opens.
 
 ---
-
-
 
 ### Added — Automatic compact breakpoint
 
@@ -233,6 +321,7 @@ BrowserTab(
   matching `uniqueKey` selects the existing tab instead of creating a copy.
 
 New controller helpers:
+
 - `canCloseFromUi(id)`, `canDuplicateFromUi(id)`, `canTogglePinFromUi(id)`
 - `forceClose(id)` — explicit alias for `close(id)` to make programmatic
   removal of required tabs clear at the call site.
@@ -321,6 +410,7 @@ behavior types with an event-log panel showing every callback in real time.
 ### Added — Tests
 
 `test/super_tab_bar_test.dart` covers:
+
 - `BrowserTab` immutability and value equality.
 - `requiredPinned` UI guards and programmatic close.
 - `uniqueNormal` deduplication (same / different / null key).

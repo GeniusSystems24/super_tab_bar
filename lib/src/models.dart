@@ -3,31 +3,25 @@
 //   File: lib/src/models.dart
 // ============================================================
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-/// Builds the content shown for a tab — both in the active content surface
-/// and (scaled down) inside the hover preview.
+/// Page builder type for [BrowserTab.pageBuilder].
 ///
-/// Since v2.5 the builder lives on each [BrowserTab] via [BrowserTab.pageBuilder]
-/// and is **required**. Use the built-in [GLTabPage] when you want the default
-/// demo content:
-///
+/// Called at build time with the current [BuildContext] and the live
+/// [BrowserTab] (as read from the controller, reflecting current
+/// dirty / title state):
 /// ```dart
 /// BrowserTab(
-///   id: 1, title: 'Home', icon: Icons.public,
-///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+///   id: 1, title: 'Home',
+///   pageBuilder: (ctx, tab) => HomePage(title: tab.title),
 /// )
 /// ```
 typedef TabPageBuilder = Widget Function(BuildContext context, BrowserTab tab);
 
 // ── Tab-kind enum ──────────────────────────────────────────
-/// The page-type of a workspace tab. Used by the built-in [GLTabPage] demo
-/// content and by the [glTabIcon] / [glPreviewMeta] helpers.
-///
-/// Since v2.5 this enum is **no longer a field on [BrowserTab]** — a tab
-/// carries its [BrowserTab.icon] and its [BrowserTab.pageBuilder] directly.
-/// [GLTabKind] is kept for callers who want to use the built-in [GLTabPage]
-/// or the icon/meta helpers inside their own [TabPageBuilder].
+/// The page-type of a workspace tab. Drives the leading icon, mini-page
+/// preview layout and the full content surface.
 enum GLTabKind { ledger, doc, store, chart, user, globe }
 
 // ── Tab-behavior enum ──────────────────────────────────────
@@ -61,15 +55,16 @@ enum SuperTabBehavior {
 /// [SuperTabBarController] which produces new instances via [copyWith].
 @immutable
 class BrowserTab {
-  const BrowserTab({
+  BrowserTab({
     required this.id,
     required this.title,
-    required this.pageBuilder,
-    this.icon,
     this.dirty = false,
     this.pinned = false,
     this.behavior = SuperTabBehavior.normal,
     this.uniqueKey,
+    this.leading,
+    this.trailing,
+    required this.pageBuilder,
   });
 
   /// Stable, unique identity. Never reuse an id after a tab is closed.
@@ -77,11 +72,6 @@ class BrowserTab {
 
   /// Display text (truncated with a tooltip at 200 px).
   final String title;
-
-  /// Leading icon shown in the tab chip. When `null` the chip renders
-  /// without an icon. Use the [glTabIcon] helper to map a [GLTabKind] to
-  /// an [IconData] when you want the legacy icon set.
-  final IconData? icon;
 
   /// Unsaved-changes indicator. Shows an amber dot; closing triggers a
   /// confirmation dialog.
@@ -100,40 +90,81 @@ class BrowserTab {
   /// is activated rather than a new one created.
   final String? uniqueKey;
 
-  /// Builds the page content for this tab — rendered both in the active
-  /// content surface and (scaled down) inside the hover preview and the
-  /// compact-mode tab switcher thumbnail.
+  /// Optional widget shown before the tab title in the tab chip.
   ///
-  /// **Required since v2.5.** Every tab must carry its own page factory.
-  /// Use the built-in [GLTabPage] when you want the default demo content:
+  /// When null the strip renders a default tab outline icon. Supply any
+  /// widget — an [Icon], an [Image], a colored [Container] — to override it:
   ///
   /// ```dart
   /// BrowserTab(
-  ///   id: 1, title: 'Home', icon: Icons.public,
-  ///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.globe),
+  ///   id: 1, title: 'Accounts',
+  ///   leading: const Icon(Icons.account_balance_outlined, size: 14),
+  ///   pageBuilder: (ctx, tab) => const AccountsPage(),
   /// )
   /// ```
+  ///
+  /// In pinned (icon-only) mode [leading] fills the entire chip area.
+  ///
+  /// **Excluded from [operator ==] and [hashCode].**
+  final Widget? leading;
+
+  /// Optional widget shown after the tab title, before the close / dirty
+  /// indicator.
+  ///
+  /// Use for badges, counters, or status chips:
+  ///
+  /// ```dart
+  /// BrowserTab(
+  ///   id: 2, title: 'Inbox',
+  ///   trailing: _UnreadBadge(count: 3),
+  ///   pageBuilder: (ctx, tab) => const InboxPage(),
+  /// )
+  /// ```
+  ///
+  /// **Excluded from [operator ==] and [hashCode].**
+  final Widget? trailing;
+
+  /// Builds the content page for this tab.
+  ///
+  /// Required. Receives the current [BuildContext] and the live [BrowserTab]
+  /// (as read from the controller at build time, reflecting current dirty /
+  /// title state):
+  ///
+  /// ```dart
+  /// BrowserTab(
+  ///   id: 1, title: 'Dashboard',
+  ///   pageBuilder: (ctx, tab) => const DashboardPage(),
+  /// )
+  /// ```
+  ///
+  /// **Note:** excluded from [operator ==] and [hashCode] — two [BrowserTab]
+  /// instances are considered equal when their data fields match, regardless
+  /// of their [pageBuilder] function references.
   final TabPageBuilder pageBuilder;
 
   /// Returns a copy with the given fields replaced.
+  ///
+  /// Note: passing `null` for [pageBuilder] keeps the existing value.
   BrowserTab copyWith({
     int? id,
     String? title,
-    IconData? icon,
     bool? dirty,
     bool? pinned,
     SuperTabBehavior? behavior,
     String? uniqueKey,
+    Widget? leading,
+    Widget? trailing,
     TabPageBuilder? pageBuilder,
   }) {
     return BrowserTab(
       id: id ?? this.id,
       title: title ?? this.title,
-      icon: icon ?? this.icon,
       dirty: dirty ?? this.dirty,
       pinned: pinned ?? this.pinned,
       behavior: behavior ?? this.behavior,
       uniqueKey: uniqueKey ?? this.uniqueKey,
+      leading: leading ?? this.leading,
+      trailing: trailing ?? this.trailing,
       pageBuilder: pageBuilder ?? this.pageBuilder,
     );
   }
@@ -144,7 +175,6 @@ class BrowserTab {
       (other is BrowserTab &&
           other.id == id &&
           other.title == title &&
-          other.icon == icon &&
           other.dirty == dirty &&
           other.pinned == pinned &&
           other.behavior == behavior &&
@@ -152,7 +182,7 @@ class BrowserTab {
 
   @override
   int get hashCode =>
-      Object.hash(id, title, icon, dirty, pinned, behavior, uniqueKey);
+      Object.hash(id, title, dirty, pinned, behavior, uniqueKey);
 
   @override
   String toString() =>
@@ -161,15 +191,7 @@ class BrowserTab {
 }
 
 // ── Helpers ────────────────────────────────────────────────
-/// Material icon for each [GLTabKind]. Use this inside your [TabPageBuilder]
-/// or when constructing a [BrowserTab] to map a kind to its leading icon:
-///
-/// ```dart
-/// BrowserTab(
-///   id: 1, title: 'Ledger', icon: glTabIcon(GLTabKind.ledger),
-///   pageBuilder: (ctx, tab) => GLTabPage(tab: tab, kind: GLTabKind.ledger),
-/// )
-/// ```
+/// Material icon for each [GLTabKind].
 IconData glTabIcon(GLTabKind kind) {
   switch (kind) {
     case GLTabKind.ledger:
@@ -187,8 +209,7 @@ IconData glTabIcon(GLTabKind kind) {
   }
 }
 
-/// Type label shown in the hover-preview header. Use inside your
-/// [TabPageBuilder] when you want the legacy per-kind meta caption.
+/// Type label shown in the hover-preview header.
 String glPreviewMeta(GLTabKind kind) {
   switch (kind) {
     case GLTabKind.ledger:
@@ -206,8 +227,7 @@ String glPreviewMeta(GLTabKind kind) {
   }
 }
 
-/// Rotating [GLTabKind]s for the "New Tab" (+) button. Use inside your
-/// [SuperTabBar.onAddTab] handler when you want the legacy cycling behaviour.
+/// Rotating [GLTabKind]s for the "New Tab" (+) button.
 const List<GLTabKind> kNewTabCycle = [
   GLTabKind.globe,
   GLTabKind.user,

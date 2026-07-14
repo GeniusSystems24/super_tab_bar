@@ -1,12 +1,12 @@
 name: super_tab_bar
 description: >
   A browser-style Flutter workspace tab bar with pinned, dirty, closable,
-  unique, and required-pinned tabs. Supports drag-to-reorder, context menus,
-  overflow dropdowns, hover previews, state-preserving pages, localization,
-  callbacks, accessibility, RTL, dirty-aware back navigation, responsive
-  compact mode, draggable mobile thumbnail previews, optional compact FAB,
-  and automatic breakpoint switching. Each tab carries its own page builder.
-  Zero third-party dependencies.
+  unique, and required-pinned tabs. Supports per-tab page builders,
+  drag-to-reorder, context menus, overflow dropdowns, hover previews,
+  state-preserving pages, localization, callbacks, accessibility, RTL,
+  dirty-aware back navigation, responsive compact mode, draggable mobile
+  thumbnail previews, optional compact FAB, and automatic breakpoint
+  switching. Zero third-party dependencies.
 
 
 version: 2.5.0

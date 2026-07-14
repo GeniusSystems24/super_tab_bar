@@ -9,6 +9,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'models.dart';
+import 'pages.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
 
@@ -318,14 +319,12 @@ class _ListRowState extends State<_ListRow> {
             ),
             child: Row(
               children: [
-                if (t.icon != null) ...[
-                  Icon(
-                    t.icon,
-                    size: 15,
-                    color: widget.active ? SuperTabBarThemeData.accent : s.fg3,
-                  ),
-                  const SizedBox(width: 10),
-                ],
+                Icon(
+                  Icons.tab_outlined,
+                  size: 15,
+                  color: widget.active ? SuperTabBarThemeData.accent : s.fg3,
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     t.title,
@@ -454,14 +453,12 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                   border: Border(bottom: BorderSide(color: s.border))),
                               child: Row(
                                 children: [
-                                  if (tab.icon != null) ...[
-                                    Icon(
-                                      tab.icon,
-                                      size: 15,
-                                      color: SuperTabBarThemeData.accent,
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
+                                  Icon(
+                                    Icons.tab_outlined,
+                                    size: 15,
+                                    color: SuperTabBarThemeData.accent,
+                                  ),
+                                  const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -475,6 +472,17 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
                                             color: s.fg1,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 1),
+                                        Text(
+                                          tab.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontFamily: SuperTabBarThemeData.monoFont,
+                                            fontSize: 10.5,
+                                            color: s.fg3,
                                           ),
                                         ),
                                       ],
@@ -618,11 +626,12 @@ class _Thumbnail extends StatelessWidget {
     const designW = 940.0;
     final scale = width / designW;
     final align = rtl ? Alignment.topRight : Alignment.topLeft;
+    final pageContent = tab.pageBuilder(context, tab);
     Widget page = Container(
       width: designW,
       color: surface,
       padding: const EdgeInsets.all(20),
-      child: tab.pageBuilder.call(context, tab),
+      child: pageContent,
     );
     if (scope != null) page = scope!(page);
     return OverflowBox(

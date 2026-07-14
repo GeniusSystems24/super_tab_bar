@@ -16,7 +16,7 @@
 // The thumbnails reuse the live page snapshots the controller already
 // captures for hover previews. Tabs without a fresh snapshot fall back to a
 // scaled live render of their page (or a plain icon card when previews are
-// disabled). Page content comes from each tab's [BrowserTab.pageBuilder].
+// disabled).
 //
 //   File: lib/src/compact.dart
 // ============================================================
@@ -28,6 +28,7 @@ import 'models.dart';
 import 'theme.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
+import 'pages.dart';
 
 // ════════════════════════════════════════════════════════════
 // PUBLIC ENTRY POINT
@@ -49,10 +50,10 @@ import 'preview_options.dart';
 /// )
 /// ```
 ///
-/// Thumbnail content comes from each tab's [BrowserTab.pageBuilder]. Pass
-/// [onCloseTab] to route the per-thumbnail close button through your own
-/// dirty-confirmation logic; when omitted, close falls back to
-/// [SuperTabBarController.close] for tabs the UI permits closing.
+/// Pass [onCloseTab] to route the
+/// per-thumbnail close button through your own dirty-confirmation logic; when
+/// omitted, close falls back to [SuperTabBarController.close] for tabs the UI
+/// permits closing.
 Future<int?> showSuperTabSwitcher(
   BuildContext context, {
   required SuperTabBarController controller,
@@ -514,14 +515,8 @@ class _TabThumbnail extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    if (tab.icon != null) ...[
-                      Icon(tab.icon,
-                          size: 15,
-                          color: active
-                              ? SuperTabBarThemeData.accent
-                              : s.fg3),
-                      const SizedBox(width: 8),
-                    ],
+                    if (tab.leading != null) tab.leading!,
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         tab.title,
@@ -610,11 +605,12 @@ class _PreviewArea extends StatelessWidget {
         const designW = 940.0;
         final scale = c.maxWidth / designW;
         final align = rtl ? Alignment.topRight : Alignment.topLeft;
+        final pageContent = tab.pageBuilder(ctx, tab);
         Widget page = Container(
           width: designW,
           color: surface,
           padding: const EdgeInsets.all(20),
-          child: tab.pageBuilder.call(ctx, tab),
+          child: pageContent,
         );
         page = scope(page);
         return OverflowBox(
@@ -639,9 +635,7 @@ class _PreviewArea extends StatelessWidget {
   Widget _blank(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     return Center(
-      child: tab.icon != null
-          ? Icon(tab.icon, size: 34, color: s.fg4)
-          : const SizedBox.shrink(),
+      child: Icon(Icons.tab_outlined, size: 34, color: s.fg4),
     );
   }
 }

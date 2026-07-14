@@ -147,7 +147,7 @@ class LauncherScreen extends StatelessWidget {
             'Strip hidden for phones. A FloatingActionButton opens a full-screen '
             'grid of tab thumbnails — tap to switch, drag to reorder. Back closes '
             'the current tab only when it is not dirty.',
-        badge: 'v2.1 · Compact · Switcher · Back',
+        badge: 'v2.5 · Compact · Switcher · Back',
         preview: const _TabThumb(
           labels: ['Inbox', 'Invoice', 'Store', 'Dashboard'],
           activeIndex: 0,
@@ -644,7 +644,7 @@ class _VersionPill extends StatelessWidget {
         border: Border.all(
             color: SuperTabBarThemeData.accent.withOpacity(0.35)),
       ),
-      child: const Text('v2.1.0',
+      child: const Text('v2.5.0',
           style: TextStyle(
               fontFamily: SuperTabBarThemeData.monoFont,
               fontSize: 10.5,

@@ -18,20 +18,14 @@
 //   • Removed the tab-navigation keyboard shortcuts (Ctrl/Cmd+T, Ctrl/Cmd+W,
 //     ← → Home End). Escape still dismisses open overlays.
 //
-// New in v2.2:
-//   • [SuperTabBar.allowAutoCompact] + [SuperTabBar.compactWidth] — the strip
-//     switches to compact mode automatically whenever the widget's available
-//     width drops at or below [compactWidth] (default 600 px, covering all
-//     phone form-factors). No manual MediaQuery boilerplate required.
+// New in v2.3:
+//   • [SuperTabBar.useCompactFloatingActionButton] — built-in FAB in compact
+//     mode; opens the switcher automatically.
 //
 // New in v2.5:
-//   • Page construction moved to each [BrowserTab] via [BrowserTab.pageBuilder]
-//     — the shared [SuperTabBar.pageBuilder] field has been removed. Each tab
-//     now carries its own page factory. Pass `pageBuilder` to
-//     [SuperTabBarController.add] for programmatically-created tabs.
-//   • The Add (+) strip button now only appears when [SuperTabBar.onAddTab] is
-//     provided. The widget no longer auto-creates tabs itself, so
-//     [SuperTabBar.onTabAdded] is no longer fired from the strip (+) button.
+//   • [BrowserTab.pageBuilder] — required per-tab builder (type: TabPageBuilder).
+//   • Add button ('+') is only shown when [SuperTabBar.onAddTab] is set.
+//   • [SuperTabBar.pageBuilder] removed.
 //
 //   File: lib/src/tab_bar.dart
 // ============================================================
@@ -43,6 +37,7 @@ import 'package:flutter/services.dart';
 import 'theme.dart';
 import 'controller.dart';
 import 'models.dart';
+import 'pages.dart';
 import 'overlays.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
@@ -61,7 +56,7 @@ class SuperTabBar extends StatefulWidget {
   /// and the same instance is accessible via `SuperTabBarController.of`.
   final SuperTabBarController? controller;
 
-  // ── Shell / embedding ────────────────────────────────────
+  // ── Shell / embedding ────────────────────────────────────────────────
   /// Draw the outer bordered card. Set false for edge-to-edge embedding.
   final bool showChrome;
 
@@ -104,8 +99,7 @@ class SuperTabBar extends StatefulWidget {
   /// (bottom-right in LTR, bottom-left in RTL).
   ///
   /// Pass [onTabClosed] as usual — it is forwarded automatically to the
-  /// switcher that the FAB opens. Page content for the thumbnails comes from
-  /// each tab's [BrowserTab.pageBuilder].
+  /// switcher that the FAB opens.
   ///
   /// Defaults to `false`.
   final bool useCompactFloatingActionButton;
@@ -134,13 +128,17 @@ class SuperTabBar extends StatefulWidget {
   /// Content surface background. Defaults to the theme `surface`.
   final Color? contentBackground;
 
-  /// Handler for the strip's `+` (new-tab) button.
-///
-/// Since v2.5 the `+` button is **only displayed when this callback is
-/// provided**. The widget no longer auto-creates tabs itself — your
-/// `onAddTab` is solely responsible for adding the tab (typically via
-/// [SuperTabBarController.add], passing a `pageBuilder` for the new tab's
-/// content). When `onAddTab` is `null` the `+` button is not rendered.
+  /// Intercepts the + button. Called instead of the controller's `add()`.
+  /// When set, [onTabAdded] will NOT fire (the id is unknown to the widget).
+  ///
+  /// **The + button is only shown when this is non-null.** Set this to
+  /// display the button and handle new-tab creation:
+  /// ```dart
+  /// onAddTab: () => ctrl.add(
+  ///   title: 'New tab',
+  ///   pageBuilder: (ctx, tab) => const MyPage(),
+  /// ),
+  /// ```
   final VoidCallback? onAddTab;
 
   // ── Localizations ────────────────────────────────────────
@@ -160,13 +158,8 @@ class SuperTabBar extends StatefulWidget {
   /// A tab was activated (strip tap, keyboard nav, or tab-list pick).
   final void Function(int id)? onTabSelected;
 
-  /// A new tab was created via the + button.
-  ///
-  /// **Deprecated since v2.5.** The widget no longer creates tabs itself —
-  /// the + button now calls [onAddTab] (and is only shown when that callback
-  /// is provided). Because the widget never learns the new tab's id, this
-  /// callback is no longer fired from the strip (+) button. It is retained on
-  /// the constructor for backward compatibility but will not be invoked.
+  /// A new tab was created via the + button (not fired when [onAddTab] is set,
+  /// since the widget does not control the id in that case).
   final void Function(int id)? onTabAdded;
 
   /// A tab was closed (after any dirty-confirmation dialog).
@@ -224,7 +217,6 @@ class SuperTabBar extends StatefulWidget {
 class _SuperTabBarState extends State<SuperTabBar> {
   late SuperTabBarController _ctrl;
   bool _ownsCtrl = false;
-  bool _disposed = false;
 
   int? _dragId;
   int? _overId;
@@ -285,7 +277,6 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   @override
   void dispose() {
-    _disposed = true;
     _captureTimer?.cancel();
     _hideAllOverlays();
     _ctrl.removeListener(_onCtrl);
@@ -402,13 +393,14 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   // ── New tab ───────────────────────────────────────────────
-  // The + button is only mounted when [SuperTabBar.onAddTab] is non-null
-  // (see _buildStrip), so this handler always delegates to the host. The
-  // widget never auto-creates tabs itself anymore — onTabAdded is therefore
-  // no longer fired from the strip (+) button (kept for backward-compat).
   void _add() {
-    widget.onAddTab?.call();
-    _scrollToEnd();
+    // The + button is only rendered when onAddTab is non-null (v2.5),
+    // so this branch is always taken. The fallback is kept as dead-code
+    // guard only.
+    if (widget.onAddTab != null) {
+      widget.onAddTab!();
+      _scrollToEnd();
+    }
   }
 
   // ── Keyboard ──────────────────────────────────────────────
@@ -441,12 +433,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   void _hideList() {
-    final hadList = _listEntry != null;
     _listEntry?.remove();
     _listEntry = null;
-    // Avoid setState during dispose() — _hideAllOverlays() is called from
-    // dispose() and setState on a defunct element throws.
-    if (hadList && mounted && !_disposed) setState(() {});
+    if (mounted) setState(() {});
   }
 
   void _hidePreview() {
@@ -657,7 +646,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
                 right: Directionality.of(ctx) == TextDirection.rtl ? null : 16,
                 left: Directionality.of(ctx) == TextDirection.rtl ? 16 : null,
                 child: FloatingActionButton(
-                  heroTag: 'super_tab_bar_compact_fab_$hashCode',
+                  heroTag: 'super_tab_bar_compact_fab_${hashCode}',
                   backgroundColor: SuperTabBarThemeData.accent,
                   foregroundColor: Colors.white,
                   tooltip: 'Open tab switcher',
@@ -731,9 +720,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
           ),
           _chevron(true, _chevEnd, s),
           const SizedBox(width: 4),
-          // The + button is only rendered when onAddTab is provided — the
-          // widget no longer auto-creates tabs itself.
-          if (widget.onAddTab != null) ...[
+          // The + button is only shown when onAddTab is explicitly provided.
+          if (widget.onAddTab != null) ...[  
             _IconBtn(
               icon: Icons.add,
               tooltip: _loc.newTab,
@@ -870,7 +858,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
         .clamp(0, ordered.length - 1);
 
     Widget pageFor(BrowserTab t) {
-      final raw = t.pageBuilder.call(context, t);
+      final Widget raw = t.pageBuilder(context, t);
       final page =
           KeyedSubtree(key: ValueKey('tabpage-content-${t.id}'), child: raw);
       final body = widget.scrollContent
@@ -1122,14 +1110,13 @@ class _TabChipState extends State<_TabChip> {
     if (widget.compact) {
       return Stack(
         children: [
-          if (tab.icon != null)
-            Center(
-              child: Icon(
-                tab.icon,
-                size: 14,
-                color: active ? SuperTabBarThemeData.accent : s.fg3,
-              ),
+          Center(
+            child: tab.leading ?? Icon(
+              Icons.tab_outlined,
+              size: 14,
+              color: active ? SuperTabBarThemeData.accent : s.fg3,
             ),
+          ),
           if (tab.dirty)
             PositionedDirectional(
               top: 7,
@@ -1149,14 +1136,12 @@ class _TabChipState extends State<_TabChip> {
 
     return Row(
       children: [
-        if (tab.icon != null) ...[
-          Icon(
-            tab.icon,
-            size: 14,
-            color: active ? SuperTabBarThemeData.accent : s.fg3,
-          ),
-          const SizedBox(width: 8),
-        ],
+        tab.leading ?? Icon(
+          Icons.tab_outlined,
+          size: 14,
+          color: active ? SuperTabBarThemeData.accent : s.fg3,
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             tab.title,
@@ -1170,6 +1155,7 @@ class _TabChipState extends State<_TabChip> {
             ),
           ),
         ),
+        if (tab.trailing != null) ...[const SizedBox(width: 4), tab.trailing!],
         const SizedBox(width: 6),
         _trailing(s, tab, active),
       ],
@@ -1255,14 +1241,12 @@ class _StaticTab extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (tab.icon != null) ...[
-            Icon(
-              tab.icon,
-              size: 14,
-              color: active ? SuperTabBarThemeData.accent : s.fg3,
-            ),
-            const SizedBox(width: 8),
-          ],
+          tab.leading ?? Icon(
+            Icons.tab_outlined,
+            size: 14,
+            color: active ? SuperTabBarThemeData.accent : s.fg3,
+          ),
+          const SizedBox(width: 8),
           Flexible(
             child: Text(
               tab.title,

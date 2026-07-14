@@ -7,19 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
-/// A dummy page builder used by tests that just need *some* content.
-Widget _dummyPage(BuildContext _, BrowserTab __) => const SizedBox.shrink();
-
 void main() {
   // ════════════════════════════════════════════════════════
   // BrowserTab immutability
   // ════════════════════════════════════════════════════════
   group('BrowserTab — immutability', () {
     test('all fields are final — copyWith produces a new instance', () {
-      const tab = BrowserTab(
+      final tab = BrowserTab(
         id: 1,
         title: 'Test',
-        pageBuilder: _dummyPage,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       final copy = tab.copyWith(title: 'Updated');
 
@@ -29,67 +26,93 @@ void main() {
     });
 
     test('copyWith preserves untouched fields', () {
-      const tab = BrowserTab(
+      final tab = BrowserTab(
         id: 1,
         title: 'T',
-        icon: Icons.public,
         dirty: true,
         pinned: true,
         behavior: SuperTabBehavior.uniqueNormal,
         uniqueKey: 'k',
-        pageBuilder: _dummyPage,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       final copy = tab.copyWith(title: 'New');
 
       expect(copy.id, 1);
-      expect(copy.icon, Icons.public);
       expect(copy.dirty, isTrue);
       expect(copy.pinned, isTrue);
       expect(copy.behavior, SuperTabBehavior.uniqueNormal);
       expect(copy.uniqueKey, 'k');
-      expect(copy.pageBuilder, same(_dummyPage));
     });
 
     test('value equality holds for identical data', () {
-      const a = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
-      const b = BrowserTab(id: 5, title: 'Same', pageBuilder: _dummyPage);
+      final a = BrowserTab(
+        id: 5,
+        title: 'Same',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      final b = BrowserTab(
+        id: 5,
+        title: 'Same',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
       expect(a, equals(b));
       expect(a.hashCode, b.hashCode);
     });
 
-    test('value equality fails for different data', () {
-      const a = BrowserTab(id: 1, title: 'A', pageBuilder: _dummyPage);
-      const b = BrowserTab(id: 2, title: 'A', pageBuilder: _dummyPage);
-      expect(a, isNot(equals(b)));
+    test(
+        'pageBuilder is excluded from == (different builders, same data → equal)',
+        () {
+      final a = BrowserTab(
+        id: 1,
+        title: 'Same',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      final b = BrowserTab(
+        id: 1,
+        title: 'Same',
+        pageBuilder: (ctx, tab) => const Text('Same'),
+      );
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
     });
 
-    test('pageBuilder is required and stored (v2.5)', () {
-      Widget page(BuildContext _, BrowserTab __) => const Text('p');
+    test('pageBuilder is excluded from hashCode', () {
+      final tab1 = BrowserTab(
+        id: 5,
+        title: 'T',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      final tab2 = BrowserTab(
+        id: 5,
+        title: 'T',
+        pageBuilder: (ctx, tab) => const Text('T'),
+      );
+      expect(tab1.hashCode, tab2.hashCode);
+    });
+
+    test('copyWith preserves pageBuilder when not specified', () {
+      TabPageBuilder builder = (ctx, tab) => const Text('page');
       final tab = BrowserTab(
         id: 1,
-        title: 'With builder',
-        pageBuilder: page,
+        title: 'T',
+        pageBuilder: builder,
       );
-      expect(tab.pageBuilder, same(page));
-      // copyWith without pageBuilder keeps the existing builder.
-      final renamed = tab.copyWith(title: 'Renamed');
-      expect(renamed.pageBuilder, same(page));
-      // copyWith can replace the builder.
-      Widget other(BuildContext _, BrowserTab __) => const Text('other');
-      final swapped = tab.copyWith(pageBuilder: other);
-      expect(swapped.pageBuilder, same(other));
+      final copy = tab.copyWith(title: 'Updated');
+      expect(copy.pageBuilder, same(builder));
     });
 
-    test('icon defaults to null when not provided', () {
-      const tab = BrowserTab(id: 1, title: 'No icon', pageBuilder: _dummyPage);
-      expect(tab.icon, isNull);
-    });
-
-    test('has no `kind` field anymore (v2.5 — removed)', () {
-      // Sanity: BrowserTab no longer accepts `kind`. This is a compile-time
-      // guarantee; the test existing & compiling is the assertion.
-      const tab = BrowserTab(id: 1, title: 'No kind', pageBuilder: _dummyPage);
-      expect(tab.title, 'No kind');
+    test('value equality fails for different data', () {
+      final a = BrowserTab(
+        id: 1,
+        title: 'A',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      final b = BrowserTab(
+        id: 2,
+        title: 'A',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      expect(a, isNot(equals(b)));
     });
   });
 
@@ -101,15 +124,18 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(
+        BrowserTab(
           id: 1,
           title: 'Home',
-          icon: Icons.public,
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
-          pageBuilder: _dummyPage,
+          pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        const BrowserTab(id: 2, title: 'Normal', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 2,
+          title: 'Normal',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 2);
     });
 
@@ -158,12 +184,12 @@ void main() {
     test('_normalize enforces pinned: true on requiredPinned tabs', () {
       // Construct with pinned: false — controller must normalise to true.
       final c = SuperTabBarController(tabs: [
-        const BrowserTab(
+        BrowserTab(
           id: 99,
           title: 'X',
           pinned: false, // intentionally wrong
           behavior: SuperTabBehavior.requiredPinned,
-          pageBuilder: _dummyPage,
+          pageBuilder: (ctx, tab) => const SizedBox(),
         ),
       ]);
       expect(c.tabById(99)!.pinned, isTrue);
@@ -179,13 +205,17 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'Normal', pageBuilder: _dummyPage),
-        const BrowserTab(
+        BrowserTab(
+          id: 1,
+          title: 'Normal',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
+        BrowserTab(
           id: 2,
           title: 'Settings',
           behavior: SuperTabBehavior.uniqueNormal,
           uniqueKey: 'settings',
-          pageBuilder: _dummyPage,
+          pageBuilder: (ctx, tab) => const SizedBox(),
         ),
       ], activeId: 1);
     });
@@ -215,7 +245,7 @@ void main() {
         title: 'Settings',
         behavior: SuperTabBehavior.uniqueNormal,
         uniqueKey: 'settings',
-        pageBuilder: _dummyPage,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       expect(resultId, 2);
       expect(ctrl.length, 2, reason: 'no new tab should be created');
@@ -227,7 +257,7 @@ void main() {
         title: 'Profile',
         behavior: SuperTabBehavior.uniqueNormal,
         uniqueKey: 'profile',
-        pageBuilder: _dummyPage,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       expect(resultId, isNot(2));
       expect(ctrl.length, 3);
@@ -237,8 +267,8 @@ void main() {
       final resultId = ctrl.add(
         title: 'Settings Copy',
         behavior: SuperTabBehavior.uniqueNormal,
-        pageBuilder: _dummyPage,
-        // no uniqueKey — dedup does not apply
+        // no uniqueKey — dedup does not apply,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       expect(ctrl.length, 3);
       expect(resultId, isNot(2));
@@ -250,7 +280,7 @@ void main() {
         behavior: SuperTabBehavior.uniqueNormal,
         uniqueKey: 'settings',
         activate: false,
-        pageBuilder: _dummyPage,
+        pageBuilder: (ctx, tab) => const SizedBox(),
       );
       expect(ctrl.activeId, 1);
     });
@@ -264,9 +294,21 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-        const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
-        const BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
+        BrowserTab(
+          id: 2,
+          title: 'Two',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
+        BrowserTab(
+          id: 3,
+          title: 'Three',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 1);
     });
 
@@ -278,40 +320,48 @@ void main() {
     });
 
     test('add creates a tab and returns its id', () {
-      final id = ctrl.add(title: 'New', pageBuilder: _dummyPage);
+      final id = ctrl.add(
+        title: 'New',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
       expect(ctrl.length, 4);
       expect(ctrl.tabById(id)?.title, 'New');
       expect(ctrl.activeId, id);
     });
 
+    test('add stores pageBuilder on the new tab (v2.5)', () {
+      TabPageBuilder builder = (ctx, tab) => const Text('page');
+      final id = ctrl.add(
+        title: 'New',
+        pageBuilder: builder,
+      );
+      expect(ctrl.tabById(id)?.pageBuilder, same(builder));
+    });
+
+    test('setPageBuilder attaches a builder after add() (v2.5)', () {
+      final id = ctrl.add(
+        title: 'New',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
+      // pageBuilder is required — always non-null
+      expect(ctrl.tabById(id)?.pageBuilder, isNotNull);
+      TabPageBuilder builder = (ctx, tab) => const Text('page');
+      ctrl.setPageBuilder(id, builder);
+      expect(ctrl.tabById(id)?.pageBuilder, same(builder));
+    });
+
+    test('setPageBuilder is a no-op for unknown id (v2.5)', () {
+      ctrl.setPageBuilder(999, (ctx, tab) => const Text('x'));
+      expect(ctrl.length, 3); // unchanged
+    });
+
     test('add with at: inserts at the given index', () {
-      ctrl.add(title: 'Inserted', pageBuilder: _dummyPage, at: 1);
+      ctrl.add(
+        title: 'Inserted',
+        at: 1,
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
       expect(ctrl.tabs[1].title, 'Inserted');
-    });
-
-    test('add carries pageBuilder onto the new tab (v2.5)', () {
-      Widget page(BuildContext _, BrowserTab __) => const SizedBox();
-      final id = ctrl.add(
-        title: 'With builder',
-        pageBuilder: page,
-      );
-      expect(ctrl.tabById(id)?.pageBuilder, same(page));
-    });
-
-    test('add carries icon onto the new tab (v2.5)', () {
-      final id = ctrl.add(
-        title: 'With icon',
-        icon: Icons.star,
-        pageBuilder: _dummyPage,
-      );
-      expect(ctrl.tabById(id)?.icon, Icons.star);
-    });
-
-    test('add requires pageBuilder (v2.5 — no default content)', () {
-      // pageBuilder is now required — sanity that it compiles as a named
-      // required param is implicit in the other add() tests above.
-      final id = ctrl.add(pageBuilder: _dummyPage);
-      expect(ctrl.tabById(id), isNotNull);
     });
 
     test('close removes the tab and selects nearest neighbour', () {
@@ -329,7 +379,10 @@ void main() {
     });
 
     test('closeOthers removes all non-pinned except id', () {
-      ctrl.add(title: 'Extra', pageBuilder: _dummyPage);
+      ctrl.add(
+        title: 'Extra',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
       ctrl.closeOthers(1);
       expect(ctrl.length, 1);
       expect(ctrl.tabs.first.id, 1);
@@ -349,22 +402,6 @@ void main() {
       expect(ctrl.tabById(nid)?.title, 'One');
       expect(ctrl.tabById(nid)?.dirty, isFalse);
       expect(ctrl.activeId, nid);
-    });
-
-    test('duplicate copies icon and pageBuilder (v2.5)', () {
-      Widget page(BuildContext _, BrowserTab __) => const Text('dup');
-      final c = SuperTabBarController(tabs: [
-        BrowserTab(
-          id: 1,
-          title: 'Original',
-          icon: Icons.ac_unit,
-          pageBuilder: page,
-        ),
-      ], activeId: 1);
-      addTearDown(c.dispose);
-      final nid = c.duplicate(1);
-      expect(c.tabById(nid)?.icon, Icons.ac_unit);
-      expect(c.tabById(nid)?.pageBuilder, same(page));
     });
 
     test('reorder moves a tab', () {
@@ -488,8 +525,7 @@ void main() {
   // ════════════════════════════════════════════════════════
   group('SuperTabBar widget', () {
     Widget wrap(Widget child) => MaterialApp(
-          theme: ThemeData(
-              extensions: const [SuperTabBarThemeData.light]),
+          theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
           home: Scaffold(body: child),
         );
 
@@ -505,8 +541,16 @@ void main() {
 
     testWidgets('onTabSelected fires when a tab is tapped', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-        const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
+        BrowserTab(
+          id: 2,
+          title: 'Two',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -524,33 +568,14 @@ void main() {
       expect(selected, 2);
     });
 
-    testWidgets('tapping + calls onAddTab (v2.5 — no auto-add)',
+    testWidgets('onTabAdded fires when a tab is added programmatically',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-      ], activeId: 1);
-      addTearDown(ctrl.dispose);
-
-      int addCalls = 0;
-      await tester.pumpWidget(wrap(
-        SuperTabBar(
-          controller: ctrl,
-          onAddTab: () => addCalls++,
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-      ));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byIcon(Icons.add));
-      await tester.pump();
-      expect(addCalls, 1, reason: 'onAddTab should be invoked once');
-      // The widget no longer auto-adds — length stays unchanged.
-      expect(ctrl.length, 1);
-    });
-
-    testWidgets('onTabAdded is not fired from the + button (v2.5)',
-        (tester) async {
-      final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -558,54 +583,94 @@ void main() {
       await tester.pumpWidget(wrap(
         SuperTabBar(
           controller: ctrl,
-          onAddTab: () {}, // + button visible
-          onTabAdded: (id) => addedId = id, // deprecated — no longer fired
+          onTabAdded: (id) => addedId = id,
         ),
       ));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byIcon(Icons.add));
+      // Programmatic add — onTabAdded fires (unlike when onAddTab intercepts).
+      ctrl.add(
+        title: 'Two',
+        pageBuilder: (ctx, tab) => const SizedBox(),
+      );
       await tester.pump();
-      expect(addedId, isNull,
-          reason: 'v2.5: onTabAdded is no longer fired from the + button');
+      expect(addedId, isNotNull);
+      expect(ctrl.length, 2);
     });
 
     testWidgets('+ button is hidden when onAddTab is null (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(controller: ctrl)));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.add), findsNothing);
+    });
 
+    testWidgets('+ button is shown and fires onAddTab when set (v2.5)',
+        (tester) async {
+      final ctrl = SuperTabBarController(tabs: [
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
+      ], activeId: 1);
+      addTearDown(ctrl.dispose);
+      bool fired = false;
       await tester.pumpWidget(wrap(SuperTabBar(
         controller: ctrl,
-        // no onAddTab → + button must NOT be rendered
+        onAddTab: () => fired = true,
       )));
       await tester.pumpAndSettle();
-      expect(find.byIcon(Icons.add), findsNothing,
-          reason: 'v2.5: the + button only shows when onAddTab is provided');
-      // ▾ (tab list) is intrinsic and stays visible.
-      expect(find.byIcon(Icons.expand_more), findsOneWidget);
+      expect(find.byIcon(Icons.add), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+      expect(fired, isTrue);
+    });
+
+    testWidgets('per-tab pageBuilder is used when provided (v2.5)',
+        (tester) async {
+      final ctrl = SuperTabBarController(tabs: [
+        BrowserTab(
+          id: 1,
+          title: 'One',
+          pageBuilder: (ctx, tab) => const Text('custom-page-content'),
+        ),
+      ], activeId: 1);
+      addTearDown(ctrl.dispose);
+      await tester.pumpWidget(wrap(SuperTabBar(
+        controller: ctrl,
+        fillContent: true,
+      )));
+      await tester.pumpAndSettle();
+      expect(find.text('custom-page-content'), findsOneWidget);
     });
 
     testWidgets('requiredPinned tab appears in pinned region', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(
+        BrowserTab(
           id: 1,
           title: 'Home',
-          icon: Icons.public,
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
-          pageBuilder: _dummyPage,
+          pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        const BrowserTab(id: 2, title: 'Doc', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 2,
+          title: 'Doc',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 2);
       addTearDown(ctrl.dispose);
 
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        onAddTab: () {},
-      )));
+      await tester.pumpWidget(wrap(SuperTabBar(controller: ctrl)));
       await tester.pumpAndSettle();
       expect(find.byType(SuperTabBar), findsOneWidget);
       // Home is pinned so it should be in the pinned region (compact chip).
@@ -614,7 +679,11 @@ void main() {
 
     testWidgets('custom localizations are used', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 1,
+          title: 'Tab',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -649,7 +718,11 @@ void main() {
 
     testWidgets('preview disabled prevents capture', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        const BrowserTab(id: 1, title: 'Tab', pageBuilder: _dummyPage),
+        BrowserTab(
+          id: 1,
+          title: 'Tab',
+          pageBuilder: (ctx, tab) => const SizedBox(),
+        ),
       ], activeId: 1);
       addTearDown(ctrl.dispose);
 
@@ -662,26 +735,6 @@ void main() {
       await tester.pumpAndSettle();
       // When disabled, no snapshot is ever captured.
       expect(ctrl.snapshot(1), isNull);
-    });
-
-    testWidgets('per-tab pageBuilder renders (v2.5)', (tester) async {
-      final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
-          id: 1,
-          title: 'One',
-          pageBuilder: (_, __) => const Text('custom-page-content'),
-        ),
-      ], activeId: 1);
-      addTearDown(ctrl.dispose);
-
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        fillContent: true,
-        scrollContent: false,
-        onAddTab: () {},
-      )));
-      await tester.pumpAndSettle();
-      expect(find.text('custom-page-content'), findsOneWidget);
     });
   });
 
@@ -697,199 +750,213 @@ void main() {
     SuperTabBarController two({bool dirty = false}) => SuperTabBarController(
           tabs: [
             BrowserTab(
-                id: 1,
-                title: 'One',
-                pageBuilder: (_, __) => const Text('page')),
+              id: 1,
+              title: 'One',
+              pageBuilder: (ctx, tab) => const SizedBox(),
+            ),
             BrowserTab(
-                id: 2,
-                title: 'Two',
-                dirty: dirty,
-                pageBuilder: (_, __) => const Text('page')),
+              id: 2,
+              title: 'Two',
+              dirty: dirty,
+              pageBuilder: (ctx, tab) => const SizedBox(),
+            ),
           ],
           activeId: 2,
         );
 
-    testWidgets('non-compact renders the ▾ tab-list button', (tester) async {
+    testWidgets('non-compact renders the strip controls', (tester) async {
       final ctrl = two();
       addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        onAddTab: () {}, // + button only shows when onAddTab is non-null
-      )));
-      await tester.pumpAndSettle();
-      // + (new tab) and ▾ (tab list) live in the strip.
-      expect(find.byIcon(Icons.add), findsOneWidget);
-      expect(find.byIcon(Icons.expand_more), findsOneWidget);
-    });
+      // v2.5: the + button only shows when onAddTab is non-null.
+      // This test verifies that the strip renders even without onAddTab.
+      testWidgets('strip renders with icons when onAddTab is omitted (v2.5)',
+          (tester) async {
+        final ctrl = two();
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabBar(
+          controller: ctrl,
+        )));
+        await tester.pumpAndSettle();
+        // ▾ (tab list) is present; + is hidden because onAddTab is null.
+        expect(find.byIcon(Icons.add), findsNothing);
+        expect(find.byIcon(Icons.expand_more), findsOneWidget);
+      });
 
-    testWidgets('compact: true hides the strip', (tester) async {
-      final ctrl = two();
-      addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        compact: true,
-        onAddTab: () {},
-      )));
-      await tester.pumpAndSettle();
-      // Strip controls are gone; only the active page remains.
-      expect(find.byIcon(Icons.add), findsNothing);
-      expect(find.byIcon(Icons.expand_more), findsNothing);
-      expect(find.text('page'), findsOneWidget);
-    });
+      testWidgets('compact: true hides the strip', (tester) async {
+        final ctrl = two();
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabBar(
+          controller: ctrl,
+          compact: true,
+        )));
+        await tester.pumpAndSettle();
+        // Strip controls are gone; the active page (SizedBox) remains.
+        expect(find.byIcon(Icons.add), findsNothing);
+        expect(find.byIcon(Icons.expand_more), findsNothing);
+      });
 
-    testWidgets('closeTabOnBack: false wraps no PopScope', (tester) async {
-      final ctrl = two();
-      addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        onAddTab: () {},
-      )));
-      await tester.pumpAndSettle();
-      expect(
-        find.descendant(
-            of: find.byType(SuperTabBar), matching: find.byType(PopScope)),
-        findsNothing,
-      );
-    });
-
-    testWidgets('closeTabOnBack blocks pop for a clean active tab',
-        (tester) async {
-      final ctrl = two(); // active tab #2 is clean
-      addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        closeTabOnBack: true,
-        onAddTab: () {},
-      )));
-      await tester.pumpAndSettle();
-      final scope = find.descendant(
-          of: find.byType(SuperTabBar), matching: find.byType(PopScope));
-      expect(scope, findsOneWidget);
-      // Clean active tab → we intercept the back (canPop == false).
-      expect(tester.widget<PopScope>(scope).canPop, isFalse);
-    });
-
-    testWidgets('closeTabOnBack allows pop when the active tab is dirty',
-        (tester) async {
-      final ctrl = two(dirty: true); // active tab #2 is dirty
-      addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabBar(
-        controller: ctrl,
-        closeTabOnBack: true,
-        onAddTab: () {},
-      )));
-      await tester.pumpAndSettle();
-      final scope = find.descendant(
-          of: find.byType(SuperTabBar), matching: find.byType(PopScope));
-      // Dirty active tab → never auto-closed → back pops normally (canPop true).
-      expect(tester.widget<PopScope>(scope).canPop, isTrue);
-    });
-  });
-
-  // ════════════════════════════════════════════════════════
-  // SuperTabSwitcher / showSuperTabSwitcher (v2.1)
-  // ════════════════════════════════════════════════════════
-  group('SuperTabSwitcher', () {
-    Widget wrap(Widget child) => MaterialApp(
-          theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
-          home: Scaffold(body: child),
+      testWidgets('closeTabOnBack: false wraps no PopScope', (tester) async {
+        final ctrl = two();
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabBar(
+          controller: ctrl,
+        )));
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(
+              of: find.byType(SuperTabBar), matching: find.byType(PopScope)),
+          findsNothing,
         );
+      });
 
-    // Blank fallback → thumbnails show an icon (or nothing when icon is null),
-    // not a live-rendered title, so each tab's title appears exactly once
-    // (in the card footer).
-    const blankPreview =
-        SuperTabBarPreviewOptions(fallback: PreviewFallback.blank);
+      testWidgets('closeTabOnBack blocks pop for a clean active tab',
+          (tester) async {
+        final ctrl = two(); // active tab #2 is clean
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabBar(
+          controller: ctrl,
+          closeTabOnBack: true,
+        )));
+        await tester.pumpAndSettle();
+        final scope = find.descendant(
+            of: find.byType(SuperTabBar), matching: find.byType(PopScope));
+        expect(scope, findsOneWidget);
+        // Clean active tab → we intercept the back (canPop == false).
+        expect(tester.widget<PopScope>(scope).canPop, isFalse);
+      });
 
-    SuperTabBarController three() => SuperTabBarController(
-          tabs: [
-            const BrowserTab(id: 1, title: 'One', pageBuilder: _dummyPage),
-            const BrowserTab(id: 2, title: 'Two', pageBuilder: _dummyPage),
-            const BrowserTab(id: 3, title: 'Three', pageBuilder: _dummyPage),
-          ],
-          activeId: 1,
-        );
-
-    testWidgets('renders a thumbnail per tab with the switcher title',
-        (tester) async {
-      final ctrl = three();
-      addTearDown(ctrl.dispose);
-      await tester.pumpWidget(wrap(SuperTabSwitcher(
-        controller: ctrl,
-        previewOptions: blankPreview,
-      )));
-      await tester.pumpAndSettle();
-      expect(find.text('Open tabs'), findsOneWidget); // switcherTitle
-      expect(find.text('One'), findsOneWidget);
-      expect(find.text('Two'), findsOneWidget);
-      expect(find.text('Three'), findsOneWidget);
+      testWidgets('closeTabOnBack allows pop when the active tab is dirty',
+          (tester) async {
+        final ctrl = two(dirty: true); // active tab #2 is dirty
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabBar(
+          controller: ctrl,
+          closeTabOnBack: true,
+        )));
+        await tester.pumpAndSettle();
+        final scope = find.descendant(
+            of: find.byType(SuperTabBar), matching: find.byType(PopScope));
+        // Dirty active tab → never auto-closed → back pops normally (canPop true).
+        expect(tester.widget<PopScope>(scope).canPop, isTrue);
+      });
     });
 
-    testWidgets('tapping a thumbnail selects that tab', (tester) async {
-      final ctrl = three();
-      addTearDown(ctrl.dispose);
-      int? picked;
-      await tester.pumpWidget(wrap(SuperTabSwitcher(
-        controller: ctrl,
-        previewOptions: blankPreview,
-        onSelect: (id) {
-          picked = id;
-          ctrl.select(id);
-        },
-      )));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Three'));
-      await tester.pump();
-      expect(picked, 3);
-      expect(ctrl.activeId, 3);
-    });
+    // ════════════════════════════════════════════════════════
+    // SuperTabSwitcher / showSuperTabSwitcher (v2.1)
+    // ════════════════════════════════════════════════════════
+    group('SuperTabSwitcher', () {
+      Widget wrap(Widget child) => MaterialApp(
+            theme: ThemeData(extensions: const [SuperTabBarThemeData.light]),
+            home: Scaffold(body: child),
+          );
 
-    testWidgets('onCloseTab fires for the thumbnail close button',
-        (tester) async {
-      final ctrl = three();
-      addTearDown(ctrl.dispose);
-      final closed = <int>[];
-      await tester.pumpWidget(wrap(SuperTabSwitcher(
-        controller: ctrl,
-        previewOptions: blankPreview,
-        onCloseTab: closed.add,
-      )));
-      await tester.pumpAndSettle();
-      // Thumbnail close buttons carry the localized "Close tab" semantics label;
-      // the header dismiss button does not.
-      await tester.tap(find.bySemanticsLabel('Close tab').first);
-      await tester.pump();
-      expect(closed, isNotEmpty);
-      expect(closed.first, 1, reason: 'first ordered tab is #1');
-    });
+      // Blank fallback → thumbnails show an icon, not a live-rendered title,
+      // so each tab's title appears exactly once (in the card footer).
+      const blankPreview =
+          SuperTabBarPreviewOptions(fallback: PreviewFallback.blank);
 
-    testWidgets('showSuperTabSwitcher returns the picked id and pops',
-        (tester) async {
-      final ctrl = three();
-      addTearDown(ctrl.dispose);
-      int? result;
-      await tester.pumpWidget(wrap(Builder(
-        builder: (ctx) => ElevatedButton(
-          onPressed: () async {
-            result = await showSuperTabSwitcher(
-              ctx,
-              controller: ctrl,
-              previewOptions: blankPreview,
-            );
+      SuperTabBarController three() => SuperTabBarController(
+            tabs: [
+              BrowserTab(
+                id: 1,
+                title: 'One',
+                pageBuilder: (ctx, tab) => const SizedBox(),
+              ),
+              BrowserTab(
+                id: 2,
+                title: 'Two',
+                pageBuilder: (ctx, tab) => const SizedBox(),
+              ),
+              BrowserTab(
+                id: 3,
+                title: 'Three',
+                pageBuilder: (ctx, tab) => const SizedBox(),
+              ),
+            ],
+            activeId: 1,
+          );
+
+      testWidgets('renders a thumbnail per tab with the switcher title',
+          (tester) async {
+        final ctrl = three();
+        addTearDown(ctrl.dispose);
+        await tester.pumpWidget(wrap(SuperTabSwitcher(
+          controller: ctrl,
+          previewOptions: blankPreview,
+        )));
+        await tester.pumpAndSettle();
+        expect(find.text('Open tabs'), findsOneWidget); // switcherTitle
+        expect(find.text('One'), findsOneWidget);
+        expect(find.text('Two'), findsOneWidget);
+        expect(find.text('Three'), findsOneWidget);
+      });
+
+      testWidgets('tapping a thumbnail selects that tab', (tester) async {
+        final ctrl = three();
+        addTearDown(ctrl.dispose);
+        int? picked;
+        await tester.pumpWidget(wrap(SuperTabSwitcher(
+          controller: ctrl,
+          previewOptions: blankPreview,
+          onSelect: (id) {
+            picked = id;
+            ctrl.select(id);
           },
-          child: const Text('open'),
-        ),
-      )));
-      await tester.tap(find.text('open'));
-      await tester.pumpAndSettle();
-      expect(find.text('Open tabs'), findsOneWidget);
+        )));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Three'));
+        await tester.pump();
+        expect(picked, 3);
+        expect(ctrl.activeId, 3);
+      });
 
-      await tester.tap(find.text('Two'));
-      await tester.pumpAndSettle();
-      // Route popped, controller updated, id returned.
-      expect(find.text('Open tabs'), findsNothing);
-      expect(ctrl.activeId, 2);
-      expect(result, 2);
+      testWidgets('onCloseTab fires for the thumbnail close button',
+          (tester) async {
+        final ctrl = three();
+        addTearDown(ctrl.dispose);
+        final closed = <int>[];
+        await tester.pumpWidget(wrap(SuperTabSwitcher(
+          controller: ctrl,
+          previewOptions: blankPreview,
+          onCloseTab: closed.add,
+        )));
+        await tester.pumpAndSettle();
+        // Thumbnail close buttons carry the localized "Close tab" semantics label;
+        // the header dismiss button does not.
+        await tester.tap(find.bySemanticsLabel('Close tab').first);
+        await tester.pump();
+        expect(closed, isNotEmpty);
+        expect(closed.first, 1, reason: 'first ordered tab is #1');
+      });
+
+      testWidgets('showSuperTabSwitcher returns the picked id and pops',
+          (tester) async {
+        final ctrl = three();
+        addTearDown(ctrl.dispose);
+        int? result;
+        await tester.pumpWidget(wrap(Builder(
+          builder: (ctx) => ElevatedButton(
+            onPressed: () async {
+              result = await showSuperTabSwitcher(
+                ctx,
+                controller: ctrl,
+                previewOptions: blankPreview,
+              );
+            },
+            child: const Text('open'),
+          ),
+        )));
+        await tester.tap(find.text('open'));
+        await tester.pumpAndSettle();
+        expect(find.text('Open tabs'), findsOneWidget);
+
+        await tester.tap(find.text('Two'));
+        await tester.pumpAndSettle();
+        // Route popped, controller updated, id returned.
+        expect(find.text('Open tabs'), findsNothing);
+        expect(ctrl.activeId, 2);
+        expect(result, 2);
+      });
     });
   });
 }

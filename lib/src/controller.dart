@@ -1,13 +1,18 @@
 // ============================================================
 // SuperTabBarController — the tab strip's state, as a ChangeNotifier.
 // ------------------------------------------------------------
+// New in v2.5:
+//   • [add] gains a [pageBuilder] parameter — dynamically created tabs can
+//     supply their own per-tab builder at creation time.
+//   • [setPageBuilder] — update a tab's page builder after creation.
+//
 // Single source of truth for the open tabs, the active tab, and the live
 // page thumbnails. The widget delegates every operation here, and the SAME
 // controller is exposed to page content via an InheritedNotifier so any
 // page can drive the strip:
 //
 //   final tabs = SuperTabBarController.of(context); // may be null
-//   tabs?.add(title: 'New report', kind: GLTabKind.chart);
+//   tabs?.add(title: 'New report', pageBuilder: (ctx, tab) => const MyPage());
 //   tabs?.setDirty(myId, true);
 //
 // `of` returns null when a widget is not hosted inside a SuperTabBar, so
@@ -33,7 +38,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/widgets.dart';
 import 'models.dart';
-import 'pages.dart';
 
 class SuperTabBarController extends ChangeNotifier {
   SuperTabBarController({List<BrowserTab>? tabs, int? activeId})
@@ -44,43 +48,25 @@ class SuperTabBarController extends ChangeNotifier {
   }
 
   // ── Default seed tabs ──────────────────────────────────────
-  // Since v2.5 a BrowserTab carries its own icon + pageBuilder (no `kind`
-  // field). The defaults use GLTabPage with the legacy GLTabKind set so the
-  // zero-config demo still renders the rich built-in pages.
   static List<BrowserTab> _defaults() => [
         BrowserTab(
             id: 1,
             title: 'Chart of Accounts',
-            icon: glTabIcon(GLTabKind.ledger),
             pinned: true,
             behavior: SuperTabBehavior.requiredPinned,
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.ledger)),
+            pageBuilder: (ctx, tab) => _defaultPage(tab)),
         BrowserTab(
             id: 2,
             title: 'Opening Journal Entry — JV-2024-0042',
-            icon: glTabIcon(GLTabKind.doc),
             dirty: true,
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.doc)),
+            pageBuilder: (ctx, tab) => _defaultPage(tab)),
+        BrowserTab(id: 3, title: 'Downtown Central Store',
+            pageBuilder: (ctx, tab) => _defaultPage(tab)),
+        BrowserTab(id: 4, title: 'Dashboard',
+            pageBuilder: (ctx, tab) => _defaultPage(tab)),
         BrowserTab(
-            id: 3,
-            title: 'Downtown Central Store',
-            icon: glTabIcon(GLTabKind.store),
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.store)),
-        BrowserTab(
-            id: 4,
-            title: 'Dashboard',
-            icon: glTabIcon(GLTabKind.chart),
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.chart)),
-        BrowserTab(
-            id: 5,
-            title: 'Trial Balance — FY2024 Q3',
-            icon: glTabIcon(GLTabKind.ledger),
-            pageBuilder: (ctx, t) =>
-                GLTabPage(tab: t, kind: GLTabKind.ledger)),
+            id: 5, title: 'Trial Balance — FY2024 Q3',
+            pageBuilder: (ctx, tab) => _defaultPage(tab)),
       ];
 
   /// Ensures requiredPinned tabs always have pinned: true.
@@ -183,27 +169,40 @@ class SuperTabBarController extends ChangeNotifier {
   /// Adds a tab and (by default) activates it. Returns the id of the
   /// affected tab.
   ///
-  /// [pageBuilder] is **required** since v2.5 — every tab carries its own
-  /// page factory. Pass [icon] to set the leading tab-chip icon (or `null`
-  /// for an iconless chip). The legacy [GLTabKind] cycling fallback for the
-  /// title/icon was removed; use [kNewTabCycle] / [glTabIcon] inside your
-  /// [SuperTabBar.onAddTab] handler if you want that behaviour.
-  ///
   /// For [SuperTabBehavior.uniqueNormal] tabs with a non-null [uniqueKey]:
   /// if a tab with the same key already exists it is activated and its id
   /// returned — no new tab is created.
   ///
   /// [SuperTabBehavior.requiredPinned] tabs are always created with
   /// `pinned: true` regardless of the [pinned] argument.
+  ///
+  // Simple page for zero-config demo tabs (no pages.dart dependency).
+  static Widget _defaultPage(BrowserTab tab) => Builder(
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(tab.title),
+    ),
+  );
+
+  /// Supply [leading] and/or [trailing] to customise the tab chip:
+  /// ```dart
+  /// ctrl.add(
+  ///   title: 'Inbox',
+  ///   leading: const Icon(Icons.inbox_outlined, size: 14),
+  ///   trailing: _Badge(count: 3),
+  ///   pageBuilder: (ctx, tab) => const InboxPage(),
+  /// );
+  /// ```
   int add({
-    required TabPageBuilder pageBuilder,
     String? title,
-    IconData? icon,
     bool activate = true,
     bool pinned = false,
     int? at,
     SuperTabBehavior behavior = SuperTabBehavior.normal,
     String? uniqueKey,
+    Widget? leading,
+    Widget? trailing,
+    required TabPageBuilder pageBuilder,
   }) {
     // Deduplication for uniqueNormal tabs.
     if (behavior == SuperTabBehavior.uniqueNormal && uniqueKey != null) {
@@ -218,10 +217,11 @@ class SuperTabBarController extends ChangeNotifier {
     final tab = BrowserTab(
       id: id,
       title: title ?? 'New Tab',
-      icon: icon,
       pinned: behavior == SuperTabBehavior.requiredPinned ? true : pinned,
       behavior: behavior,
       uniqueKey: uniqueKey,
+      leading: leading,
+      trailing: trailing,
       pageBuilder: pageBuilder,
     );
 
@@ -286,6 +286,22 @@ class SuperTabBarController extends ChangeNotifier {
     }
     if (kill.contains(_activeId)) _activeId = id;
     notifyListeners();
+  }
+
+  /// Updates the [BrowserTab.pageBuilder] for [id] after creation.
+  ///
+  /// ```dart
+  /// final id = ctrl.add(title: 'Report',
+  ///     pageBuilder: (ctx, tab) => const SizedBox());
+  /// ctrl.setPageBuilder(id, (ctx, tab) => ReportPage(tabId: id));
+  /// ```
+  ///
+  /// Does not call [notifyListeners] — the builder takes effect on the next
+  /// build triggered by another mutation.
+  void setPageBuilder(int id, TabPageBuilder builder) {
+    final i = _tabs.indexWhere((t) => t.id == id);
+    if (i < 0) return;
+    _tabs[i] = _tabs[i].copyWith(pageBuilder: builder);
   }
 
   /// Duplicates [id] as the next sibling and activates the copy.
