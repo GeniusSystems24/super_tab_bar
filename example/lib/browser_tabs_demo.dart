@@ -51,10 +51,6 @@ class _BrowserTabsDemoState extends State<BrowserTabsDemo> {
     super.dispose();
   }
 
-  // Each tab gets a real stateful page — its counter / field / scroll position
-  // is the thing we want to survive a tab switch.
-  Widget _pageBuilder(BuildContext context, BrowserTab tab) =>
-      _StatefulTabPage(key: ValueKey('page-${tab.id}-$_lazy'), tab: tab);
 
   @override
   Widget build(BuildContext context) {

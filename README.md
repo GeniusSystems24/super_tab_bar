@@ -57,7 +57,7 @@ RTL throughout. Zero third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.6.0
+  super_tab_bar: ^2.6.1
 ```
 
 ```bash

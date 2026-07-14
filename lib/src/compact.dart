@@ -515,7 +515,11 @@ class _TabThumbnail extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    if (tab.leading != null) tab.leading!,
+                    tab.leading ?? Icon(Icons.tab_outlined,
+                        size: 15,
+                        color: active
+                            ? SuperTabBarThemeData.accent
+                            : s.fg3),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

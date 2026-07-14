@@ -646,7 +646,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
                 right: Directionality.of(ctx) == TextDirection.rtl ? null : 16,
                 left: Directionality.of(ctx) == TextDirection.rtl ? 16 : null,
                 child: FloatingActionButton(
-                  heroTag: 'super_tab_bar_compact_fab_${hashCode}',
+                  heroTag: 'super_tab_bar_compact_fab_$hashCode',
                   backgroundColor: SuperTabBarThemeData.accent,
                   foregroundColor: Colors.white,
                   tooltip: 'Open tab switcher',

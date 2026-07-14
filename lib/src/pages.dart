@@ -511,7 +511,7 @@ class _PageStore extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(), HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor()],
+              colors: [const HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(), const HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor()],
             ),
           ),
           child: Stack(
@@ -535,7 +535,7 @@ class _PageStore extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        Row(children: const [
+        const Row(children: [
           _Stat(label: "Today's sales", value: 'SAR 18,420', delta: '6.2% vs avg', up: true),
           SizedBox(width: 12),
           _Stat(label: 'Transactions', value: '142', delta: '12 in last hour', up: true),
@@ -638,7 +638,7 @@ class _PageDashboard extends StatelessWidget {
           actions: const [_Btn('Last 7 months ▾'), _Btn('Export report', primary: true)],
         ),
         const SizedBox(height: 20),
-        Row(children: const [
+        const Row(children: [
           _Stat(label: 'Revenue MTD', value: 'SAR 512,660', delta: '8.4%', up: true),
           SizedBox(width: 12),
           _Stat(label: 'Expenses MTD', value: 'SAR 329,410', delta: '3.1%', up: false),

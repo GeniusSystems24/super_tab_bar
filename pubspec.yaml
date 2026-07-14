@@ -9,7 +9,7 @@ description: >
   switching. Zero third-party dependencies.
 
 
-version: 2.6.0
+version: 2.6.1
 
 homepage: https://github.com/GeniusSystems24/super_tab_bar
 repository: https://github.com/GeniusSystems24/super_tab_bar
@@ -22,6 +22,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Shared GeniusLink design-system foundation — provides SuperPalette,
+  # SuperMaterialThemeData, and SuperThemeData for automatic light/dark theming.
+  super_core: ^1.0.0
 
 dev_dependencies:
   flutter_test:

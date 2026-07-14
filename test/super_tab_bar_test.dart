@@ -91,7 +91,7 @@ void main() {
     });
 
     test('copyWith preserves pageBuilder when not specified', () {
-      TabPageBuilder builder = (ctx, tab) => const Text('page');
+      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
       final tab = BrowserTab(
         id: 1,
         title: 'T',
@@ -330,7 +330,7 @@ void main() {
     });
 
     test('add stores pageBuilder on the new tab (v2.5)', () {
-      TabPageBuilder builder = (ctx, tab) => const Text('page');
+      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
       final id = ctrl.add(
         title: 'New',
         pageBuilder: builder,
@@ -345,7 +345,7 @@ void main() {
       );
       // pageBuilder is required — always non-null
       expect(ctrl.tabById(id)?.pageBuilder, isNotNull);
-      TabPageBuilder builder = (ctx, tab) => const Text('page');
+      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
       ctrl.setPageBuilder(id, builder);
       expect(ctrl.tabById(id)?.pageBuilder, same(builder));
     });

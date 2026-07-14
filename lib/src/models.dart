@@ -55,7 +55,7 @@ enum SuperTabBehavior {
 /// [SuperTabBarController] which produces new instances via [copyWith].
 @immutable
 class BrowserTab {
-  BrowserTab({
+  const BrowserTab({
     required this.id,
     required this.title,
     this.dirty = false,

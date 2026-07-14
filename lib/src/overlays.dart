@@ -453,7 +453,7 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                   border: Border(bottom: BorderSide(color: s.border))),
                               child: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.tab_outlined,
                                     size: 15,
                                     color: SuperTabBarThemeData.accent,
