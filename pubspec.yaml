@@ -9,22 +9,26 @@ description: >
   switching. Zero third-party dependencies.
 
 
-version: 2.6.1
+# package version
+version: 2.7.0
 
+# package homepage, repository, and issue tracker URLs
 homepage: https://github.com/GeniusSystems24/super_tab_bar
 repository: https://github.com/GeniusSystems24/super_tab_bar
 issue_tracker: https://github.com/GeniusSystems24/super_tab_bar/issues
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
-  flutter: ">=3.16.0"
+  sdk: ">=3.8.0 <4.0.0"
+  flutter: ">=3.32.0"
 
 dependencies:
   flutter:
     sdk: flutter
   # Shared GeniusLink design-system foundation — provides SuperPalette,
   # SuperMaterialThemeData, and SuperThemeData for automatic light/dark theming.
-  super_core: ^1.0.0
+  # v1.1.0 adds SuperMaterialThemeData.maybeOf + SuperTabBarThemeData
+  # .fromMaterialTheme, both used by this package.
+  super_core: ">=1.2.0 <2.0.0"
 
 dev_dependencies:
   flutter_test:

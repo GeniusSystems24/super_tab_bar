@@ -5,6 +5,7 @@
 // a self-contained screen pushed with a floating "back to demos" button.
 
 import 'package:flutter/material.dart';
+import 'package:super_core/super_core.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
 import 'example_01_basic_workspace.dart';
@@ -28,21 +29,21 @@ class _ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
+    final t = _dark
+        ? SuperMaterialThemeData.dark(
+            palette: SuperPalette.purplePalette
+          )
+        : SuperMaterialThemeData.light(
+            palette: SuperPalette.purplePalette
+          );
     return MaterialApp(
       title: 'super_tab_bar examples',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A7CFF)),
-        fontFamily: SuperTabBarThemeData.bodyFont,
-        scaffoldBackgroundColor: SuperTabBarThemeData.light.bg,
-        extensions: const [SuperTabBarThemeData.light],
+      theme: t.copyWith(
+        extensions: [SuperTabBarThemeData.fromMaterialTheme(t)],
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF4A7CFF), brightness: Brightness.dark),
-        fontFamily: SuperTabBarThemeData.bodyFont,
-        scaffoldBackgroundColor: SuperTabBarThemeData.dark.bg,
-        extensions: const [SuperTabBarThemeData.dark],
+      darkTheme: t.copyWith(
+        extensions: [SuperTabBarThemeData.fromMaterialTheme(t)],
       ),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
       home: LauncherScreen(
@@ -128,8 +129,7 @@ class LauncherScreen extends StatelessWidget {
       ),
       _Demo(
         title: 'Tab behaviors + callbacks',
-        subtitle:
-            'requiredPinned tabs that cannot be closed or unpinned, '
+        subtitle: 'requiredPinned tabs that cannot be closed or unpinned, '
             'uniqueNormal tabs that deduplicate on re-open, and a live '
             'event log showing all seven direct callbacks.',
         badge: 'v2 · Behaviors · Callbacks',
@@ -180,21 +180,18 @@ class LauncherScreen extends StatelessWidget {
                             const SizedBox(width: 12),
                             Text('SUPER_TAB_BAR',
                                 style: TextStyle(
-                                    fontFamily:
-                                        SuperTabBarThemeData.monoFont,
+                                    fontFamily: SuperTabBarThemeData.monoFont,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.8,
-                                    color:
-                                        SuperTabBarThemeData.accent)),
+                                    color: SuperTabBarThemeData.accent)),
                             const SizedBox(width: 10),
                             _VersionPill(),
                           ]),
                           const SizedBox(height: 16),
                           Text('Browser-style workspace tabs',
                               style: TextStyle(
-                                  fontFamily:
-                                      SuperTabBarThemeData.displayFont,
+                                  fontFamily: SuperTabBarThemeData.displayFont,
                                   fontSize: 34,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.8,
@@ -209,8 +206,7 @@ class LauncherScreen extends StatelessWidget {
                               'previews, and state-preserving pages. Open any '
                               'example to try it live in Light / Dark and LTR / RTL.',
                               style: TextStyle(
-                                  fontFamily:
-                                      SuperTabBarThemeData.bodyFont,
+                                  fontFamily: SuperTabBarThemeData.bodyFont,
                                   fontSize: 14.5,
                                   height: 1.6,
                                   color: s.fg3),
@@ -249,7 +245,8 @@ class LauncherScreen extends StatelessWidget {
                 }),
                 const SizedBox(height: 24),
                 Center(
-                  child: Text('MIT © GeniusSystems24 · pure Flutter, zero dependencies',
+                  child: Text(
+                      'MIT © GeniusSystems24 · pure Flutter, zero dependencies',
                       style: TextStyle(
                           fontFamily: SuperTabBarThemeData.monoFont,
                           fontSize: 11,
@@ -311,8 +308,7 @@ class _DemoCardState extends State<_DemoCard> {
                 color: _h
                     ? SuperTabBarThemeData.accent.withOpacity(0.55)
                     : s.border),
-            borderRadius:
-                BorderRadius.circular(SuperTabBarThemeData.radiusXl),
+            borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusXl),
             boxShadow: _h ? SuperTabBarThemeData.cardShadow : null,
           ),
           clipBehavior: Clip.antiAlias,
@@ -338,8 +334,7 @@ class _DemoCardState extends State<_DemoCard> {
                         ),
                         child: Text('0${widget.index}',
                             style: TextStyle(
-                                fontFamily:
-                                    SuperTabBarThemeData.monoFont,
+                                fontFamily: SuperTabBarThemeData.monoFont,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg2)),
@@ -362,17 +357,14 @@ class _DemoCardState extends State<_DemoCard> {
                       Expanded(
                         child: Text(widget.demo.title,
                             style: TextStyle(
-                                fontFamily:
-                                    SuperTabBarThemeData.displayFont,
+                                fontFamily: SuperTabBarThemeData.displayFont,
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg1)),
                       ),
                       Icon(Icons.arrow_outward,
                           size: 16,
-                          color: _h
-                              ? SuperTabBarThemeData.accent
-                              : s.fg3),
+                          color: _h ? SuperTabBarThemeData.accent : s.fg3),
                     ]),
                     const SizedBox(height: 6),
                     Text(widget.demo.subtitle,
@@ -493,8 +485,7 @@ class _TabThumb extends StatelessWidget {
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(6)),
                 ),
-                child: const Icon(Icons.push_pin,
-                    size: 9, color: accent),
+                child: const Icon(Icons.push_pin, size: 9, color: accent),
               ),
               Container(
                   width: 1,
@@ -504,11 +495,11 @@ class _TabThumb extends StatelessWidget {
             ],
             Expanded(
               child: ClipRect(
-                child: Row(children: [for (var i = 0; i < labels.length; i++) tab(i)]),
+                child: Row(
+                    children: [for (var i = 0; i < labels.length; i++) tab(i)]),
               ),
             ),
-            if (overflow)
-              Icon(Icons.chevron_right, size: 13, color: s.fg3),
+            if (overflow) Icon(Icons.chevron_right, size: 13, color: s.fg3),
             const SizedBox(width: 2),
             Icon(Icons.add, size: 12, color: s.fg3),
             const SizedBox(width: 2),
@@ -542,29 +533,27 @@ class _TabThumb extends StatelessWidget {
 
     switch (contentKind) {
       case _Content.form:
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              bar(70, c: s.fg1, h: 8),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: s.bg,
-                    borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: s.border),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: Column(children: [
-                    bar(double.infinity, h: 5),
-                    const SizedBox(height: 6),
-                    bar(double.infinity, h: 5),
-                    const SizedBox(height: 6),
-                    bar(120, h: 5),
-                  ]),
-                ),
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          bar(70, c: s.fg1, h: 8),
+          const SizedBox(height: 10),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: s.bg,
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: s.border),
               ),
-            ]);
+              padding: const EdgeInsets.all(8),
+              child: Column(children: [
+                bar(double.infinity, h: 5),
+                const SizedBox(height: 6),
+                bar(double.infinity, h: 5),
+                const SizedBox(height: 6),
+                bar(120, h: 5),
+              ]),
+            ),
+          ),
+        ]);
       case _Content.cards:
         return Column(children: [
           Row(children: [
@@ -595,23 +584,21 @@ class _TabThumb extends StatelessWidget {
           ),
         ]);
       case _Content.list:
-        return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              bar(70, c: s.fg1, h: 8),
-              const SizedBox(height: 9),
-              for (var i = 0; i < 4; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(children: [
-                    bar(26, h: 5),
-                    const SizedBox(width: 8),
-                    Expanded(child: bar(double.infinity, h: 5)),
-                    const SizedBox(width: 8),
-                    bar(30, c: SuperTabBarThemeData.accent.withOpacity(0.5), h: 5),
-                  ]),
-                ),
-            ]);
+        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          bar(70, c: s.fg1, h: 8),
+          const SizedBox(height: 9),
+          for (var i = 0; i < 4; i++)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(children: [
+                bar(26, h: 5),
+                const SizedBox(width: 8),
+                Expanded(child: bar(double.infinity, h: 5)),
+                const SizedBox(width: 8),
+                bar(30, c: SuperTabBarThemeData.accent.withOpacity(0.5), h: 5),
+              ]),
+            ),
+        ]);
     }
   }
 }
@@ -641,8 +628,8 @@ class _VersionPill extends StatelessWidget {
       decoration: BoxDecoration(
         color: SuperTabBarThemeData.accent.withOpacity(0.13),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-            color: SuperTabBarThemeData.accent.withOpacity(0.35)),
+        border:
+            Border.all(color: SuperTabBarThemeData.accent.withOpacity(0.35)),
       ),
       child: const Text('v2.5.0',
           style: TextStyle(
@@ -695,8 +682,7 @@ class _ThemeToggle extends StatelessWidget {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(color: s.borderStrong),
-            borderRadius:
-                BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+            borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusMd),
           ),
           child: Row(children: [
             Icon(dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
@@ -767,9 +753,7 @@ class _OriginalDemoState extends State<_OriginalDemo> {
   Widget build(BuildContext context) {
     return themed(
       brightness: _light ? Brightness.light : Brightness.dark,
-      ext: _light
-          ? SuperTabBarThemeData.light
-          : SuperTabBarThemeData.dark,
+      ext: _light ? SuperTabBarThemeData.light : SuperTabBarThemeData.dark,
       child: BrowserTabsDemo(
         light: _light,
         onToggleTheme: (v) => setState(() => _light = v),

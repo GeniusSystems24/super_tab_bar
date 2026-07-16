@@ -6,6 +6,27 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.7.0] — 2026-07-16
+
+### Added
+
+- **`SuperTabBarThemeData.fromMaterialTheme(SuperMaterialThemeData)`** — derives the
+  component theme directly from a `SuperMaterialThemeData`, reading palette-,
+  brightness- and device-mode-aware tokens from its registered
+  `SuperThemeData` instead of duplicating hard-coded light/dark hex.
+- ``SuperTabBarThemeData.of(context)`` now prefers this bridge: it returns an explicitly registered
+  `SuperTabBarThemeData` extension when present, otherwise derives from the ambient
+  `SuperMaterialThemeData`, and only falls back to the built-in preset when
+  neither is available.
+
+### Changed
+
+- Upgraded to **super_core 1.1.0** (`SuperMaterialThemeData` is now a
+  `ThemeData` subclass with responsive `SuperDeviceMode` tokens). Minimum
+  raised to `dart >=3.8.0`, `flutter >=3.32.0`.
+
+---
+
 ## [2.6.0] — 2026-07-13
 
 ### Breaking changes

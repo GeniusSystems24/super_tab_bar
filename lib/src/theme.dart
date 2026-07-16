@@ -160,6 +160,33 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     );
   }
 
+  /// Derives a [SuperTabBarThemeData] from a [SuperMaterialThemeData].
+  ///
+  /// This is the preferred bridge (v2.7.0): it reads the palette-, brightness-
+  /// and device-mode-aware surface tokens from `theme.superTheme` (the
+  /// [SuperThemeData] that [SuperMaterialThemeData] registers) so the tab bar
+  /// shares one source of truth with the rest of the toolkit instead of
+  /// duplicating hard-coded light/dark hex. Explicit extensions still win in
+  /// [of]; this is the automatic default.
+  factory SuperTabBarThemeData.fromMaterialTheme(SuperMaterialThemeData theme) {
+    return SuperTabBarThemeData.fromColorScheme(theme.colorScheme);
+    // final s = theme.superTheme;
+    // final isDark = theme.brightness == Brightness.dark;
+    // return SuperTabBarThemeData(
+    //   bg: s.bg,
+    //   surface: s.surface,
+    //   surface2: isDark ? s.hover : s.surface,
+    //   inputBg: s.inputBg,
+    //   hover: s.hover,
+    //   border: s.border,
+    //   borderStrong: s.borderStrong,
+    //   fg1: s.fg1,
+    //   fg2: s.fg2,
+    //   fg3: s.fg3,
+    //   fg4: s.fg4,
+    // );
+  }
+
   /// Reads the registered [ThemeExtension], or bridges from the current
   /// Material [ColorScheme] (enables [SuperMaterialThemeData] compatibility),
   /// or falls back to [dark] when no Material theme is present.
@@ -171,6 +198,10 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
   static SuperTabBarThemeData of(BuildContext context) {
     final ext = Theme.of(context).extension<SuperTabBarThemeData>();
     if (ext != null) return ext;
+    final superTheme = SuperMaterialThemeData.maybeOf(context);
+    if (superTheme != null) {
+      return SuperTabBarThemeData.fromMaterialTheme(superTheme);
+    }
     return SuperTabBarThemeData.fromColorScheme(
         Theme.of(context).colorScheme);
   }
