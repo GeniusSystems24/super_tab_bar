@@ -756,6 +756,6 @@ await showSuperTabDirtyCloseDialog(context, tab,
 ## Additional information
 
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
-- **Repository:** https://github.com/GeniusSystems24/super_tab_bar
-- **Issues:** https://github.com/GeniusSystems24/super_tab_bar/issues
+- **Repository:** <https://github.com/GeniusSystems24/super_tab_bar>
+- **Issues:** <https://github.com/GeniusSystems24/super_tab_bar/issues>
 - **License:** MIT — see [LICENSE](LICENSE)
