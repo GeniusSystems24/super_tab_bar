@@ -28,7 +28,6 @@ import 'models.dart';
 import 'theme.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
-import 'pages.dart';
 
 // ════════════════════════════════════════════════════════════
 // PUBLIC ENTRY POINT
@@ -242,11 +241,11 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: cols,
-                            crossAxisSpacing: 14,
-                            mainAxisSpacing: 14,
-                            childAspectRatio: 0.82,
-                          ),
+                                crossAxisCount: cols,
+                                crossAxisSpacing: 14,
+                                mainAxisSpacing: 14,
+                                childAspectRatio: 0.82,
+                              ),
                           itemCount: tabs.length,
                           itemBuilder: (ctx, i) => _cell(s, tabs[i]),
                         );
@@ -306,15 +305,15 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
   }
 
   Widget _empty(SuperTabBarThemeData s) => Center(
-        child: Text(
-          _loc.noOpenTabs,
-          style: TextStyle(
-            fontFamily: SuperTabBarThemeData.bodyFont,
-            fontSize: 13,
-            color: s.fg3,
-          ),
-        ),
-      );
+    child: Text(
+      _loc.noOpenTabs,
+      style: TextStyle(
+        fontFamily: SuperTabBarThemeData.bodyFont,
+        fontSize: 13,
+        color: s.fg3,
+      ),
+    ),
+  );
 
   // ── One thumbnail cell (draggable + drop target) ──────────
   Widget _cell(SuperTabBarThemeData s, BrowserTab tab) {
@@ -445,14 +444,16 @@ class _TabThumbnail extends StatelessWidget {
             boxShadow: elevated
                 ? SuperTabBarThemeData.popShadow
                 : (isOver
-                    ? [
-                        BoxShadow(
-                          color: SuperTabBarThemeData.accent.withOpacity(0.28),
-                          blurRadius: 18,
-                          spreadRadius: -4,
-                        )
-                      ]
-                    : null),
+                      ? [
+                          BoxShadow(
+                            color: SuperTabBarThemeData.accent.withOpacity(
+                              0.28,
+                            ),
+                            blurRadius: 18,
+                            spreadRadius: -4,
+                          ),
+                        ]
+                      : null),
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -496,8 +497,11 @@ class _TabThumbnail extends StatelessWidget {
                                 color: const Color(0xCC000000),
                                 borderRadius: BorderRadius.circular(13),
                               ),
-                              child: const Icon(Icons.close,
-                                  size: 15, color: Colors.white),
+                              child: const Icon(
+                                Icons.close,
+                                size: 15,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
@@ -507,19 +511,22 @@ class _TabThumbnail extends StatelessWidget {
               ),
               // Footer: icon · title · dirty / pin
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 9,
+                ),
                 decoration: BoxDecoration(
                   color: s.surface,
                   border: Border(top: BorderSide(color: s.border)),
                 ),
                 child: Row(
                   children: [
-                    tab.leading ?? Icon(Icons.tab_outlined,
-                        size: 15,
-                        color: active
-                            ? SuperTabBarThemeData.accent
-                            : s.fg3),
+                    tab.leading ??
+                        Icon(
+                          Icons.tab_outlined,
+                          size: 15,
+                          color: active ? SuperTabBarThemeData.accent : s.fg3,
+                        ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -529,8 +536,9 @@ class _TabThumbnail extends StatelessWidget {
                         style: TextStyle(
                           fontFamily: SuperTabBarThemeData.bodyFont,
                           fontSize: 12.5,
-                          fontWeight:
-                              active ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight: active
+                              ? FontWeight.w600
+                              : FontWeight.w500,
                           color: s.fg1,
                         ),
                       ),
@@ -591,7 +599,9 @@ class _PreviewArea extends StatelessWidget {
                 alignment: rtl ? Alignment.topRight : Alignment.topLeft,
                 clipBehavior: Clip.hardEdge,
                 child: RawImage(
-                    image: snapshot, filterQuality: FilterQuality.medium),
+                  image: snapshot,
+                  filterQuality: FilterQuality.medium,
+                ),
               ),
             )
           else if (fallback == PreviewFallback.liveRender)
@@ -638,9 +648,7 @@ class _PreviewArea extends StatelessWidget {
 
   Widget _blank(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
-    return Center(
-      child: Icon(Icons.tab_outlined, size: 34, color: s.fg4),
-    );
+    return Center(child: Icon(Icons.tab_outlined, size: 34, color: s.fg4));
   }
 }
 

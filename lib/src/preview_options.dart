@@ -46,8 +46,9 @@ class SuperTabBarPreviewOptions {
   static const SuperTabBarPreviewOptions defaults = SuperTabBarPreviewOptions();
 
   /// Previews fully disabled — no capture, no popover.
-  static const SuperTabBarPreviewOptions disabled =
-      SuperTabBarPreviewOptions(enabled: false);
+  static const SuperTabBarPreviewOptions disabled = SuperTabBarPreviewOptions(
+    enabled: false,
+  );
 }
 
 /// What to display inside [MiniPagePreview] when no

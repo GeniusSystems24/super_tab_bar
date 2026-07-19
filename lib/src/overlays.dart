@@ -9,7 +9,6 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'models.dart';
-import 'pages.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
 
@@ -19,11 +18,11 @@ typedef ScopeWrapper = Widget Function(Widget child);
 
 // ── Shared pop-card decoration ──────────────────────────────
 BoxDecoration _popDecoration(SuperTabBarThemeData s) => BoxDecoration(
-      color: s.surface,
-      border: Border.all(color: s.borderStrong),
-      borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusMd),
-      boxShadow: SuperTabBarThemeData.popShadow,
-    );
+  color: s.surface,
+  border: Border.all(color: s.borderStrong),
+  borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+  boxShadow: SuperTabBarThemeData.popShadow,
+);
 
 // ════════════════════════════════════════════════════════════
 // CONTEXT MENU
@@ -48,13 +47,13 @@ class TabMenuItem {
   }) : divider = false;
 
   const TabMenuItem.divider()
-      : icon = null,
-        label = null,
-        hint = null,
-        danger = false,
-        disabled = false,
-        run = null,
-        divider = true;
+    : icon = null,
+      label = null,
+      hint = null,
+      danger = false,
+      disabled = false,
+      run = null,
+      divider = true;
 }
 
 /// Right-click context menu, opened at the cursor [at] (global).
@@ -97,7 +96,10 @@ class TabContextMenu extends StatelessWidget {
                   if (it.divider)
                     Container(
                       height: 1,
-                      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                      margin: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 4,
+                      ),
                       color: s.border,
                     )
                   else
@@ -130,7 +132,9 @@ class _MenuRowState extends State<_MenuRow> {
     final color = it.danger ? SuperTabBarThemeData.danger : s.fg1;
 
     return MouseRegion(
-      cursor: it.disabled ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+      cursor: it.disabled
+          ? SystemMouseCursors.forbidden
+          : SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: GestureDetector(
@@ -214,8 +218,10 @@ class TabListDropdown extends StatelessWidget {
     final screen = MediaQuery.of(context).size;
     final rtl = Directionality.of(context) == TextDirection.rtl;
     const w = 280.0;
-    final left =
-        (rtl ? anchor.left : anchor.right - w).clamp(8.0, screen.width - w - 8);
+    final left = (rtl ? anchor.left : anchor.right - w).clamp(
+      8.0,
+      screen.width - w - 8,
+    );
     final top = (anchor.bottom + 6).clamp(8.0, screen.height - 8);
     final maxH = (screen.height - top - 16).clamp(160.0, screen.height);
 
@@ -295,7 +301,9 @@ class _ListRowState extends State<_ListRow> {
   Widget build(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     final t = widget.tab;
-    final bg = widget.active ? s.inputBg : (_hover ? s.hover : Colors.transparent);
+    final bg = widget.active
+        ? s.inputBg
+        : (_hover ? s.hover : Colors.transparent);
 
     return Semantics(
       button: true,
@@ -333,7 +341,9 @@ class _ListRowState extends State<_ListRow> {
                     style: TextStyle(
                       fontFamily: SuperTabBarThemeData.bodyFont,
                       fontSize: 13,
-                      fontWeight: widget.active ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight: widget.active
+                          ? FontWeight.w600
+                          : FontWeight.w500,
                       color: widget.active ? s.fg1 : s.fg2,
                     ),
                   ),
@@ -448,9 +458,14 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                             // header
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 11, vertical: 9),
+                                horizontal: 11,
+                                vertical: 9,
+                              ),
                               decoration: BoxDecoration(
-                                  border: Border(bottom: BorderSide(color: s.border))),
+                                border: Border(
+                                  bottom: BorderSide(color: s.border),
+                                ),
+                              ),
                               child: Row(
                                 children: [
                                   const Icon(
@@ -461,14 +476,16 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           tab.title,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            fontFamily: SuperTabBarThemeData.bodyFont,
+                                            fontFamily:
+                                                SuperTabBarThemeData.bodyFont,
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
                                             color: s.fg1,
@@ -480,7 +497,8 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
-                                            fontFamily: SuperTabBarThemeData.monoFont,
+                                            fontFamily:
+                                                SuperTabBarThemeData.monoFont,
                                             fontSize: 10.5,
                                             color: s.fg3,
                                           ),
@@ -490,7 +508,11 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                   ),
                                   if (tab.pinned) ...[
                                     const SizedBox(width: 6),
-                                    Icon(Icons.push_pin, size: 12, color: s.fg3),
+                                    Icon(
+                                      Icons.push_pin,
+                                      size: 12,
+                                      color: s.fg3,
+                                    ),
                                   ],
                                   if (tab.dirty) ...[
                                     const SizedBox(width: 6),
@@ -598,7 +620,9 @@ class _Thumbnail extends StatelessWidget {
                   alignment: rtl ? Alignment.topRight : Alignment.topLeft,
                   clipBehavior: Clip.hardEdge,
                   child: RawImage(
-                      image: snapshot, filterQuality: FilterQuality.medium),
+                    image: snapshot,
+                    filterQuality: FilterQuality.medium,
+                  ),
                 ),
               )
             else if (fallback == PreviewFallback.liveRender)
@@ -675,8 +699,10 @@ Future<String?> showSuperTabDirtyCloseDialog(
     pageBuilder: (ctx, a1, a2) => const SizedBox.shrink(),
     transitionBuilder: (ctx, anim, _, __) {
       final s = SuperTabBarThemeData.of(ctx);
-      final curved =
-          CurvedAnimation(parent: anim, curve: SuperTabBarThemeData.curveEmphasized);
+      final curved = CurvedAnimation(
+        parent: anim,
+        curve: SuperTabBarThemeData.curveEmphasized,
+      );
       return FadeTransition(
         opacity: curved,
         child: Transform.scale(
@@ -692,8 +718,9 @@ Future<String?> showSuperTabDirtyCloseDialog(
                   decoration: BoxDecoration(
                     color: s.surface,
                     border: Border.all(color: s.borderStrong),
-                    borderRadius:
-                        BorderRadius.circular(SuperTabBarThemeData.radiusXl),
+                    borderRadius: BorderRadius.circular(
+                      SuperTabBarThemeData.radiusXl,
+                    ),
                     boxShadow: SuperTabBarThemeData.popShadow,
                   ),
                   child: Column(
@@ -708,7 +735,9 @@ Future<String?> showSuperTabDirtyCloseDialog(
                             height: 36,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: SuperTabBarThemeData.warning.withOpacity(0.14),
+                              color: SuperTabBarThemeData.warning.withOpacity(
+                                0.14,
+                              ),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -725,7 +754,8 @@ Future<String?> showSuperTabDirtyCloseDialog(
                                 Text(
                                   localizations.discardChangesTitle,
                                   style: TextStyle(
-                                    fontFamily: SuperTabBarThemeData.displayFont,
+                                    fontFamily:
+                                        SuperTabBarThemeData.displayFont,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: s.fg1,
@@ -785,8 +815,7 @@ Future<String?> showGLDirtyCloseDialog(
   BuildContext context,
   BrowserTab tab, {
   SuperTabBarLocalizations localizations = SuperTabBarLocalizations.en,
-}) =>
-    showSuperTabDirtyCloseDialog(context, tab, localizations: localizations);
+}) => showSuperTabDirtyCloseDialog(context, tab, localizations: localizations);
 
 class _DialogBtn extends StatelessWidget {
   final String label;
@@ -817,9 +846,11 @@ class _DialogBtn extends StatelessWidget {
             decoration: BoxDecoration(
               color: danger ? SuperTabBarThemeData.danger : Colors.transparent,
               border: Border.all(
-                  color: danger ? Colors.transparent : s.borderStrong),
-              borderRadius:
-                  BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                color: danger ? Colors.transparent : s.borderStrong,
+              ),
+              borderRadius: BorderRadius.circular(
+                SuperTabBarThemeData.radiusMd,
+              ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -3,7 +3,6 @@
 //   File: lib/src/models.dart
 // ============================================================
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// Page builder type for [BrowserTab.pageBuilder].

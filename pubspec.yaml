@@ -10,7 +10,7 @@ description: >
 
 
 # package version
-version: 2.7.0
+version: 2.7.2
 
 # package homepage, repository, and issue tracker URLs
 homepage: https://github.com/GeniusSystems24/super_tab_bar
@@ -28,7 +28,7 @@ dependencies:
   # SuperMaterialThemeData, and SuperThemeData for automatic light/dark theming.
   # v1.1.0 adds SuperMaterialThemeData.maybeOf + SuperTabBarThemeData
   # .fromMaterialTheme, both used by this package.
-  super_core: ">=1.2.0 <2.0.0"
+  super_core: ">=2.1.0 <3.0.0"
 
 dev_dependencies:
   flutter_test:

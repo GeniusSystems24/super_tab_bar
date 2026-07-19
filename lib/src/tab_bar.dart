@@ -37,7 +37,6 @@ import 'package:flutter/services.dart';
 import 'theme.dart';
 import 'controller.dart';
 import 'models.dart';
-import 'pages.dart';
 import 'overlays.dart';
 import 'localizations.dart';
 import 'preview_options.dart';
@@ -360,11 +359,15 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   void _scrollByDir(bool towardEnd) {
     if (!_scroll.hasClients) return;
-    final target = (_scroll.offset + 220 * (towardEnd ? 1 : -1))
-        .clamp(0.0, _scroll.position.maxScrollExtent);
-    _scroll.animateTo(target,
-        duration: SuperTabBarThemeData.durSlow,
-        curve: SuperTabBarThemeData.curveStandard);
+    final target = (_scroll.offset + 220 * (towardEnd ? 1 : -1)).clamp(
+      0.0,
+      _scroll.position.maxScrollExtent,
+    );
+    _scroll.animateTo(
+      target,
+      duration: SuperTabBarThemeData.durSlow,
+      curve: SuperTabBarThemeData.curveStandard,
+    );
   }
 
   // ── Close (with dirty guard) ──────────────────────────────
@@ -615,13 +618,15 @@ class _SuperTabBarState extends State<SuperTabBar> {
                         color: s.bg,
                         border: Border.all(color: s.border),
                         borderRadius: BorderRadius.circular(
-                            SuperTabBarThemeData.radiusLg),
+                          SuperTabBarThemeData.radiusLg,
+                        ),
                       )
                     : BoxDecoration(color: s.bg),
                 clipBehavior: widget.showChrome ? Clip.antiAlias : Clip.none,
                 child: Column(
-                  mainAxisSize:
-                      widget.fillContent ? MainAxisSize.max : MainAxisSize.min,
+                  mainAxisSize: widget.fillContent
+                      ? MainAxisSize.max
+                      : MainAxisSize.min,
                   children: [
                     // Compact mode hides the strip; pair with SuperTabSwitcher.
                     if (!compact) _buildStrip(s),
@@ -721,12 +726,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
           _chevron(true, _chevEnd, s),
           const SizedBox(width: 4),
           // The + button is only shown when onAddTab is explicitly provided.
-          if (widget.onAddTab != null) ...[  
-            _IconBtn(
-              icon: Icons.add,
-              tooltip: _loc.newTab,
-              onTap: _add,
-            ),
+          if (widget.onAddTab != null) ...[
+            _IconBtn(icon: Icons.add, tooltip: _loc.newTab, onTap: _add),
             const SizedBox(width: 2),
           ],
           _IconBtn(
@@ -777,8 +778,11 @@ class _SuperTabBarState extends State<SuperTabBar> {
         }),
         feedback: _StaticTab(tab: tab, active: active, feedback: true),
         childWhenDragging: Opacity(
-            opacity: 0.4,
-            child: IgnorePointer(child: _StaticTab(tab: tab, active: active))),
+          opacity: 0.4,
+          child: IgnorePointer(
+            child: _StaticTab(tab: tab, active: active),
+          ),
+        ),
         child: _tabChip(tab, compact: false, first: first, isOver: isOver),
       ),
     );
@@ -859,8 +863,10 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
     Widget pageFor(BrowserTab t) {
       final Widget raw = t.pageBuilder(context, t);
-      final page =
-          KeyedSubtree(key: ValueKey('tabpage-content-${t.id}'), child: raw);
+      final page = KeyedSubtree(
+        key: ValueKey('tabpage-content-${t.id}'),
+        child: raw,
+      );
       final body = widget.scrollContent
           ? SingleChildScrollView(
               key: PageStorageKey('tabpage-${t.id}'),
@@ -877,7 +883,9 @@ class _SuperTabBarState extends State<SuperTabBar> {
       surface = widget.fillContent
           ? body
           : ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 440), child: body);
+              constraints: const BoxConstraints(maxHeight: 440),
+              child: body,
+            );
     } else {
       final stack = IndexedStack(
         index: activeIndex,
@@ -885,13 +893,17 @@ class _SuperTabBarState extends State<SuperTabBar> {
         children: [
           for (final t in ordered)
             _KeepAliveTabPage(
-                key: ValueKey('keepalive-${t.id}'), child: pageFor(t)),
+              key: ValueKey('keepalive-${t.id}'),
+              child: pageFor(t),
+            ),
         ],
       );
       surface = widget.fillContent
           ? stack
           : ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 440), child: stack);
+              constraints: const BoxConstraints(maxHeight: 440),
+              child: stack,
+            );
     }
 
     return Container(
@@ -1070,8 +1082,9 @@ class _TabChipState extends State<_TabChip> {
             alignment: AlignmentDirectional.centerStart,
             decoration: BoxDecoration(
               color: bg,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(9)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(9),
+              ),
             ),
             child: Stack(
               clipBehavior: Clip.none,
@@ -1106,16 +1119,22 @@ class _TabChipState extends State<_TabChip> {
   }
 
   Widget _content(
-      SuperTabBarThemeData s, BrowserTab tab, bool active, Color fg) {
+    SuperTabBarThemeData s,
+    BrowserTab tab,
+    bool active,
+    Color fg,
+  ) {
     if (widget.compact) {
       return Stack(
         children: [
           Center(
-            child: tab.leading ?? Icon(
-              Icons.tab_outlined,
-              size: 14,
-              color: active ? SuperTabBarThemeData.accent : s.fg3,
-            ),
+            child:
+                tab.leading ??
+                Icon(
+                  Icons.tab_outlined,
+                  size: 14,
+                  color: active ? SuperTabBarThemeData.accent : s.fg3,
+                ),
           ),
           if (tab.dirty)
             PositionedDirectional(
@@ -1136,11 +1155,12 @@ class _TabChipState extends State<_TabChip> {
 
     return Row(
       children: [
-        tab.leading ?? Icon(
-          Icons.tab_outlined,
-          size: 14,
-          color: active ? SuperTabBarThemeData.accent : s.fg3,
-        ),
+        tab.leading ??
+            Icon(
+              Icons.tab_outlined,
+              size: 14,
+              color: active ? SuperTabBarThemeData.accent : s.fg3,
+            ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
@@ -1241,11 +1261,12 @@ class _StaticTab extends StatelessWidget {
       ),
       child: Row(
         children: [
-          tab.leading ?? Icon(
-            Icons.tab_outlined,
-            size: 14,
-            color: active ? SuperTabBarThemeData.accent : s.fg3,
-          ),
+          tab.leading ??
+              Icon(
+                Icons.tab_outlined,
+                size: 14,
+                color: active ? SuperTabBarThemeData.accent : s.fg3,
+              ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
@@ -1265,7 +1286,9 @@ class _StaticTab extends StatelessWidget {
     );
     if (!feedback) return chip;
     return Material(
-        color: Colors.transparent, child: Opacity(opacity: 0.9, child: chip));
+      color: Colors.transparent,
+      child: Opacity(opacity: 0.9, child: chip),
+    );
   }
 }
 
@@ -1317,11 +1340,7 @@ class _IconBtnState extends State<_IconBtn> {
               color: on ? s.hover : Colors.transparent,
               borderRadius: BorderRadius.circular(7),
             ),
-            child: Icon(
-              widget.icon,
-              size: 16,
-              color: on ? s.fg1 : s.fg3,
-            ),
+            child: Icon(widget.icon, size: 16, color: on ? s.fg1 : s.fg3),
           ),
         ),
       ),

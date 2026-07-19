@@ -43,13 +43,16 @@ class _Pill extends StatelessWidget {
         color: c.withOpacity(0.15),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(text,
-          style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.44,
-              color: c)),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.44,
+          color: c,
+        ),
+      ),
     );
   }
 }
@@ -67,15 +70,22 @@ class _Btn extends StatelessWidget {
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: primary ? _blue : Colors.transparent,
-        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
-        border: Border.all(color: primary ? Colors.transparent : s.borderStrong),
+        borderRadius: BorderRadius.circular(
+          BrowserStyleTabBarThemeData.radiusMd,
+        ),
+        border: Border.all(
+          color: primary ? Colors.transparent : s.borderStrong,
+        ),
       ),
-      child: Text(label,
-          style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: primary ? Colors.white : s.fg1)),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: primary ? Colors.white : s.fg1,
+        ),
+      ),
     );
   }
 }
@@ -97,12 +107,15 @@ class _Avatar extends StatelessWidget {
         color: _oklchApprox(hue),
         shape: BoxShape.circle,
       ),
-      child: Text(initials,
-          style: TextStyle(
-              fontFamily: BrowserStyleTabBarThemeData.displayFont,
-              fontSize: size * 0.38,
-              fontWeight: FontWeight.w700,
-              color: Colors.white)),
+      child: Text(
+        initials,
+        style: TextStyle(
+          fontFamily: BrowserStyleTabBarThemeData.displayFont,
+          fontSize: size * 0.38,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 
@@ -123,7 +136,9 @@ class _Card extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.bg,
         border: Border.all(color: s.border),
-        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusLg),
+        borderRadius: BorderRadius.circular(
+          BrowserStyleTabBarThemeData.radiusLg,
+        ),
       ),
       child: child,
     );
@@ -134,7 +149,12 @@ class _Header extends StatelessWidget {
   final String crumb, title;
   final String? desc;
   final List<Widget> actions;
-  const _Header({required this.crumb, required this.title, this.desc, this.actions = const []});
+  const _Header({
+    required this.crumb,
+    required this.title,
+    this.desc,
+    this.actions = const [],
+  });
   @override
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
@@ -145,22 +165,39 @@ class _Header extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(crumb,
-                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11, letterSpacing: 0.44, color: s.fg3)),
+              Text(
+                crumb,
+                style: TextStyle(
+                  fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                  fontSize: 11,
+                  letterSpacing: 0.44,
+                  color: s.fg3,
+                ),
+              ),
               const SizedBox(height: 7),
-              Text(title,
-                  style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.displayFont,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
-                      color: s.fg1)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w700,
+                  height: 1.15,
+                  color: s.fg1,
+                ),
+              ),
               if (desc != null) ...[
                 const SizedBox(height: 8),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 560),
-                  child: Text(desc!,
-                      style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13.5, height: 1.5, color: s.fg3)),
+                  child: Text(
+                    desc!,
+                    style: TextStyle(
+                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                      fontSize: 13.5,
+                      height: 1.5,
+                      color: s.fg3,
+                    ),
+                  ),
                 ),
               ],
             ],
@@ -179,7 +216,12 @@ class _Stat extends StatelessWidget {
   final String label, value;
   final String? delta;
   final bool up;
-  const _Stat({required this.label, required this.value, this.delta, this.up = true});
+  const _Stat({
+    required this.label,
+    required this.value,
+    this.delta,
+    this.up = true,
+  });
   @override
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
@@ -189,21 +231,40 @@ class _Stat extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 11.5, fontWeight: FontWeight.w600, color: s.fg3)),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w600,
+                color: s.fg3,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text(value,
-                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.displayFont, fontSize: 23, fontWeight: FontWeight.w700, color: s.fg1)),
+            Text(
+              value,
+              style: TextStyle(
+                fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                fontSize: 23,
+                fontWeight: FontWeight.w700,
+                color: s.fg1,
+              ),
+            ),
             if (delta != null) ...[
               const SizedBox(height: 6),
-              Text('${up ? '▲' : '▼'} $delta',
-                  style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: up ? BrowserStyleTabBarThemeData.success : BrowserStyleTabBarThemeData.danger)),
+              Text(
+                '${up ? '▲' : '▼'} $delta',
+                style: TextStyle(
+                  fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: up
+                      ? BrowserStyleTabBarThemeData.success
+                      : BrowserStyleTabBarThemeData.danger,
+                ),
+              ),
             ],
           ],
         ),
@@ -228,17 +289,31 @@ class _Cell {
   final bool mono;
   final bool pill;
   final String? tone;
-  const _Cell({this.v, this.node, this.strong = false, this.mono = false, this.pill = false, this.tone});
+  const _Cell({
+    this.v,
+    this.node,
+    this.strong = false,
+    this.mono = false,
+    this.pill = false,
+    this.tone,
+  });
 }
 
 class _Table extends StatelessWidget {
   final List<_Col> cols;
   final List<List<_Cell>> rows;
   final Set<int> highlight;
-  const _Table({required this.cols, required this.rows, this.highlight = const {}});
+  const _Table({
+    required this.cols,
+    required this.rows,
+    this.highlight = const {},
+  });
 
   Widget _slot(_Col c, Widget child) {
-    final aligned = Align(alignment: c.end ? Alignment.centerRight : Alignment.centerLeft, child: child);
+    final aligned = Align(
+      alignment: c.end ? Alignment.centerRight : Alignment.centerLeft,
+      child: child,
+    );
     if (c.flex != null) return Expanded(flex: c.flex!, child: aligned);
     return SizedBox(width: c.width, child: aligned);
   }
@@ -252,19 +327,26 @@ class _Table extends StatelessWidget {
           // header
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            decoration: BoxDecoration(border: Border(bottom: BorderSide(color: s.border))),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: s.border)),
+            ),
             child: Row(
               children: cols
-                  .map((c) => _slot(
-                        c,
-                        Text(c.label.toUpperCase(),
-                            style: TextStyle(
-                                fontFamily: BrowserStyleTabBarThemeData.monoFont,
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.6,
-                                color: s.fg3)),
-                      ))
+                  .map(
+                    (c) => _slot(
+                      c,
+                      Text(
+                        c.label.toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.6,
+                          color: s.fg3,
+                        ),
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
           ),
@@ -273,12 +355,17 @@ class _Table extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
               decoration: BoxDecoration(
-                color: highlight.contains(ri) ? _blue.withOpacity(0.07) : Colors.transparent,
-                border: ri < rows.length - 1 ? Border(bottom: BorderSide(color: s.border)) : null,
+                color: highlight.contains(ri)
+                    ? _blue.withOpacity(0.07)
+                    : Colors.transparent,
+                border: ri < rows.length - 1
+                    ? Border(bottom: BorderSide(color: s.border))
+                    : null,
               ),
               child: Row(
                 children: [
-                  for (int ci = 0; ci < cols.length; ci++) _slot(cols[ci], _buildCell(context, rows[ri][ci]))
+                  for (int ci = 0; ci < cols.length; ci++)
+                    _slot(cols[ci], _buildCell(context, rows[ri][ci])),
                 ],
               ),
             ),
@@ -291,15 +378,22 @@ class _Table extends StatelessWidget {
     final s = BrowserStyleTabBarThemeData.of(context);
     if (cell.node != null) return cell.node!;
     if (cell.pill) return _Pill(cell.v ?? '', tone: cell.tone ?? 'neutral');
-    final color = cell.tone != null ? _tone(context, cell.tone!) : (cell.strong ? s.fg1 : s.fg2);
-    return Text(cell.v ?? '',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-            fontFamily: cell.mono ? BrowserStyleTabBarThemeData.monoFont : BrowserStyleTabBarThemeData.bodyFont,
-            fontSize: 13,
-            fontWeight: cell.strong ? FontWeight.w600 : FontWeight.w500,
-            color: color));
+    final color = cell.tone != null
+        ? _tone(context, cell.tone!)
+        : (cell.strong ? s.fg1 : s.fg2);
+    return Text(
+      cell.v ?? '',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        fontFamily: cell.mono
+            ? BrowserStyleTabBarThemeData.monoFont
+            : BrowserStyleTabBarThemeData.bodyFont,
+        fontSize: 13,
+        fontWeight: cell.strong ? FontWeight.w600 : FontWeight.w500,
+        color: color,
+      ),
+    );
   }
 }
 
@@ -338,9 +432,18 @@ class _PageLedger extends StatelessWidget {
         decoration: BoxDecoration(
           color: grow ? s.inputBg : Colors.transparent,
           border: Border.all(color: s.borderStrong),
-          borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+          borderRadius: BorderRadius.circular(
+            BrowserStyleTabBarThemeData.radiusMd,
+          ),
         ),
-        child: Text(t, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, color: grow ? s.fg3 : s.fg2)),
+        child: Text(
+          t,
+          style: TextStyle(
+            fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+            fontSize: 13,
+            color: grow ? s.fg3 : s.fg2,
+          ),
+        ),
       );
       return grow ? Expanded(child: chip) : chip;
     }
@@ -351,17 +454,20 @@ class _PageLedger extends StatelessWidget {
         _Header(
           crumb: 'Accounting / General Ledger',
           title: tab.title,
-          desc: 'Every posting account in the workspace, grouped by classification with live balances.',
+          desc:
+              'Every posting account in the workspace, grouped by classification with live balances.',
           actions: const [_Btn('Export'), _Btn('New account', primary: true)],
         ),
         const SizedBox(height: 20),
-        Row(children: [
-          filter('Search accounts…', grow: true),
-          const SizedBox(width: 10),
-          filter('All types ▾'),
-          const SizedBox(width: 10),
-          filter('FY 2024 ▾'),
-        ]),
+        Row(
+          children: [
+            filter('Search accounts…', grow: true),
+            const SizedBox(width: 10),
+            filter('All types ▾'),
+            const SizedBox(width: 10),
+            filter('FY 2024 ▾'),
+          ],
+        ),
         const SizedBox(height: 16),
         _Table(
           cols: const [
@@ -378,7 +484,7 @@ class _PageLedger extends StatelessWidget {
                 _Cell(v: r[1], strong: true),
                 _Cell(v: r[2], pill: true, tone: toneFor[r[2]]),
                 _Cell(v: _sar(r[3]), mono: true, strong: true),
-              ]
+              ],
           ],
         ),
       ],
@@ -405,23 +511,40 @@ class _PageDoc extends StatelessWidget {
       ['Prepared by', 'M. Nasser'],
     ];
     Widget total(String label, String value, {Color? color}) => Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            Text(label.toUpperCase(),
-                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 10.5, letterSpacing: 0.5, color: s.fg3)),
-            const SizedBox(height: 4),
-            Text(value,
-                style: TextStyle(
-                    fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 16, fontWeight: FontWeight.w700, color: color ?? s.fg1)),
-          ],
-        );
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontFamily: BrowserStyleTabBarThemeData.monoFont,
+            fontSize: 10.5,
+            letterSpacing: 0.5,
+            color: s.fg3,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontFamily: BrowserStyleTabBarThemeData.monoFont,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: color ?? s.fg1,
+          ),
+        ),
+      ],
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _Header(
           crumb: 'Accounting / Journal',
           title: tab.title,
-          actions: const [_Pill('UNSAVED', tone: 'warning'), _Btn('Discard'), _Btn('Post entry', primary: true)],
+          actions: const [
+            _Pill('UNSAVED', tone: 'warning'),
+            _Btn('Discard'),
+            _Btn('Post entry', primary: true),
+          ],
         ),
         const SizedBox(height: 20),
         Row(
@@ -434,17 +557,30 @@ class _PageDoc extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(meta[i][0].toUpperCase(),
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 10.5, letterSpacing: 0.5, color: s.fg3)),
+                      Text(
+                        meta[i][0].toUpperCase(),
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                          fontSize: 10.5,
+                          letterSpacing: 0.5,
+                          color: s.fg3,
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      Text(meta[i][1],
-                          style: TextStyle(
-                              fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w600, color: s.fg1)),
+                      Text(
+                        meta[i][1],
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: s.fg1,
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ),
-            ]
+            ],
           ],
         ),
         const SizedBox(height: 16),
@@ -460,9 +596,17 @@ class _PageDoc extends StatelessWidget {
               [
                 _Cell(v: l[0], mono: true),
                 _Cell(v: l[1], strong: true),
-                _Cell(v: l[2].isNotEmpty ? _sar(l[2]) : '—', mono: true, tone: l[2].isEmpty ? 'neutral' : null),
-                _Cell(v: l[3].isNotEmpty ? _sar(l[3]) : '—', mono: true, tone: l[3].isEmpty ? 'neutral' : null),
-              ]
+                _Cell(
+                  v: l[2].isNotEmpty ? _sar(l[2]) : '—',
+                  mono: true,
+                  tone: l[2].isEmpty ? 'neutral' : null,
+                ),
+                _Cell(
+                  v: l[3].isNotEmpty ? _sar(l[3]) : '—',
+                  mono: true,
+                  tone: l[3].isEmpty ? 'neutral' : null,
+                ),
+              ],
           ],
         ),
         const SizedBox(height: 16),
@@ -473,7 +617,11 @@ class _PageDoc extends StatelessWidget {
             const SizedBox(width: 40),
             total('Total credit', 'SAR 556,200.00'),
             const SizedBox(width: 40),
-            total('Difference', 'SAR 0.00', color: BrowserStyleTabBarThemeData.success),
+            total(
+              'Difference',
+              'SAR 0.00',
+              color: BrowserStyleTabBarThemeData.success,
+            ),
           ],
         ),
       ],
@@ -507,11 +655,16 @@ class _PageStore extends StatelessWidget {
           height: 96,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusLg),
+            borderRadius: BorderRadius.circular(
+              BrowserStyleTabBarThemeData.radiusLg,
+            ),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [const HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(), const HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor()],
+              colors: [
+                const HSLColor.fromAHSL(1, 250, 0.35, 0.38).toColor(),
+                const HSLColor.fromAHSL(1, 220, 0.32, 0.32).toColor(),
+              ],
             ),
           ),
           child: Stack(
@@ -522,26 +675,60 @@ class _PageStore extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('BRANCH · RYD-01',
-                        style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11, letterSpacing: 0.5, color: Colors.white.withOpacity(0.7))),
+                    Text(
+                      'BRANCH · RYD-01',
+                      style: TextStyle(
+                        fontFamily: BrowserStyleTabBarThemeData.monoFont,
+                        fontSize: 11,
+                        letterSpacing: 0.5,
+                        color: Colors.white.withOpacity(0.7),
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(tab.title,
-                        style: const TextStyle(fontFamily: BrowserStyleTabBarThemeData.displayFont, fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white)),
+                    Text(
+                      tab.title,
+                      style: const TextStyle(
+                        fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
                   ],
                 ),
               ),
-              const Align(alignment: Alignment.topRight, child: _Pill('OPEN', tone: 'success')),
+              const Align(
+                alignment: Alignment.topRight,
+                child: _Pill('OPEN', tone: 'success'),
+              ),
             ],
           ),
         ),
         const SizedBox(height: 18),
-        const Row(children: [
-          _Stat(label: "Today's sales", value: 'SAR 18,420', delta: '6.2% vs avg', up: true),
-          SizedBox(width: 12),
-          _Stat(label: 'Transactions', value: '142', delta: '12 in last hour', up: true),
-          SizedBox(width: 12),
-          _Stat(label: 'Avg basket', value: 'SAR 129.70', delta: '1.4%', up: false),
-        ]),
+        const Row(
+          children: [
+            _Stat(
+              label: "Today's sales",
+              value: 'SAR 18,420',
+              delta: '6.2% vs avg',
+              up: true,
+            ),
+            SizedBox(width: 12),
+            _Stat(
+              label: 'Transactions',
+              value: '142',
+              delta: '12 in last hour',
+              up: true,
+            ),
+            SizedBox(width: 12),
+            _Stat(
+              label: 'Avg basket',
+              value: 'SAR 129.70',
+              delta: '1.4%',
+              up: false,
+            ),
+          ],
+        ),
         const SizedBox(height: 18),
         IntrinsicHeight(
           child: Row(
@@ -554,23 +741,48 @@ class _PageStore extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Store details',
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w700, color: s.fg1)),
+                      Text(
+                        'Store details',
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: s.fg1,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       for (int i = 0; i < details.length; i++)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 9),
                           decoration: BoxDecoration(
-                              border: i < details.length - 1 ? Border(bottom: BorderSide(color: s.border)) : null),
+                            border: i < details.length - 1
+                                ? Border(bottom: BorderSide(color: s.border))
+                                : null,
+                          ),
                           child: Row(
                             children: [
-                              Text(details[i][0], style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, color: s.fg3)),
+                              Text(
+                                details[i][0],
+                                style: TextStyle(
+                                  fontFamily:
+                                      BrowserStyleTabBarThemeData.bodyFont,
+                                  fontSize: 13,
+                                  color: s.fg3,
+                                ),
+                              ),
                               const Spacer(),
                               Flexible(
-                                child: Text(details[i][1],
-                                    textAlign: TextAlign.right,
-                                    style: TextStyle(
-                                        fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
+                                child: Text(
+                                  details[i][1],
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    fontFamily:
+                                        BrowserStyleTabBarThemeData.bodyFont,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: s.fg1,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -587,8 +799,15 @@ class _PageStore extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('On shift',
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w700, color: s.fg1)),
+                      Text(
+                        'On shift',
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: s.fg1,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       for (final p in shift)
                         Padding(
@@ -600,10 +819,25 @@ class _PageStore extends StatelessWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(p[0],
-                                      style: TextStyle(
-                                          fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
-                                  Text(p[1], style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 11.5, color: s.fg3)),
+                                  Text(
+                                    p[0],
+                                    style: TextStyle(
+                                      fontFamily:
+                                          BrowserStyleTabBarThemeData.bodyFont,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: s.fg1,
+                                    ),
+                                  ),
+                                  Text(
+                                    p[1],
+                                    style: TextStyle(
+                                      fontFamily:
+                                          BrowserStyleTabBarThemeData.bodyFont,
+                                      fontSize: 11.5,
+                                      color: s.fg3,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -627,7 +861,15 @@ class _PageDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
-    final bars = [['Jan', 58], ['Feb', 72], ['Mar', 49], ['Apr', 81], ['May', 66], ['Jun', 94], ['Jul', 77]];
+    final bars = [
+      ['Jan', 58],
+      ['Feb', 72],
+      ['Mar', 49],
+      ['Apr', 81],
+      ['May', 66],
+      ['Jun', 94],
+      ['Jul', 77],
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -635,18 +877,43 @@ class _PageDashboard extends StatelessWidget {
           crumb: 'Overview',
           title: tab.title,
           desc: 'Live financial position across all branches, month to date.',
-          actions: const [_Btn('Last 7 months ▾'), _Btn('Export report', primary: true)],
+          actions: const [
+            _Btn('Last 7 months ▾'),
+            _Btn('Export report', primary: true),
+          ],
         ),
         const SizedBox(height: 20),
-        const Row(children: [
-          _Stat(label: 'Revenue MTD', value: 'SAR 512,660', delta: '8.4%', up: true),
-          SizedBox(width: 12),
-          _Stat(label: 'Expenses MTD', value: 'SAR 329,410', delta: '3.1%', up: false),
-          SizedBox(width: 12),
-          _Stat(label: 'Net profit', value: 'SAR 183,250', delta: '18.2%', up: true),
-          SizedBox(width: 12),
-          _Stat(label: 'Cash position', value: 'SAR 343,420', delta: '2.0%', up: true),
-        ]),
+        const Row(
+          children: [
+            _Stat(
+              label: 'Revenue MTD',
+              value: 'SAR 512,660',
+              delta: '8.4%',
+              up: true,
+            ),
+            SizedBox(width: 12),
+            _Stat(
+              label: 'Expenses MTD',
+              value: 'SAR 329,410',
+              delta: '3.1%',
+              up: false,
+            ),
+            SizedBox(width: 12),
+            _Stat(
+              label: 'Net profit',
+              value: 'SAR 183,250',
+              delta: '18.2%',
+              up: true,
+            ),
+            SizedBox(width: 12),
+            _Stat(
+              label: 'Cash position',
+              value: 'SAR 343,420',
+              delta: '2.0%',
+              up: true,
+            ),
+          ],
+        ),
         const SizedBox(height: 16),
         _Card(
           pad: 20,
@@ -656,8 +923,15 @@ class _PageDashboard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Monthly revenue',
-                      style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w700, color: s.fg1)),
+                  Text(
+                    'Monthly revenue',
+                    style: TextStyle(
+                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: s.fg1,
+                    ),
+                  ),
                   const _Pill('▲ 8.4% YoY', tone: 'success'),
                 ],
               ),
@@ -679,18 +953,29 @@ class _PageDashboard extends StatelessWidget {
                                 width: double.infinity,
                                 height: ((bars[i][1] as int) / 100) * 122,
                                 decoration: BoxDecoration(
-                                  color: i == 5 ? _blue : _blue.withOpacity(0.28),
-                                  borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+                                  color: i == 5
+                                      ? _blue
+                                      : _blue.withOpacity(0.28),
+                                  borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(4),
+                                  ),
                                 ),
                               ),
                             ),
                             const SizedBox(height: 8),
-                            Text(bars[i][0] as String,
-                                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11, color: s.fg3)),
+                            Text(
+                              bars[i][0] as String,
+                              style: TextStyle(
+                                fontFamily:
+                                    BrowserStyleTabBarThemeData.monoFont,
+                                fontSize: 11,
+                                color: s.fg3,
+                              ),
+                            ),
                           ],
                         ),
                       ),
-                    ]
+                    ],
                   ],
                 ),
               ),
@@ -709,8 +994,22 @@ class _PagePeople extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
     final people = [
-      ['Sara Al-Otaibi', 'Branch Manager', 'Riyadh', 'Active', 'success', '200'],
-      ['Mohammed Nasser', 'Accountant', 'Head Office', 'Active', 'success', '250'],
+      [
+        'Sara Al-Otaibi',
+        'Branch Manager',
+        'Riyadh',
+        'Active',
+        'success',
+        '200',
+      ],
+      [
+        'Mohammed Nasser',
+        'Accountant',
+        'Head Office',
+        'Active',
+        'success',
+        '250',
+      ],
       ['Lina Haddad', 'Cashier', 'Riyadh', 'On leave', 'warning', '30'],
       ['Khalid Faisal', 'Inventory Lead', 'Jeddah', 'Active', 'success', '140'],
       ['Noura Saleh', 'Sales Associate', 'Riyadh', 'Invited', 'info', '320'],
@@ -736,21 +1035,30 @@ class _PagePeople extends StatelessWidget {
             for (final p in people)
               [
                 _Cell(
-                  node: Row(children: [
-                    _Avatar(p[0], hue: double.parse(p[5]), size: 30),
-                    const SizedBox(width: 11),
-                    Flexible(
-                      child: Text(p[0],
+                  node: Row(
+                    children: [
+                      _Avatar(p[0], hue: double.parse(p[5]), size: 30),
+                      const SizedBox(width: 11),
+                      Flexible(
+                        child: Text(
+                          p[0],
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
-                    ),
-                  ]),
+                          style: TextStyle(
+                            fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: s.fg1,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 _Cell(v: p[1]),
                 _Cell(v: p[2]),
                 _Cell(v: p[3], pill: true, tone: p[4]),
-              ]
+              ],
           ],
         ),
       ],
@@ -770,7 +1078,11 @@ class _PageGeneric extends StatelessWidget {
       ['Added store · Jeddah North', '3h ago'],
       ['Invited Noura Saleh', 'Yesterday'],
     ];
-    final platforms = [['Salla', true], ['Zid', true], ['Foodics POS', false]];
+    final platforms = [
+      ['Salla', true],
+      ['Zid', true],
+      ['Foodics POS', false],
+    ];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -791,24 +1103,55 @@ class _PageGeneric extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Recent activity',
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w700, color: s.fg1)),
+                      Text(
+                        'Recent activity',
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: s.fg1,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       for (int i = 0; i < activity.length; i++)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                              border: i < activity.length - 1 ? Border(bottom: BorderSide(color: s.border)) : null),
+                            border: i < activity.length - 1
+                                ? Border(bottom: BorderSide(color: s.border))
+                                : null,
+                          ),
                           child: Row(
                             children: [
-                              Container(width: 7, height: 7, decoration: const BoxDecoration(color: _blue, shape: BoxShape.circle)),
+                              Container(
+                                width: 7,
+                                height: 7,
+                                decoration: const BoxDecoration(
+                                  color: _blue,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: Text(activity[i][0],
-                                    style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, color: s.fg1)),
+                                child: Text(
+                                  activity[i][0],
+                                  style: TextStyle(
+                                    fontFamily:
+                                        BrowserStyleTabBarThemeData.bodyFont,
+                                    fontSize: 13,
+                                    color: s.fg1,
+                                  ),
+                                ),
                               ),
-                              Text(activity[i][1],
-                                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11.5, color: s.fg3)),
+                              Text(
+                                activity[i][1],
+                                style: TextStyle(
+                                  fontFamily:
+                                      BrowserStyleTabBarThemeData.monoFont,
+                                  fontSize: 11.5,
+                                  color: s.fg3,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -823,22 +1166,42 @@ class _PageGeneric extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Connected platforms',
-                          style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, fontWeight: FontWeight.w700, color: s.fg1)),
+                      Text(
+                        'Connected platforms',
+                        style: TextStyle(
+                          fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                          color: s.fg1,
+                        ),
+                      ),
                       const SizedBox(height: 12),
                       for (int i = 0; i < platforms.length; i++)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 11),
                           decoration: BoxDecoration(
-                              border: i < platforms.length - 1 ? Border(bottom: BorderSide(color: s.border)) : null),
+                            border: i < platforms.length - 1
+                                ? Border(bottom: BorderSide(color: s.border))
+                                : null,
+                          ),
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(platforms[i][0] as String,
-                                    style: TextStyle(
-                                        fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
+                                child: Text(
+                                  platforms[i][0] as String,
+                                  style: TextStyle(
+                                    fontFamily:
+                                        BrowserStyleTabBarThemeData.bodyFont,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: s.fg1,
+                                  ),
+                                ),
                               ),
-                              if (platforms[i][1] as bool) const _Pill('Connected', tone: 'success') else const _Btn('Connect'),
+                              if (platforms[i][1] as bool)
+                                const _Pill('Connected', tone: 'success')
+                              else
+                                const _Btn('Connect'),
                             ],
                           ),
                         ),

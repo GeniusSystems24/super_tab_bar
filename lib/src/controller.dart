@@ -41,41 +41,54 @@ import 'models.dart';
 
 class SuperTabBarController extends ChangeNotifier {
   SuperTabBarController({List<BrowserTab>? tabs, int? activeId})
-      : _tabs = _normalize(tabs ?? _defaults()) {
+    : _tabs = _normalize(tabs ?? _defaults()) {
     _seed = _tabs.fold<int>(0, (m, t) => t.id > m ? t.id : m);
-    _activeId = activeId ??
-        (_tabs.length > 1 ? _tabs[1].id : (_tabs.isNotEmpty ? _tabs.first.id : null));
+    _activeId =
+        activeId ??
+        (_tabs.length > 1
+            ? _tabs[1].id
+            : (_tabs.isNotEmpty ? _tabs.first.id : null));
   }
 
   // ── Default seed tabs ──────────────────────────────────────
   static List<BrowserTab> _defaults() => [
-        BrowserTab(
-            id: 1,
-            title: 'Chart of Accounts',
-            pinned: true,
-            behavior: SuperTabBehavior.requiredPinned,
-            pageBuilder: (ctx, tab) => _defaultPage(tab)),
-        BrowserTab(
-            id: 2,
-            title: 'Opening Journal Entry — JV-2024-0042',
-            dirty: true,
-            pageBuilder: (ctx, tab) => _defaultPage(tab)),
-        BrowserTab(id: 3, title: 'Downtown Central Store',
-            pageBuilder: (ctx, tab) => _defaultPage(tab)),
-        BrowserTab(id: 4, title: 'Dashboard',
-            pageBuilder: (ctx, tab) => _defaultPage(tab)),
-        BrowserTab(
-            id: 5, title: 'Trial Balance — FY2024 Q3',
-            pageBuilder: (ctx, tab) => _defaultPage(tab)),
-      ];
+    BrowserTab(
+      id: 1,
+      title: 'Chart of Accounts',
+      pinned: true,
+      behavior: SuperTabBehavior.requiredPinned,
+      pageBuilder: (ctx, tab) => _defaultPage(tab),
+    ),
+    BrowserTab(
+      id: 2,
+      title: 'Opening Journal Entry — JV-2024-0042',
+      dirty: true,
+      pageBuilder: (ctx, tab) => _defaultPage(tab),
+    ),
+    BrowserTab(
+      id: 3,
+      title: 'Downtown Central Store',
+      pageBuilder: (ctx, tab) => _defaultPage(tab),
+    ),
+    BrowserTab(
+      id: 4,
+      title: 'Dashboard',
+      pageBuilder: (ctx, tab) => _defaultPage(tab),
+    ),
+    BrowserTab(
+      id: 5,
+      title: 'Trial Balance — FY2024 Q3',
+      pageBuilder: (ctx, tab) => _defaultPage(tab),
+    ),
+  ];
 
   /// Ensures requiredPinned tabs always have pinned: true.
   static List<BrowserTab> _normalize(List<BrowserTab> tabs) => [
-        for (final t in tabs)
-          t.behavior == SuperTabBehavior.requiredPinned && !t.pinned
-              ? t.copyWith(pinned: true)
-              : t,
-      ];
+    for (final t in tabs)
+      t.behavior == SuperTabBehavior.requiredPinned && !t.pinned
+          ? t.copyWith(pinned: true)
+          : t,
+  ];
 
   final List<BrowserTab> _tabs;
   int? _activeId;
@@ -178,10 +191,8 @@ class SuperTabBarController extends ChangeNotifier {
   ///
   // Simple page for zero-config demo tabs (no pages.dart dependency).
   static Widget _defaultPage(BrowserTab tab) => Builder(
-    builder: (ctx) => Padding(
-      padding: const EdgeInsets.all(24),
-      child: Text(tab.title),
-    ),
+    builder: (ctx) =>
+        Padding(padding: const EdgeInsets.all(24), child: Text(tab.title)),
   );
 
   /// Supply [leading] and/or [trailing] to customise the tab chip:
@@ -252,8 +263,9 @@ class SuperTabBarController extends ChangeNotifier {
       if (_tabs.isEmpty) {
         _activeId = null;
       } else {
-        final candidates =
-            ord.where((t) => t.id != id && _tabs.any((n) => n.id == t.id)).toList();
+        final candidates = ord
+            .where((t) => t.id != id && _tabs.any((n) => n.id == t.id))
+            .toList();
         final idx = oi.clamp(0, candidates.length - 1);
         _activeId = candidates.isEmpty ? _tabs.first.id : candidates[idx].id;
       }
@@ -278,7 +290,11 @@ class SuperTabBarController extends ChangeNotifier {
   void closeToRight(int id) {
     final oi = ordered.indexWhere((t) => t.id == id);
     if (oi < 0) return;
-    final kill = ordered.skip(oi + 1).where((t) => !t.pinned).map((t) => t.id).toSet();
+    final kill = ordered
+        .skip(oi + 1)
+        .where((t) => !t.pinned)
+        .map((t) => t.id)
+        .toSet();
     if (kill.isEmpty) return;
     _tabs.removeWhere((t) => kill.contains(t.id));
     for (final k in kill) {
@@ -393,12 +409,15 @@ class SuperTabBarController extends ChangeNotifier {
 
   // ── Inherited lookup ───────────────────────────────────────
   /// The controller hosting [context], or null if not inside a [SuperTabBar].
-  static SuperTabBarController? of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<SuperTabBarScope>()?.controller;
+  static SuperTabBarController? of(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<SuperTabBarScope>()
+      ?.controller;
 
   /// Non-listening variant — use in callbacks / initState.
   static SuperTabBarController? read(BuildContext context) =>
-      (context.getElementForInheritedWidgetOfExactType<SuperTabBarScope>()?.widget
+      (context
+                  .getElementForInheritedWidgetOfExactType<SuperTabBarScope>()
+                  ?.widget
               as SuperTabBarScope?)
           ?.controller;
 
