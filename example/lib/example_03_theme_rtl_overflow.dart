@@ -132,7 +132,7 @@ class _ThemeRtlOverflowExampleState
             ),
             title: Text('03 · Theme + RTL + overflow',
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.displayFont,
+                    fontFamily: s.displayFontFamily,
                     fontWeight: FontWeight.w700,
                     fontSize: 16,
                     color: s.fg1)),
@@ -193,27 +193,27 @@ class _ThemeRtlOverflowExampleState
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 8),
                       decoration: BoxDecoration(
-                        color: SuperTabBarThemeData.accent
-                            .withOpacity(0.12),
+                        color: s.accentColor
+                            .withValues(alpha: 0.12),
                         border: Border.all(
-                            color: SuperTabBarThemeData.accent
-                                .withOpacity(0.4)),
+                            color: s.accentColor
+                                .withValues(alpha: 0.4)),
                         borderRadius: BorderRadius.circular(
-                            SuperTabBarThemeData.radiusMd),
+                            s.radiusMedium),
                       ),
                       child: Row(mainAxisSize: MainAxisSize.min, children: [
-                        const Icon(Icons.add,
+                        Icon(Icons.add,
                             size: 14,
-                            color: SuperTabBarThemeData.accent),
+                            color: s.accentColor),
                         const SizedBox(width: 6),
                         Text(
                           'Add tab (${_ctrl.length}/20)',
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontFamily:
-                                  SuperTabBarThemeData.bodyFont,
+                                  s.bodyFontFamily,
                               fontSize: 12.5,
                               fontWeight: FontWeight.w600,
-                              color: SuperTabBarThemeData.accent),
+                              color: s.accentColor),
                         ),
                       ]),
                     ),
@@ -232,14 +232,14 @@ class _ThemeRtlOverflowExampleState
                   'bg #F7F3EE · surface #FFF · inputBg #EEE9E2 · '
                   'border #DDD7CE · fg1 #1A1714 · fg3 #7A7268',
                   style: TextStyle(
-                      fontFamily: SuperTabBarThemeData.monoFont,
+                      fontFamily: s.monoFontFamily,
                       fontSize: 11,
                       color: s.fg3),
                 ),
               ),
             // ── preview / l10n info bar ───────────────────────
             AnimatedContainer(
-              duration: SuperTabBarThemeData.durBase,
+              duration: s.baseDuration,
               height: (!_previewEnabled || _previewInstant || _arabic) ? 30 : 0,
               color: s.surface,
               clipBehavior: Clip.antiAlias,
@@ -252,14 +252,14 @@ class _ThemeRtlOverflowExampleState
                 child: Row(children: [
                   if (_arabic)
                     _InfoChip('SuperTabBarLocalizations.ar',
-                        SuperTabBarThemeData.accent),
+                        s.accentColor),
                   if (_previewInstant)
                     _InfoChip(
                         'SuperTabBarPreviewOptions(hoverDelay: Duration.zero)',
-                        SuperTabBarThemeData.success),
+                        s.successColor),
                   if (!_previewEnabled)
                     _InfoChip('SuperTabBarPreviewOptions.disabled',
-                        SuperTabBarThemeData.danger),
+                        s.dangerColor),
                 ]),
               ),
             ),
@@ -303,17 +303,18 @@ class _InfoChip extends StatelessWidget {
   const _InfoChip(this.text, this.color);
   @override
   Widget build(BuildContext context) {
+    final s = SuperTabBarThemeData.of(context);
     return Container(
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withOpacity(0.30)),
+        border: Border.all(color: color.withValues(alpha: 0.30)),
       ),
       child: Text(text,
           style: TextStyle(
-            fontFamily: SuperTabBarThemeData.monoFont,
+            fontFamily: s.monoFontFamily,
             fontSize: 10,
             fontWeight: FontWeight.w700,
             color: color,
@@ -341,7 +342,7 @@ class _SegmentedToggle extends StatelessWidget {
         color: s.inputBg,
         border: Border.all(color: s.border),
         borderRadius:
-            BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+            BorderRadius.circular(s.radiusMedium),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -350,19 +351,19 @@ class _SegmentedToggle extends StatelessWidget {
           return GestureDetector(
             onTap: () => onChanged(i),
             child: AnimatedContainer(
-              duration: SuperTabBarThemeData.durFast,
+              duration: s.fastDuration,
               padding: const EdgeInsets.symmetric(
                   horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
                 color: active
-                    ? SuperTabBarThemeData.accent
+                    ? s.accentColor
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(
-                    SuperTabBarThemeData.radiusSm),
+                    s.radiusSmall),
               ),
               child: Text(options[i],
                   style: TextStyle(
-                      fontFamily: SuperTabBarThemeData.bodyFont,
+                      fontFamily: s.bodyFontFamily,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: active ? Colors.white : s.fg2)),

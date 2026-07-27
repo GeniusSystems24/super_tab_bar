@@ -160,10 +160,10 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                 height: 38,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: BrowserStyleTabBarThemeData.accent.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+                  color: BrowserStyleTabBarThemeData.of(context).accentColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
                 ),
-                child: Icon(Icons.tab_outlined, size: 19, color: BrowserStyleTabBarThemeData.accent),
+                child: Icon(Icons.tab_outlined, size: 19, color: BrowserStyleTabBarThemeData.of(context).accentColor),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -171,7 +171,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontFamily: BrowserStyleTabBarThemeData.displayFont,
+                        fontFamily: BrowserStyleTabBarThemeData.of(context).displayFontFamily,
                         fontSize: 19,
                         fontWeight: FontWeight.w700,
                         color: s.fg1)),
@@ -181,7 +181,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                 decoration: BoxDecoration(
                     color: s.bg, borderRadius: BorderRadius.circular(999), border: Border.all(color: s.border)),
                 child: Text('tab #${widget.tab.id}',
-                    style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11, color: s.fg3)),
+                    style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 11, color: s.fg3)),
               ),
             ],
           ),
@@ -198,7 +198,7 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
               Expanded(
                 child: TextField(
                   controller: _field,
-                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, color: s.fg1),
+                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 14, color: s.fg1),
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: 'Type here, switch tabs, come back…',
@@ -208,10 +208,10 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
                     enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: s.border),
-                        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd)),
+                        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium)),
                     focusedBorder: OutlineInputBorder(
-                        borderSide: const BorderSide(color: BrowserStyleTabBarThemeData.accent, width: 1.5),
-                        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd)),
+                        borderSide: BorderSide(color: BrowserStyleTabBarThemeData.of(context).accentColor, width: 1.5),
+                        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium)),
                   ),
                 ),
               ),
@@ -219,13 +219,13 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
           ),
           const SizedBox(height: 16),
           Text('Scroll position is also preserved — scroll this list, switch away, and return:',
-              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 12.5, color: s.fg3)),
+              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 12.5, color: s.fg3)),
           const SizedBox(height: 10),
           Expanded(
             child: Container(
               decoration: BoxDecoration(
                 color: s.bg,
-                borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+                borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
                 border: Border.all(color: s.border),
               ),
               clipBehavior: Clip.antiAlias,
@@ -239,9 +239,9 @@ class _StatefulTabPageState extends State<_StatefulTabPage> {
                   itemBuilder: (ctx, i) => ListTile(
                     dense: true,
                     leading: Text('${(i + 1).toString().padLeft(2, '0')}',
-                        style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 12, color: s.fg4)),
+                        style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 12, color: s.fg4)),
                     title: Text('Line item ${i + 1} · ${widget.tab.title}',
-                        style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, color: s.fg2)),
+                        style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 13, color: s.fg2)),
                   ),
                 ),
               ),
@@ -290,7 +290,7 @@ class _CounterControl extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: s.bg,
-        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
         border: Border.all(color: s.border),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -301,7 +301,7 @@ class _CounterControl extends StatelessWidget {
           child: Text('$value',
               textAlign: TextAlign.center,
               style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 17, fontWeight: FontWeight.w700, color: BrowserStyleTabBarThemeData.accent)),
+                  fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 17, fontWeight: FontWeight.w700, color: BrowserStyleTabBarThemeData.of(context).accentColor)),
         ),
         Container(width: 1, height: 24, color: s.border),
         btn(Icons.add_rounded, onPlus),
@@ -315,15 +315,15 @@ class _LazyBadge extends StatelessWidget {
   const _LazyBadge({required this.lazy});
   @override
   Widget build(BuildContext context) {
-    final c = lazy ? BrowserStyleTabBarThemeData.warning : BrowserStyleTabBarThemeData.success;
+    final c = lazy ? BrowserStyleTabBarThemeData.of(context).warningColor : BrowserStyleTabBarThemeData.of(context).successColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
-      decoration: BoxDecoration(color: c.withOpacity(0.14), borderRadius: BorderRadius.circular(999), border: Border.all(color: c.withOpacity(0.45))),
+      decoration: BoxDecoration(color: c.withValues(alpha: 0.14), borderRadius: BorderRadius.circular(999), border: Border.all(color: c.withValues(alpha: 0.45))),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
         Icon(lazy ? Icons.refresh_rounded : Icons.lock_outline_rounded, size: 13, color: c),
         const SizedBox(width: 6),
         Text(lazy ? 'lazyPages: true · resets' : 'lazyPages: false · preserved',
-            style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 11, fontWeight: FontWeight.w700, color: c)),
+            style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 11, fontWeight: FontWeight.w700, color: c)),
       ]),
     );
   }
@@ -352,15 +352,15 @@ class _SegToggle extends StatelessWidget {
             duration: BrowserStyleTabBarThemeData.durFast,
             padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
             decoration: BoxDecoration(
-              color: selected ? BrowserStyleTabBarThemeData.accent : Colors.transparent,
-              borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusSm),
+              color: selected ? BrowserStyleTabBarThemeData.of(context).accentColor : Colors.transparent,
+              borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusSmall),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               Icon(ic, size: 14, color: selected ? Colors.white : s.fg3),
               const SizedBox(width: 6),
               Text(label,
                   style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+                      fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
                       fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: selected ? Colors.white : s.fg2)),
@@ -371,7 +371,7 @@ class _SegToggle extends StatelessWidget {
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: s.bg,
-        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
         border: Border.all(color: s.border),
       ),
       child: Row(mainAxisSize: MainAxisSize.min, children: [
@@ -398,13 +398,13 @@ class _DirToggle extends StatelessWidget {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(color: s.border),
-            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(rtl ? Icons.format_textdirection_r_to_l_rounded : Icons.format_textdirection_l_to_r_rounded, size: 15, color: s.fg2),
             const SizedBox(width: 8),
             Text(rtl ? 'RTL' : 'LTR',
-                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
+                style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
           ]),
         ),
       ),
@@ -440,12 +440,12 @@ class _Shell extends StatelessWidget {
                         children: [
                           Text('GENIUSLINK DESIGN SYSTEM',
                               style: TextStyle(
-                                  fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.65, color: BrowserStyleTabBarThemeData.accent)),
+                                  fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.65, color: BrowserStyleTabBarThemeData.of(context).accentColor)),
                           const SizedBox(height: 10),
                           Text(title,
-                              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.displayFont, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.7, color: s.fg1)),
+                              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).displayFontFamily, fontSize: 30, fontWeight: FontWeight.w800, letterSpacing: -0.7, color: s.fg1)),
                           const SizedBox(height: 6),
-                          Text(subtitle, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 14, color: s.fg3)),
+                          Text(subtitle, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 14, color: s.fg3)),
                         ],
                       ),
                     ),
@@ -480,14 +480,14 @@ class _ThemeToggle extends StatelessWidget {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(color: s.borderStrong),
-            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
           ),
           child: Row(
             children: [
               Icon(light ? Icons.light_mode_outlined : Icons.dark_mode_outlined, size: 15, color: s.fg2),
               const SizedBox(width: 8),
               Text(light ? 'Light' : 'Dark',
-                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
+                  style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 13, fontWeight: FontWeight.w600, color: s.fg1)),
             ],
           ),
         ),
@@ -508,11 +508,11 @@ class _Section extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(children: [
-          Container(width: 4, height: 22, color: BrowserStyleTabBarThemeData.accent, margin: const EdgeInsets.only(right: 12)),
-          Expanded(child: Text(title, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 16, fontWeight: FontWeight.w700, color: s.fg1))),
+          Container(width: 4, height: 22, color: BrowserStyleTabBarThemeData.of(context).accentColor, margin: const EdgeInsets.only(right: 12)),
+          Expanded(child: Text(title, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 16, fontWeight: FontWeight.w700, color: s.fg1))),
         ]),
         const SizedBox(height: 8),
-        Text(desc, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, height: 1.55, color: s.fg3)),
+        Text(desc, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 13, height: 1.55, color: s.fg3)),
         const SizedBox(height: 18),
         child,
       ],
@@ -533,13 +533,13 @@ class _Spec extends StatelessWidget {
       decoration: BoxDecoration(
         color: s.surface,
         border: Border.all(color: s.border),
-        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusLg),
+        borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusLarge),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label.toUpperCase(),
-              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: BrowserStyleTabBarThemeData.accent)),
+              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: BrowserStyleTabBarThemeData.of(context).accentColor)),
           const SizedBox(height: 12),
           child,
         ],
@@ -555,11 +555,11 @@ class _Pill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = BrowserStyleTabBarThemeData.of(context);
-    final c = {'info': BrowserStyleTabBarThemeData.accent, 'warning': BrowserStyleTabBarThemeData.warning, 'success': BrowserStyleTabBarThemeData.success, 'neutral': s.fg3}[tone] ?? s.fg3;
+    final c = {'info': BrowserStyleTabBarThemeData.of(context).accentColor, 'warning': BrowserStyleTabBarThemeData.of(context).warningColor, 'success': BrowserStyleTabBarThemeData.of(context).successColor, 'neutral': s.fg3}[tone] ?? s.fg3;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-      decoration: BoxDecoration(color: c.withOpacity(0.15), borderRadius: BorderRadius.circular(999)),
-      child: Text(text, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 11, fontWeight: FontWeight.w700, color: c)),
+      decoration: BoxDecoration(color: c.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(999)),
+      child: Text(text, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 11, fontWeight: FontWeight.w700, color: c)),
     );
   }
 }
@@ -576,7 +576,7 @@ Widget _bullets(BuildContext context, List<String> items, {Color? color}) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('•  ', style: TextStyle(fontSize: 13, color: color ?? s.fg3, height: 1.55)),
-              Expanded(child: Text(i, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.bodyFont, fontSize: 13, height: 1.55, color: color ?? s.fg2))),
+              Expanded(child: Text(i, style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily, fontSize: 13, height: 1.55, color: color ?? s.fg2))),
             ],
           ),
         ),
@@ -658,7 +658,7 @@ class _DocsGrid extends StatelessWidget {
               'fillContent · scrollContent\n'
               'BrowserTab(id, title, kind,\n'
               '  dirty?, pinned?)',
-              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 12.5, height: 1.7, color: s.fg2),
+              style: TextStyle(fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 12.5, height: 1.7, color: s.fg2),
             ),
           );
         }),

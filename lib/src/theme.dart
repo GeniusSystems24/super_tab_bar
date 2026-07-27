@@ -1,31 +1,8 @@
 // ============================================================
-// SuperTabBarThemeData — the component's own ThemeExtension.
+// SuperTabBarThemeData — the component ThemeExtension.
 // ------------------------------------------------------------
-// Self-contained: all surfaces and brand constants needed by SuperTabBar.
-//
-//   • Instance fields  = surfaces that SWAP between dark & light (lerped).
-//   • Static const     = brand constants that don't vary by theme.
-//
-// v2.5.0 — SuperMaterialThemeData compatibility
-// ----------------------------------------------
-// SuperTabBarThemeData.of(context) now bridges from the Material ColorScheme
-// automatically when no explicit extension is registered. This means
-// registering SuperMaterialThemeData.light/dark() in MaterialApp is
-// sufficient — no extra extension wiring is needed:
-//
-//   MaterialApp(
-//     theme:     SuperMaterialThemeData.light(palette: SuperPalette.bluePalette),
-//     darkTheme: SuperMaterialThemeData.dark(palette: SuperPalette.bluePalette),
-//     // SuperTabBar themes automatically from ColorScheme.
-//   )
-//
-// To override explicitly:
-//
-//   ThemeData(
-//     extensions: [SuperTabBarThemeData.fromColorScheme(colorScheme)],
-//   )
-//
-//   File: lib/src/theme.dart
+// v3.0.0 derives brand colors, typography, radii, and motion from super_core's
+// ambient SuperMaterialThemeData. Explicit extension overrides still win.
 // ============================================================
 
 import 'package:flutter/material.dart';
@@ -33,19 +10,6 @@ import 'package:super_core/super_core.dart';
 
 @immutable
 class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
-  // ── Swappable surfaces (dark ↔ light) ──────────────────────
-  final Color bg; // strip container / page base
-  final Color surface; // active-tab content / card
-  final Color surface2; // nested card
-  final Color inputBg; // input fill / close-button hover
-  final Color hover; // hover tint
-  final Color border; // hairline
-  final Color borderStrong; // solid divider / pop-card edge
-  final Color fg1; // primary text
-  final Color fg2; // secondary
-  final Color fg3; // tertiary / placeholder
-  final Color fg4; // disabled
-
   const SuperTabBarThemeData({
     required this.bg,
     required this.surface,
@@ -58,28 +22,74 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     required this.fg2,
     required this.fg3,
     required this.fg4,
+    this.accentColor = const Color(0xFF4A7CFF),
+    this.successColor = const Color(0xFF1DB88A),
+    this.warningColor = const Color(0xFFF97316),
+    this.dangerColor = const Color(0xFFEF4444),
+    this.infoColor = const Color(0xFF0EA5E9),
+    this.displayFontFamily = 'Manrope',
+    this.bodyFontFamily = 'Inter',
+    this.monoFontFamily = 'JetBrainsMono',
+    this.radiusSmall = 4,
+    this.radiusMedium = 6,
+    this.radiusLarge = 8,
+    this.radiusExtraLarge = 12,
+    this.cardShadows = defaultCardShadow,
+    this.popShadows = defaultPopShadow,
+    this.fastDuration = const Duration(milliseconds: 100),
+    this.baseDuration = const Duration(milliseconds: 150),
+    this.slowDuration = const Duration(milliseconds: 300),
+    this.slowerDuration = const Duration(milliseconds: 500),
+    this.standardCurve = const Cubic(0.4, 0, 0.2, 1),
+    this.decelerateCurve = const Cubic(0, 0, 0.2, 1),
+    this.emphasizedCurve = const Cubic(0.2, 0, 0, 1),
   });
 
-  // ── Brand + semantic palette (theme-independent · const) ───
-  static const Color accent = Color(0xFF4A7CFF);
-  static const Color success = Color(0xFF1DB88A);
-  static const Color warning = Color(0xFFF97316);
-  static const Color danger = Color(0xFFEF4444);
-  static const Color info = accent;
+  // Swappable surfaces.
+  final Color bg;
+  final Color surface;
+  final Color surface2;
+  final Color inputBg;
+  final Color hover;
+  final Color border;
+  final Color borderStrong;
+  final Color fg1;
+  final Color fg2;
+  final Color fg3;
+  final Color fg4;
 
-  // ── Typography ─────────────────────────────────────────────
-  static const String displayFont = 'Manrope';
-  static const String bodyFont = 'Inter';
-  static const String monoFont = 'JetBrainsMono';
+  // Brand and semantic colors resolved from super_core.
+  final Color accentColor;
+  final Color successColor;
+  final Color warningColor;
+  final Color dangerColor;
+  final Color infoColor;
 
-  // ── Radii ──────────────────────────────────────────────────
-  static const double radiusSm = 4;
-  static const double radiusMd = 6;
-  static const double radiusLg = 8;
-  static const double radiusXl = 12;
+  // Typography resolved from SuperTokensData.
+  final String displayFontFamily;
+  final String bodyFontFamily;
+  final String monoFontFamily;
 
-  // ── Elevation ──────────────────────────────────────────────
-  static const List<BoxShadow> cardShadow = [
+  // Responsive radii resolved from SuperSpacing.
+  final double radiusSmall;
+  final double radiusMedium;
+  final double radiusLarge;
+  final double radiusExtraLarge;
+
+  // Elevation.
+  final List<BoxShadow> cardShadows;
+  final List<BoxShadow> popShadows;
+
+  // Motion resolved from SuperTokensData where possible.
+  final Duration fastDuration;
+  final Duration baseDuration;
+  final Duration slowDuration;
+  final Duration slowerDuration;
+  final Curve standardCurve;
+  final Curve decelerateCurve;
+  final Curve emphasizedCurve;
+
+  static const List<BoxShadow> defaultCardShadow = [
     BoxShadow(
       color: Color(0x40000000),
       blurRadius: 50,
@@ -87,7 +97,8 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
       offset: Offset(0, 25),
     ),
   ];
-  static const List<BoxShadow> popShadow = [
+
+  static const List<BoxShadow> defaultPopShadow = [
     BoxShadow(
       color: Color(0x73000000),
       blurRadius: 32,
@@ -96,16 +107,55 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     ),
   ];
 
-  // ── Motion ─────────────────────────────────────────────────
+  // Legacy constants retained for source compatibility. New code should read
+  // the resolved instance from SuperTabBarThemeData.of(context).
+  @Deprecated('Use SuperTabBarThemeData.of(context).accentColor.')
+  static const Color accent = Color(0xFF4A7CFF);
+  @Deprecated('Use SuperTabBarThemeData.of(context).successColor.')
+  static const Color success = Color(0xFF1DB88A);
+  @Deprecated('Use SuperTabBarThemeData.of(context).warningColor.')
+  static const Color warning = Color(0xFFF97316);
+  @Deprecated('Use SuperTabBarThemeData.of(context).dangerColor.')
+  static const Color danger = Color(0xFFEF4444);
+  @Deprecated('Use SuperTabBarThemeData.of(context).infoColor.')
+  static const Color info = Color(0xFF0EA5E9);
+
+  @Deprecated('Use SuperTabBarThemeData.of(context).displayFontFamily.')
+  static const String displayFont = 'Manrope';
+  @Deprecated('Use SuperTabBarThemeData.of(context).bodyFontFamily.')
+  static const String bodyFont = 'Inter';
+  @Deprecated('Use SuperTabBarThemeData.of(context).monoFontFamily.')
+  static const String monoFont = 'JetBrainsMono';
+
+  @Deprecated('Use SuperTabBarThemeData.of(context).radiusSmall.')
+  static const double radiusSm = 4;
+  @Deprecated('Use SuperTabBarThemeData.of(context).radiusMedium.')
+  static const double radiusMd = 6;
+  @Deprecated('Use SuperTabBarThemeData.of(context).radiusLarge.')
+  static const double radiusLg = 8;
+  @Deprecated('Use SuperTabBarThemeData.of(context).radiusExtraLarge.')
+  static const double radiusXl = 12;
+
+  @Deprecated('Use SuperTabBarThemeData.of(context).cardShadows.')
+  static const List<BoxShadow> cardShadow = defaultCardShadow;
+  @Deprecated('Use SuperTabBarThemeData.of(context).popShadows.')
+  static const List<BoxShadow> popShadow = defaultPopShadow;
+
+  @Deprecated('Use SuperTabBarThemeData.of(context).fastDuration.')
   static const Duration durFast = Duration(milliseconds: 100);
+  @Deprecated('Use SuperTabBarThemeData.of(context).baseDuration.')
   static const Duration durBase = Duration(milliseconds: 150);
+  @Deprecated('Use SuperTabBarThemeData.of(context).slowDuration.')
   static const Duration durSlow = Duration(milliseconds: 300);
+  @Deprecated('Use SuperTabBarThemeData.of(context).slowerDuration.')
   static const Duration durSlower = Duration(milliseconds: 500);
+  @Deprecated('Use SuperTabBarThemeData.of(context).standardCurve.')
   static const Curve curveStandard = Cubic(0.4, 0, 0.2, 1);
+  @Deprecated('Use SuperTabBarThemeData.of(context).decelerateCurve.')
   static const Curve curveDecelerate = Cubic(0, 0, 0.2, 1);
+  @Deprecated('Use SuperTabBarThemeData.of(context).emphasizedCurve.')
   static const Curve curveEmphasized = Cubic(0.2, 0, 0, 1);
 
-  // ── Static presets ─────────────────────────────────────────
   static const SuperTabBarThemeData dark = SuperTabBarThemeData(
     bg: Color(0xFF111318),
     surface: Color(0xFF1E2025),
@@ -134,77 +184,73 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     fg4: Color(0xFFC2C6D6),
   );
 
-  // ── SuperMaterialThemeData compatibility ──────────────────
-
-  /// Derives a [SuperTabBarThemeData] from a Material [ColorScheme].
-  ///
-  /// Called automatically by [of] when no explicit extension is registered,
-  /// enabling seamless use with [SuperMaterialThemeData]. Reads GeniusLink
-  /// neutral surface constants for surface/border tokens so the tab bar
-  /// remains visually consistent with the rest of the Super toolkit.
+  /// Derives the component theme from a regular Material [ColorScheme].
   factory SuperTabBarThemeData.fromColorScheme(ColorScheme cs) {
-    final isDark = cs.brightness == Brightness.dark;
-    final fallback = isDark ? dark : light;
-    // Use GeniusLink-standard neutral surfaces for visual consistency;
-    // fg tokens come from the ColorScheme for accurate palette adaptation.
     return SuperTabBarThemeData(
-      bg: isDark ? const Color(0xFF111318) : const Color(0xFFF7F8FA),
-      surface: isDark ? const Color(0xFF1E2025) : cs.surface,
-      surface2: isDark ? const Color(0xFF292D38) : cs.surfaceContainerHighest,
-      inputBg: isDark ? const Color(0xFF33353A) : cs.surfaceContainerHighest,
-      hover: isDark ? const Color(0xFF2F3540) : fallback.hover,
-      border: isDark ? const Color(0x6643464F) : cs.outline,
-      borderStrong: isDark ? const Color(0xFF434654) : cs.outlineVariant,
+      bg: cs.surface,
+      surface: cs.surfaceContainerLow,
+      surface2: cs.surfaceContainer,
+      inputBg: cs.surfaceContainerHighest,
+      hover: cs.onSurface.withValues(alpha: 0.08),
+      border: cs.outlineVariant,
+      borderStrong: cs.outline,
       fg1: cs.onSurface,
       fg2: cs.onSurfaceVariant,
-      fg3: isDark ? const Color(0xFF8D90A0) : cs.onSurfaceVariant,
-      fg4: isDark ? const Color(0xFF44474E) : fallback.fg4,
+      fg3: cs.onSurfaceVariant.withValues(alpha: 0.78),
+      fg4: cs.onSurface.withValues(alpha: 0.38),
+      accentColor: cs.primary,
+      dangerColor: cs.error,
+      infoColor: cs.tertiary,
     );
   }
 
-  /// Derives a [SuperTabBarThemeData] from a [SuperMaterialThemeData].
-  ///
-  /// This is the preferred bridge (v2.7.0): it reads the palette-, brightness-
-  /// and device-mode-aware surface tokens from `theme.superTheme` (the
-  /// [SuperThemeData] that [SuperMaterialThemeData] registers) so the tab bar
-  /// shares one source of truth with the rest of the toolkit instead of
-  /// duplicating hard-coded light/dark hex. Explicit extensions still win in
-  /// [of]; this is the automatic default.
+  /// Derives every available value from the active GeniusLink design system.
   factory SuperTabBarThemeData.fromMaterialTheme(SuperMaterialThemeData theme) {
-    return SuperTabBarThemeData.fromColorScheme(theme.colorScheme);
-    // final s = theme.superTheme;
-    // final isDark = theme.brightness == Brightness.dark;
-    // return SuperTabBarThemeData(
-    //   bg: s.bg,
-    //   surface: s.surface,
-    //   surface2: isDark ? s.hover : s.surface,
-    //   inputBg: s.inputBg,
-    //   hover: s.hover,
-    //   border: s.border,
-    //   borderStrong: s.borderStrong,
-    //   fg1: s.fg1,
-    //   fg2: s.fg2,
-    //   fg3: s.fg3,
-    //   fg4: s.fg4,
-    // );
+    final s = theme.superTheme;
+    final tokens = s.tokens;
+    final spacing = s.spacing;
+    return SuperTabBarThemeData(
+      bg: s.bg,
+      surface: s.surface,
+      surface2: theme.colorScheme.surfaceContainerHigh,
+      inputBg: s.inputBg,
+      hover: s.hover,
+      border: s.border,
+      borderStrong: s.borderStrong,
+      fg1: s.fg1,
+      fg2: s.fg2,
+      fg3: s.fg3,
+      fg4: s.fg4,
+      accentColor: tokens.accent,
+      successColor: tokens.success,
+      warningColor: tokens.warning,
+      dangerColor: tokens.danger,
+      infoColor: tokens.info,
+      displayFontFamily: tokens.displayFont,
+      bodyFontFamily: tokens.bodyFont,
+      monoFontFamily: tokens.monoFont,
+      radiusSmall: spacing.radiusControl,
+      radiusMedium: spacing.radiusMd,
+      radiusLarge: spacing.radiusCard,
+      radiusExtraLarge: spacing.radiusPill,
+      fastDuration: tokens.durFast,
+      baseDuration: tokens.durBase,
+      slowDuration: tokens.durExpand,
+      standardCurve: tokens.curveStandard,
+      decelerateCurve: tokens.curveOut,
+    );
   }
 
-  /// Reads the registered [ThemeExtension], or bridges from the current
-  /// Material [ColorScheme] (enables [SuperMaterialThemeData] compatibility),
-  /// or falls back to [dark] when no Material theme is present.
-  ///
-  /// Priority:
-  /// 1. Explicit `SuperTabBarThemeData` extension registered on [ThemeData]
-  /// 2. Derived from `Theme.of(context).colorScheme` via [fromColorScheme]
-  /// 3. Static [dark] preset (last resort / no-theme environments)
+  /// Reads an explicit extension first, then derives from super_core or Material.
   static SuperTabBarThemeData of(BuildContext context) {
-    final ext = Theme.of(context).extension<SuperTabBarThemeData>();
+    final material = Theme.of(context);
+    final ext = material.extension<SuperTabBarThemeData>();
     if (ext != null) return ext;
     final superTheme = SuperMaterialThemeData.maybeOf(context);
     if (superTheme != null) {
       return SuperTabBarThemeData.fromMaterialTheme(superTheme);
     }
-    return SuperTabBarThemeData.fromColorScheme(Theme.of(context).colorScheme);
+    return SuperTabBarThemeData.fromColorScheme(material.colorScheme);
   }
 
   @override
@@ -220,6 +266,27 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     Color? fg2,
     Color? fg3,
     Color? fg4,
+    Color? accentColor,
+    Color? successColor,
+    Color? warningColor,
+    Color? dangerColor,
+    Color? infoColor,
+    String? displayFontFamily,
+    String? bodyFontFamily,
+    String? monoFontFamily,
+    double? radiusSmall,
+    double? radiusMedium,
+    double? radiusLarge,
+    double? radiusExtraLarge,
+    List<BoxShadow>? cardShadows,
+    List<BoxShadow>? popShadows,
+    Duration? fastDuration,
+    Duration? baseDuration,
+    Duration? slowDuration,
+    Duration? slowerDuration,
+    Curve? standardCurve,
+    Curve? decelerateCurve,
+    Curve? emphasizedCurve,
   }) => SuperTabBarThemeData(
     bg: bg ?? this.bg,
     surface: surface ?? this.surface,
@@ -232,6 +299,27 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     fg2: fg2 ?? this.fg2,
     fg3: fg3 ?? this.fg3,
     fg4: fg4 ?? this.fg4,
+    accentColor: accentColor ?? this.accentColor,
+    successColor: successColor ?? this.successColor,
+    warningColor: warningColor ?? this.warningColor,
+    dangerColor: dangerColor ?? this.dangerColor,
+    infoColor: infoColor ?? this.infoColor,
+    displayFontFamily: displayFontFamily ?? this.displayFontFamily,
+    bodyFontFamily: bodyFontFamily ?? this.bodyFontFamily,
+    monoFontFamily: monoFontFamily ?? this.monoFontFamily,
+    radiusSmall: radiusSmall ?? this.radiusSmall,
+    radiusMedium: radiusMedium ?? this.radiusMedium,
+    radiusLarge: radiusLarge ?? this.radiusLarge,
+    radiusExtraLarge: radiusExtraLarge ?? this.radiusExtraLarge,
+    cardShadows: cardShadows ?? this.cardShadows,
+    popShadows: popShadows ?? this.popShadows,
+    fastDuration: fastDuration ?? this.fastDuration,
+    baseDuration: baseDuration ?? this.baseDuration,
+    slowDuration: slowDuration ?? this.slowDuration,
+    slowerDuration: slowerDuration ?? this.slowerDuration,
+    standardCurve: standardCurve ?? this.standardCurve,
+    decelerateCurve: decelerateCurve ?? this.decelerateCurve,
+    emphasizedCurve: emphasizedCurve ?? this.emphasizedCurve,
   );
 
   @override
@@ -240,6 +328,12 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     double t,
   ) {
     if (other is! SuperTabBarThemeData) return this;
+    Duration duration(Duration a, Duration b) => Duration(
+      microseconds:
+          (a.inMicroseconds + (b.inMicroseconds - a.inMicroseconds) * t)
+              .round(),
+    );
+    final useOther = t >= 0.5;
     return SuperTabBarThemeData(
       bg: Color.lerp(bg, other.bg, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
@@ -252,10 +346,32 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
       fg2: Color.lerp(fg2, other.fg2, t)!,
       fg3: Color.lerp(fg3, other.fg3, t)!,
       fg4: Color.lerp(fg4, other.fg4, t)!,
+      accentColor: Color.lerp(accentColor, other.accentColor, t)!,
+      successColor: Color.lerp(successColor, other.successColor, t)!,
+      warningColor: Color.lerp(warningColor, other.warningColor, t)!,
+      dangerColor: Color.lerp(dangerColor, other.dangerColor, t)!,
+      infoColor: Color.lerp(infoColor, other.infoColor, t)!,
+      displayFontFamily:
+          useOther ? other.displayFontFamily : displayFontFamily,
+      bodyFontFamily: useOther ? other.bodyFontFamily : bodyFontFamily,
+      monoFontFamily: useOther ? other.monoFontFamily : monoFontFamily,
+      radiusSmall: radiusSmall + (other.radiusSmall - radiusSmall) * t,
+      radiusMedium: radiusMedium + (other.radiusMedium - radiusMedium) * t,
+      radiusLarge: radiusLarge + (other.radiusLarge - radiusLarge) * t,
+      radiusExtraLarge:
+          radiusExtraLarge + (other.radiusExtraLarge - radiusExtraLarge) * t,
+      cardShadows: useOther ? other.cardShadows : cardShadows,
+      popShadows: useOther ? other.popShadows : popShadows,
+      fastDuration: duration(fastDuration, other.fastDuration),
+      baseDuration: duration(baseDuration, other.baseDuration),
+      slowDuration: duration(slowDuration, other.slowDuration),
+      slowerDuration: duration(slowerDuration, other.slowerDuration),
+      standardCurve: useOther ? other.standardCurve : standardCurve,
+      decelerateCurve: useOther ? other.decelerateCurve : decelerateCurve,
+      emphasizedCurve: useOther ? other.emphasizedCurve : emphasizedCurve,
     );
   }
 }
 
-// ── Backward-compatible alias ──────────────────────────────────
 /// Alias for [SuperTabBarThemeData]. Maintained for backward compatibility.
 typedef BrowserStyleTabBarThemeData = SuperTabBarThemeData;

@@ -105,7 +105,7 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
         ),
         title: Text('02 · Document shell',
             style: TextStyle(
-                fontFamily: SuperTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: s.fg1)),
@@ -141,12 +141,12 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 _BehaviorChip(
-                  color: SuperTabBarThemeData.danger,
+                  color: SuperTabBarThemeData.of(context).dangerColor,
                   label: 'requiredPinned',
                   desc: 'Chart of Accounts — no close · unpin · dupe in UI',
                 ),
                 _BehaviorChip(
-                  color: SuperTabBarThemeData.success,
+                  color: SuperTabBarThemeData.of(context).successColor,
                   label: 'normal',
                   desc: 'all other tabs',
                 ),
@@ -156,17 +156,17 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: SuperTabBarThemeData.accent.withOpacity(0.10),
+                      color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(4),
                       border: Border.all(
-                          color: SuperTabBarThemeData.accent.withOpacity(0.30)),
+                          color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.30)),
                     ),
                     child: Text(
                       _lastEvent!,
                       style: TextStyle(
-                        fontFamily: SuperTabBarThemeData.monoFont,
+                        fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                         fontSize: 10,
-                        color: SuperTabBarThemeData.accent,
+                        color: SuperTabBarThemeData.of(context).accentColor,
                       ),
                     ),
                   ),
@@ -245,7 +245,7 @@ class _CoAPage extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Chart of Accounts',
             style: TextStyle(
-                fontFamily: SuperTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
                 color: s.fg1)),
@@ -254,7 +254,7 @@ class _CoAPage extends StatelessWidget {
           'Tap "Open ledger" on any row to open a new tab via '
           'SuperTabBarController.of(context).',
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
               fontSize: 13,
               color: s.fg3),
         ),
@@ -265,7 +265,7 @@ class _CoAPage extends StatelessWidget {
               color: s.bg,
               border: Border.all(color: s.border),
               borderRadius:
-                  BorderRadius.circular(SuperTabBarThemeData.radiusLg),
+                  BorderRadius.circular(SuperTabBarThemeData.of(context).radiusLarge),
             ),
             clipBehavior: Clip.antiAlias,
             child: ListView.separated(
@@ -276,12 +276,12 @@ class _CoAPage extends StatelessWidget {
                 return ListTile(
                   leading: Text(a.$1,
                       style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.monoFont,
+                          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                           fontSize: 12,
                           color: s.fg3)),
                   title: Text(a.$2,
                       style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.bodyFont,
+                          fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                           fontWeight: FontWeight.w600,
                           color: s.fg1)),
                   subtitle:
@@ -358,24 +358,24 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           Expanded(
             child: Text(widget.tab.title,
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.displayFont,
+                    fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                     fontSize: 22,
                     fontWeight: FontWeight.w700,
                     color: s.fg1)),
           ),
           if (_saving)
-            const SizedBox(
+            SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
-                    strokeWidth: 2, color: SuperTabBarThemeData.accent))
+                    strokeWidth: 2, color: SuperTabBarThemeData.of(context).accentColor))
           else
             ElevatedButton.icon(
               onPressed: _hasDirtied ? _save : null,
               icon: const Icon(Icons.save_outlined, size: 16),
               label: const Text('Save & rename tab'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: SuperTabBarThemeData.accent,
+                backgroundColor: SuperTabBarThemeData.of(context).accentColor,
                 foregroundColor: Colors.white,
               ),
             ),
@@ -385,7 +385,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           'Type anything in the memo field — the tab gets a dirty dot. '
           'Press Save to clear the dot and rename the tab to a generated ref.',
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
               fontSize: 12.5,
               color: s.fg3),
         ),
@@ -395,7 +395,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
           onChanged: (_) => _markDirty(),
           maxLines: 5,
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
               fontSize: 14,
               color: s.fg1),
           decoration: InputDecoration(
@@ -405,7 +405,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
             fillColor: s.inputBg,
             border: OutlineInputBorder(
               borderRadius:
-                  BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                  BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
             ),
           ),
         ),
@@ -423,11 +423,11 @@ class _PlaceholderPage extends StatelessWidget {
     final s = SuperTabBarThemeData.of(context);
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.tab_outlined, size: 40, color: SuperTabBarThemeData.accent),
+        Icon(Icons.tab_outlined, size: 40, color: SuperTabBarThemeData.of(context).accentColor),
         const SizedBox(height: 12),
         Text(tab.title,
             style: TextStyle(
-                fontFamily: SuperTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 color: s.fg1)),
@@ -452,14 +452,14 @@ class _BehaviorChip extends StatelessWidget {
       const SizedBox(width: 5),
       Text(label,
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
               fontSize: 10,
               fontWeight: FontWeight.w700,
               color: color)),
       const SizedBox(width: 4),
       Text('— $desc',
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
               fontSize: 10.5,
               color: SuperTabBarThemeData.of(context).fg3)),
     ]);
@@ -491,7 +491,7 @@ class _NewTabSheet extends StatelessWidget {
         children: [
           Text('Open new tab',
               style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.displayFont,
+                  fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: s.fg1)),
@@ -509,14 +509,14 @@ class _NewTabSheet extends StatelessWidget {
                     color: s.inputBg,
                     border: Border.all(color: s.border),
                     borderRadius:
-                        BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                        BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
                   ),
                   child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(k.$3, size: 15, color: SuperTabBarThemeData.accent),
+                    Icon(k.$3, size: 15, color: SuperTabBarThemeData.of(context).accentColor),
                     const SizedBox(width: 8),
                     Text(k.$2,
                         style: TextStyle(
-                            fontFamily: SuperTabBarThemeData.bodyFont,
+                            fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: s.fg1)),

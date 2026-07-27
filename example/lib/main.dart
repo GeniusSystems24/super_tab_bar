@@ -29,21 +29,14 @@ class _ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
-    final t = _dark
-        ? SuperMaterialThemeData.dark(
-            palette: SuperPalette.purplePalette
-          )
-        : SuperMaterialThemeData.light(
-            palette: SuperPalette.purplePalette
-          );
     return MaterialApp(
       title: 'super_tab_bar examples',
       debugShowCheckedModeBanner: false,
-      theme: t.copyWith(
-        extensions: [SuperTabBarThemeData.fromMaterialTheme(t)],
+      theme: SuperMaterialThemeData.light(
+        palette: SuperPalette.purplePalette,
       ),
-      darkTheme: t.copyWith(
-        extensions: [SuperTabBarThemeData.fromMaterialTheme(t)],
+      darkTheme: SuperMaterialThemeData.dark(
+        palette: SuperPalette.purplePalette,
       ),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
       home: LauncherScreen(
@@ -147,7 +140,7 @@ class LauncherScreen extends StatelessWidget {
             'Strip hidden for phones. A FloatingActionButton opens a full-screen '
             'grid of tab thumbnails — tap to switch, drag to reorder. Back closes '
             'the current tab only when it is not dirty.',
-        badge: 'v2.5 · Compact · Switcher · Back',
+        badge: 'v3.0 · Compact · Switcher · Back',
         preview: const _TabThumb(
           labels: ['Inbox', 'Invoice', 'Store', 'Dashboard'],
           activeIndex: 0,
@@ -180,18 +173,18 @@ class LauncherScreen extends StatelessWidget {
                             const SizedBox(width: 12),
                             Text('SUPER_TAB_BAR',
                                 style: TextStyle(
-                                    fontFamily: SuperTabBarThemeData.monoFont,
+                                    fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                                     fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     letterSpacing: 1.8,
-                                    color: SuperTabBarThemeData.accent)),
+                                    color: SuperTabBarThemeData.of(context).accentColor)),
                             const SizedBox(width: 10),
                             _VersionPill(),
                           ]),
                           const SizedBox(height: 16),
                           Text('Browser-style workspace tabs',
                               style: TextStyle(
-                                  fontFamily: SuperTabBarThemeData.displayFont,
+                                  fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                                   fontSize: 34,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: -0.8,
@@ -206,7 +199,7 @@ class LauncherScreen extends StatelessWidget {
                               'previews, and state-preserving pages. Open any '
                               'example to try it live in Light / Dark and LTR / RTL.',
                               style: TextStyle(
-                                  fontFamily: SuperTabBarThemeData.bodyFont,
+                                  fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                                   fontSize: 14.5,
                                   height: 1.6,
                                   color: s.fg3),
@@ -246,9 +239,9 @@ class LauncherScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 Center(
                   child: Text(
-                      'MIT © GeniusSystems24 · pure Flutter, zero dependencies',
+                      'MIT © GeniusSystems24 · Flutter + super_core 3.0',
                       style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.monoFont,
+                          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                           fontSize: 11,
                           color: s.fg4)),
                 ),
@@ -297,8 +290,8 @@ class _DemoCardState extends State<_DemoCard> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: SuperTabBarThemeData.durBase,
-          curve: SuperTabBarThemeData.curveStandard,
+          duration: SuperTabBarThemeData.of(context).baseDuration,
+          curve: SuperTabBarThemeData.of(context).standardCurve,
           transform: _h
               ? (Matrix4.identity()..translate(0.0, -4.0))
               : Matrix4.identity(),
@@ -306,10 +299,10 @@ class _DemoCardState extends State<_DemoCard> {
             color: s.surface,
             border: Border.all(
                 color: _h
-                    ? SuperTabBarThemeData.accent.withOpacity(0.55)
+                    ? SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.55)
                     : s.border),
-            borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusXl),
-            boxShadow: _h ? SuperTabBarThemeData.cardShadow : null,
+            borderRadius: BorderRadius.circular(SuperTabBarThemeData.of(context).radiusExtraLarge),
+            boxShadow: _h ? SuperTabBarThemeData.of(context).cardShadows : null,
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -328,13 +321,13 @@ class _DemoCardState extends State<_DemoCard> {
                         height: 24,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: s.bg.withOpacity(0.82),
+                          color: s.bg.withValues(alpha: 0.82),
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(color: s.border),
                         ),
                         child: Text('0${widget.index}',
                             style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.monoFont,
+                                fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg2)),
@@ -357,21 +350,21 @@ class _DemoCardState extends State<_DemoCard> {
                       Expanded(
                         child: Text(widget.demo.title,
                             style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.displayFont,
+                                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                                 fontSize: 16.5,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg1)),
                       ),
                       Icon(Icons.arrow_outward,
                           size: 16,
-                          color: _h ? SuperTabBarThemeData.accent : s.fg3),
+                          color: _h ? SuperTabBarThemeData.of(context).accentColor : s.fg3),
                     ]),
                     const SizedBox(height: 6),
                     Text(widget.demo.subtitle,
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                            fontFamily: SuperTabBarThemeData.bodyFont,
+                            fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                             fontSize: 12.5,
                             height: 1.5,
                             color: s.fg3)),
@@ -428,7 +421,7 @@ class _TabThumb extends StatelessWidget {
             fg3: const Color(0xFF8A8175),
           )
         : base;
-    const accent = SuperTabBarThemeData.accent;
+    final accent = SuperTabBarThemeData.of(context).accentColor;
 
     Widget tab(int i) {
       final active = i == activeIndex;
@@ -450,7 +443,7 @@ class _TabThumb extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.bodyFont,
+                    fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                     fontSize: 9.5,
                     fontWeight: active ? FontWeight.w700 : FontWeight.w500,
                     color: active ? s.fg1 : s.fg3)),
@@ -460,8 +453,8 @@ class _TabThumb extends StatelessWidget {
             Container(
                 width: 5,
                 height: 5,
-                decoration: const BoxDecoration(
-                    color: SuperTabBarThemeData.warning,
+                decoration: BoxDecoration(
+                    color: SuperTabBarThemeData.of(context).warningColor,
                     shape: BoxShape.circle)),
           ],
         ]),
@@ -485,7 +478,7 @@ class _TabThumb extends StatelessWidget {
                   borderRadius:
                       const BorderRadius.vertical(top: Radius.circular(6)),
                 ),
-                child: const Icon(Icons.push_pin, size: 9, color: accent),
+                child:  Icon(Icons.push_pin, size: 9, color: accent),
               ),
               Container(
                   width: 1,
@@ -595,7 +588,7 @@ class _TabThumb extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(child: bar(double.infinity, h: 5)),
                 const SizedBox(width: 8),
-                bar(30, c: SuperTabBarThemeData.accent.withOpacity(0.5), h: 5),
+                bar(30, c: s.accentColor.withValues(alpha: 0.5), h: 5),
               ]),
             ),
         ]);
@@ -612,7 +605,7 @@ class _Mark extends StatelessWidget {
       height: 30,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: SuperTabBarThemeData.accent,
+        color: SuperTabBarThemeData.of(context).accentColor,
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Icon(Icons.tab_rounded, size: 17, color: Colors.white),
@@ -626,17 +619,17 @@ class _VersionPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: SuperTabBarThemeData.accent.withOpacity(0.13),
+        color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(999),
         border:
-            Border.all(color: SuperTabBarThemeData.accent.withOpacity(0.35)),
+            Border.all(color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.35)),
       ),
-      child: const Text('v2.5.0',
+      child: Text('v3.0.0',
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
               fontSize: 10.5,
               fontWeight: FontWeight.w700,
-              color: SuperTabBarThemeData.accent)),
+              color: SuperTabBarThemeData.of(context).accentColor)),
     );
   }
 }
@@ -656,7 +649,7 @@ class _TagPill extends StatelessWidget {
       ),
       child: Text(text,
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
               fontSize: 10,
               fontWeight: FontWeight.w600,
               letterSpacing: 0.3,
@@ -682,7 +675,7 @@ class _ThemeToggle extends StatelessWidget {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(color: s.borderStrong),
-            borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+            borderRadius: BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
           ),
           child: Row(children: [
             Icon(dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
@@ -690,7 +683,7 @@ class _ThemeToggle extends StatelessWidget {
             const SizedBox(width: 8),
             Text(dark ? 'Dark' : 'Light',
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.bodyFont,
+                    fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: s.fg1)),
@@ -714,19 +707,19 @@ class _BackScaffold extends StatelessWidget {
         bottom: 16,
         child: SafeArea(
           child: Material(
-            color: Colors.black.withOpacity(0.62),
+            color: Colors.black.withValues(alpha: 0.62),
             borderRadius: BorderRadius.circular(999),
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
               onTap: () => Navigator.of(context).maybePop(),
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Icon(Icons.arrow_back, size: 16, color: Colors.white),
-                  SizedBox(width: 7),
+                  const Icon(Icons.arrow_back, size: 16, color: Colors.white),
+                  const SizedBox(width: 7),
                   Text('Demos',
                       style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.bodyFont,
+                          fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                           color: Colors.white)),

@@ -1,7 +1,7 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v 2.5.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
-[![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.16-1DB88A.svg)](https://flutter.dev)
+[![pub package](https://img.shields.io/badge/pub-v2.8.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
+[![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.32-1DB88A.svg)](https://flutter.dev)
 [![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
 
 A browser-style workspace tab bar for Flutter — pinned / dirty / closable tabs,
@@ -10,7 +10,7 @@ drag-to-reorder, context menu, overflow dropdown, **live mini-page previews** on
 hover, **state-preserving pages**, **localization support**, **direct event
 callbacks**, and accessibility semantics. New in 2.1: a mobile **compact mode**
 with a draggable thumbnail **tab switcher** and **dirty-aware back navigation**.
-RTL throughout. Zero third-party dependencies.
+RTL throughout. Styled by the shared `super_core` 3.0 design system.
 
 ---
 
@@ -49,7 +49,7 @@ RTL throughout. Zero third-party dependencies.
 - ♿ **Accessibility** — `Semantics` on every tab chip, close button and
   context-menu row.
 - 🌍 **RTL** — strip, chevrons, drag, dropdown and switcher all mirror.
-- 🔌 **Zero dependencies** — pure Flutter + Material.
+- 🎨 **Shared design system** — colors, typography, radii, spacing, and motion derive from `super_core` 3.0.
 
 ---
 
@@ -57,7 +57,8 @@ RTL throughout. Zero third-party dependencies.
 
 ```yaml
 dependencies:
-  super_tab_bar: ^2.6.1
+  super_core: ^3.0.0
+  super_tab_bar: ^2.8.0
 ```
 
 ```bash
@@ -68,23 +69,28 @@ flutter pub get
 
 ## Setup
 
-Register `SuperTabBarThemeData` on your `MaterialApp`:
+Use `SuperMaterialThemeData` as the application theme. `SuperTabBarThemeData`
+is derived automatically from the active palette and device mode:
 
 ```dart
+import 'package:super_core/super_core.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
 MaterialApp(
-  theme: ThemeData(
-    extensions: const [SuperTabBarThemeData.light],
+  theme: SuperMaterialThemeData.light(
+    palette: SuperPalette.purplePalette,
   ),
-  darkTheme: ThemeData(
-    extensions: const [SuperTabBarThemeData.dark],
+  darkTheme: SuperMaterialThemeData.dark(
+    palette: SuperPalette.purplePalette,
   ),
+  themeMode: ThemeMode.system,
   home: const MyHome(),
 );
 ```
 
-The widget falls back to the dark preset if nothing is registered.
+An explicit `SuperTabBarThemeData` extension can still override individual
+component values. Without `super_core`, the component derives a fallback theme
+from the ambient Material `ColorScheme`.
 
 ---
 

@@ -8,3 +8,7 @@ build/
 .idea/
 .vscode/
 *.log
+
+
+*.zip
+/patches/

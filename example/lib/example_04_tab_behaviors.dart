@@ -117,7 +117,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
         title: Text(
           '04 · Tab behaviors + callbacks',
           style: TextStyle(
-            fontFamily: SuperTabBarThemeData.displayFont,
+            fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
             fontWeight: FontWeight.w700,
             fontSize: 16,
             color: s.fg1,
@@ -143,21 +143,21 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                   label: 'Open Settings',
                   subtitle: 'uniqueNormal — deduplicates',
                   icon: Icons.settings_outlined,
-                  color: SuperTabBarThemeData.accent,
+                  color: SuperTabBarThemeData.of(context).accentColor,
                   onTap: _openSettings,
                 ),
                 _ActionBtn(
                   label: 'Add normal tab',
                   subtitle: 'normal — standard',
                   icon: Icons.add_circle_outline,
-                  color: SuperTabBarThemeData.success,
+                  color: SuperTabBarThemeData.of(context).successColor,
                   onTap: _addNormalTab,
                 ),
                 _ActionBtn(
                   label: 'Toggle dirty',
                   subtitle: 'active tab',
                   icon: Icons.edit_outlined,
-                  color: SuperTabBarThemeData.warning,
+                  color: SuperTabBarThemeData.of(context).warningColor,
                   onTap: _markDirty,
                 ),
               ],
@@ -174,17 +174,17 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
               runSpacing: 6,
               children: [
                 _LegendChip(
-                  color: SuperTabBarThemeData.danger,
+                  color: SuperTabBarThemeData.of(context).dangerColor,
                   label: 'requiredPinned',
                   desc: 'always pinned — no close / unpin / duplicate in UI',
                 ),
                 _LegendChip(
-                  color: SuperTabBarThemeData.accent,
+                  color: SuperTabBarThemeData.of(context).accentColor,
                   label: 'uniqueNormal',
                   desc: 'no duplicate — re-open selects existing',
                 ),
                 _LegendChip(
-                  color: SuperTabBarThemeData.success,
+                  color: SuperTabBarThemeData.of(context).successColor,
                   label: 'normal',
                   desc: 'close · duplicate · pin · unpin all available',
                 ),
@@ -240,7 +240,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                     Text(
                       'EVENT LOG',
                       style: TextStyle(
-                        fontFamily: SuperTabBarThemeData.monoFont,
+                        fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.9,
@@ -254,9 +254,9 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                         child: Text(
                           'Clear',
                           style: TextStyle(
-                            fontFamily: SuperTabBarThemeData.bodyFont,
+                            fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                             fontSize: 11,
-                            color: SuperTabBarThemeData.accent,
+                            color: SuperTabBarThemeData.of(context).accentColor,
                           ),
                         ),
                       ),
@@ -268,7 +268,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                           child: Text(
                             'Interact with the tab bar to see events here.',
                             style: TextStyle(
-                              fontFamily: SuperTabBarThemeData.bodyFont,
+                              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                               fontSize: 12,
                               color: s.fg4,
                             ),
@@ -288,8 +288,8 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 7, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: SuperTabBarThemeData.accent
-                                        .withOpacity(0.12),
+                                    color: SuperTabBarThemeData.of(context).accentColor
+                                        .withValues(alpha: 0.12),
                                     borderRadius:
                                         BorderRadius.circular(4),
                                   ),
@@ -297,10 +297,10 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                                     e.event,
                                     style: TextStyle(
                                       fontFamily:
-                                          SuperTabBarThemeData.monoFont,
+                                          SuperTabBarThemeData.of(context).monoFontFamily,
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
-                                      color: SuperTabBarThemeData.accent,
+                                      color: SuperTabBarThemeData.of(context).accentColor,
                                     ),
                                   ),
                                 ),
@@ -310,7 +310,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
                                     e.detail,
                                     style: TextStyle(
                                       fontFamily:
-                                          SuperTabBarThemeData.monoFont,
+                                          SuperTabBarThemeData.of(context).monoFontFamily,
                                       fontSize: 11,
                                       color: s.fg2,
                                     ),
@@ -341,7 +341,7 @@ class _BehaviorPage extends StatelessWidget {
     final ctrl = SuperTabBarController.of(context);
     final (color, label, bullets) = switch (tab.behavior) {
       SuperTabBehavior.requiredPinned => (
-          SuperTabBarThemeData.danger,
+          SuperTabBarThemeData.of(context).dangerColor,
           'requiredPinned',
           [
             'Always pinned — cannot be unpinned from the UI',
@@ -351,7 +351,7 @@ class _BehaviorPage extends StatelessWidget {
           ]
         ),
       SuperTabBehavior.uniqueNormal => (
-          SuperTabBarThemeData.accent,
+          SuperTabBarThemeData.of(context).accentColor,
           'uniqueNormal',
           [
             'Can be closed, pinned, and unpinned',
@@ -361,7 +361,7 @@ class _BehaviorPage extends StatelessWidget {
           ]
         ),
       SuperTabBehavior.normal => (
-          SuperTabBarThemeData.success,
+          SuperTabBarThemeData.of(context).successColor,
           'normal',
           [
             'All operations available: close, duplicate, pin, unpin',
@@ -382,14 +382,14 @@ class _BehaviorPage extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(6),
-                border: Border.all(color: color.withOpacity(0.3)),
+                border: Border.all(color: color.withValues(alpha: 0.3)),
               ),
               child: Text(
                 'SuperTabBehavior.$label',
                 style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.monoFont,
+                  fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -401,7 +401,7 @@ class _BehaviorPage extends StatelessWidget {
               child: Text(
                 tab.title,
                 style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.displayFont,
+                  fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                   color: s.fg1,
@@ -414,7 +414,7 @@ class _BehaviorPage extends StatelessWidget {
             Text(
               'uniqueKey: "${tab.uniqueKey}"',
               style: TextStyle(
-                fontFamily: SuperTabBarThemeData.monoFont,
+                fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                 fontSize: 11,
                 color: s.fg3,
               ),
@@ -440,7 +440,7 @@ class _BehaviorPage extends StatelessWidget {
                     child: Text(
                       b,
                       style: TextStyle(
-                        fontFamily: SuperTabBarThemeData.bodyFont,
+                        fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                         fontSize: 13,
                         height: 1.5,
                         color: s.fg2,
@@ -492,12 +492,12 @@ class _SmallBtn extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(color: s.borderStrong),
             borderRadius:
-                BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
           ),
           child: Text(
             label,
             style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: s.fg1,
@@ -538,16 +538,16 @@ class _ActionBtnState extends State<_ActionBtn> {
       child: GestureDetector(
         onTap: widget.onTap,
         child: AnimatedContainer(
-          duration: SuperTabBarThemeData.durBase,
+          duration: SuperTabBarThemeData.of(context).baseDuration,
           padding:
               const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
             color: _h
-                ? widget.color.withOpacity(0.14)
-                : widget.color.withOpacity(0.08),
-            border: Border.all(color: widget.color.withOpacity(0.35)),
+                ? widget.color.withValues(alpha: 0.14)
+                : widget.color.withValues(alpha: 0.08),
+            border: Border.all(color: widget.color.withValues(alpha: 0.35)),
             borderRadius:
-                BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
           ),
           child: Row(mainAxisSize: MainAxisSize.min, children: [
             Icon(widget.icon, size: 15, color: widget.color),
@@ -556,7 +556,7 @@ class _ActionBtnState extends State<_ActionBtn> {
               Text(
                 widget.label,
                 style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.bodyFont,
+                  fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                   color: widget.color,
@@ -565,7 +565,7 @@ class _ActionBtnState extends State<_ActionBtn> {
               Text(
                 widget.subtitle,
                 style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.monoFont,
+                  fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                   fontSize: 10,
                   color: s.fg3,
                 ),
@@ -598,7 +598,7 @@ class _LegendChip extends StatelessWidget {
       Text(
         label,
         style: TextStyle(
-          fontFamily: SuperTabBarThemeData.monoFont,
+          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
           fontSize: 10.5,
           fontWeight: FontWeight.w700,
           color: color,
@@ -608,7 +608,7 @@ class _LegendChip extends StatelessWidget {
       Text(
         '— $desc',
         style: TextStyle(
-          fontFamily: SuperTabBarThemeData.bodyFont,
+          fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
           fontSize: 11,
           color: s.fg3,
         ),

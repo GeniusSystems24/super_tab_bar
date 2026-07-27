@@ -19,7 +19,7 @@ Widget themed({required Brightness brightness, required BrowserStyleTabBarThemeD
     data: ThemeData(
       brightness: brightness,
       useMaterial3: true,
-      fontFamily: BrowserStyleTabBarThemeData.bodyFont,
+      fontFamily: ext.bodyFontFamily,
       scaffoldBackgroundColor: ext.bg,
       extensions: [ext],
     ),
@@ -96,11 +96,11 @@ class _GhostIconButtonState extends State<GhostIconButton> {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: on ? s.hover : Colors.transparent,
-            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.radiusMd),
+            borderRadius: BorderRadius.circular(BrowserStyleTabBarThemeData.of(context).radiusMedium),
           ),
           child: Icon(widget.icon,
               size: widget.iconSize,
-              color: widget.color ?? (widget.active ? BrowserStyleTabBarThemeData.accent : (on ? s.fg1 : s.fg3))),
+              color: widget.color ?? (widget.active ? BrowserStyleTabBarThemeData.of(context).accentColor : (on ? s.fg1 : s.fg3))),
         ),
       ),
     );
@@ -147,7 +147,7 @@ class PanelHeader extends StatelessWidget {
         children: [
           Text(text.toUpperCase(),
               style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.monoFont, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: s.fg3)),
+                  fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily, fontSize: 10.5, fontWeight: FontWeight.w700, letterSpacing: 0.8, color: s.fg3)),
           const Spacer(),
           ...trailing,
         ],

@@ -6,6 +6,32 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.8.0] — 2026-07-27
+
+### Breaking changes
+
+- Requires `super_core ^3.0.0`, Dart `>=3.8.0`, and Flutter `>=3.32.0`.
+- Theme customization should use the resolved instance returned by
+  `SuperTabBarThemeData.of(context)` rather than static brand constants.
+
+### Changed
+
+- `SuperTabBarThemeData.fromMaterialTheme` now reads surfaces from
+  `theme.superTheme`, colors and font families from `SuperTokensData`, radii
+  from `SuperSpacing`, and motion from the active Super token bundle.
+- Internal widgets and examples now use dynamic palette-aware component values.
+- Replaced deprecated `Color.withOpacity` calls with `withValues(alpha:)`.
+- Simplified the example app to use `SuperMaterialThemeData.light` and `.dark`
+  directly; no manual tab-bar extension registration is required.
+
+### Compatibility
+
+- Existing static color, typography, radius, shadow, and motion constants remain
+  available as legacy aliases. New code should use the resolved instance fields
+  documented in `MIGRATION.md`.
+
+---
+
 ## [2.7.0] — 2026-07-16
 
 ### Added

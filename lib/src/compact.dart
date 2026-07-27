@@ -64,12 +64,13 @@ Future<int?> showSuperTabSwitcher(
 }) {
   final loc = localizations ?? SuperTabBarLocalizations.en;
   final prev = previewOptions ?? SuperTabBarPreviewOptions.defaults;
+  final s = SuperTabBarThemeData.of(context);
   return Navigator.of(context).push<int>(
     PageRouteBuilder<int>(
       opaque: true,
       barrierColor: const Color(0x99000000),
-      transitionDuration: SuperTabBarThemeData.durSlow,
-      reverseTransitionDuration: SuperTabBarThemeData.durBase,
+      transitionDuration: s.slowDuration,
+      reverseTransitionDuration: s.baseDuration,
       pageBuilder: (ctx, anim, _) => SuperTabSwitcher(
         controller: controller,
         localizations: loc,
@@ -86,7 +87,7 @@ Future<int?> showSuperTabSwitcher(
       transitionsBuilder: (ctx, anim, _, child) {
         final curved = CurvedAnimation(
           parent: anim,
-          curve: SuperTabBarThemeData.curveDecelerate,
+          curve: s.decelerateCurve,
         );
         return FadeTransition(
           opacity: curved,
@@ -272,7 +273,7 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
                 Text(
                   _loc.switcherTitle,
                   style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.displayFont,
+                    fontFamily: s.displayFontFamily,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: s.fg1,
@@ -282,7 +283,7 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
                 Text(
                   '${_loc.openTabsHeaderFor(count)}  ·  ${_loc.reorderHint}',
                   style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.bodyFont,
+                    fontFamily: s.bodyFontFamily,
                     fontSize: 12,
                     color: s.fg3,
                   ),
@@ -308,7 +309,7 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
     child: Text(
       _loc.noOpenTabs,
       style: TextStyle(
-        fontFamily: SuperTabBarThemeData.bodyFont,
+        fontFamily: s.bodyFontFamily,
         fontSize: 13,
         color: s.fg3,
       ),
@@ -421,8 +422,8 @@ class _TabThumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     final borderColor = isOver
-        ? SuperTabBarThemeData.accent
-        : (active ? SuperTabBarThemeData.accent : s.border);
+        ? s.accentColor
+        : (active ? s.accentColor : s.border);
 
     return Semantics(
       button: true,
@@ -432,21 +433,21 @@ class _TabThumbnail extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
-          duration: SuperTabBarThemeData.durBase,
-          curve: SuperTabBarThemeData.curveStandard,
+          duration: s.baseDuration,
+          curve: s.standardCurve,
           decoration: BoxDecoration(
             color: s.surface,
-            borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusXl),
+            borderRadius: BorderRadius.circular(s.radiusExtraLarge),
             border: Border.all(
               color: borderColor,
               width: (active || isOver) ? 2 : 1,
             ),
             boxShadow: elevated
-                ? SuperTabBarThemeData.popShadow
+                ? s.popShadows
                 : (isOver
                       ? [
                           BoxShadow(
-                            color: SuperTabBarThemeData.accent.withOpacity(
+                            color: s.accentColor.withValues(alpha:
                               0.28,
                             ),
                             blurRadius: 18,
@@ -473,12 +474,12 @@ class _TabThumbnail extends StatelessWidget {
                       ),
                     ),
                     if (active)
-                      const Positioned(
+                      Positioned(
                         top: 8,
                         left: 8,
                         child: _Badge(
-                          color: SuperTabBarThemeData.accent,
-                          child: Text('ACTIVE'),
+                          color: s.accentColor,
+                          child: const Text('ACTIVE'),
                         ),
                       ),
                     if (showClose)
@@ -525,7 +526,7 @@ class _TabThumbnail extends StatelessWidget {
                         Icon(
                           Icons.tab_outlined,
                           size: 15,
-                          color: active ? SuperTabBarThemeData.accent : s.fg3,
+                          color: active ? s.accentColor : s.fg3,
                         ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -534,7 +535,7 @@ class _TabThumbnail extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.bodyFont,
+                          fontFamily: s.bodyFontFamily,
                           fontSize: 12.5,
                           fontWeight: active
                               ? FontWeight.w600
@@ -552,8 +553,8 @@ class _TabThumbnail extends StatelessWidget {
                       Container(
                         width: 7,
                         height: 7,
-                        decoration: const BoxDecoration(
-                          color: SuperTabBarThemeData.warning,
+                        decoration: BoxDecoration(
+                          color: s.warningColor,
                           shape: BoxShape.circle,
                         ),
                       ),
@@ -659,15 +660,16 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = SuperTabBarThemeData.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusSm),
+        borderRadius: BorderRadius.circular(s.radiusSmall),
       ),
       child: DefaultTextStyle(
-        style: const TextStyle(
-          fontFamily: SuperTabBarThemeData.bodyFont,
+        style: TextStyle(
+          fontFamily: s.bodyFontFamily,
           fontSize: 9,
           fontWeight: FontWeight.w700,
           letterSpacing: 0.5,

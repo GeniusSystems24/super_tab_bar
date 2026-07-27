@@ -358,6 +358,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   void _scrollByDir(bool towardEnd) {
+    final s = SuperTabBarThemeData.of(context);
     if (!_scroll.hasClients) return;
     final target = (_scroll.offset + 220 * (towardEnd ? 1 : -1)).clamp(
       0.0,
@@ -365,8 +366,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
     );
     _scroll.animateTo(
       target,
-      duration: SuperTabBarThemeData.durSlow,
-      curve: SuperTabBarThemeData.curveStandard,
+      duration: s.slowDuration,
+      curve: s.standardCurve,
     );
   }
 
@@ -618,7 +619,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
                         color: s.bg,
                         border: Border.all(color: s.border),
                         borderRadius: BorderRadius.circular(
-                          SuperTabBarThemeData.radiusLg,
+                          s.radiusLarge,
                         ),
                       )
                     : BoxDecoration(color: s.bg),
@@ -652,7 +653,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
                 left: Directionality.of(ctx) == TextDirection.rtl ? 16 : null,
                 child: FloatingActionButton(
                   heroTag: 'super_tab_bar_compact_fab_$hashCode',
-                  backgroundColor: SuperTabBarThemeData.accent,
+                  backgroundColor: s.accentColor,
                   foregroundColor: Colors.white,
                   tooltip: 'Open tab switcher',
                   onPressed: () => showSuperTabSwitcher(
@@ -816,8 +817,8 @@ class _SuperTabBarState extends State<SuperTabBar> {
 
   Widget _chevron(bool towardEnd, bool show, SuperTabBarThemeData s) {
     return AnimatedContainer(
-      duration: SuperTabBarThemeData.durBase,
-      curve: SuperTabBarThemeData.curveStandard,
+      duration: s.baseDuration,
+      curve: s.standardCurve,
       width: show ? 26 : 0,
       height: 32,
       margin: const EdgeInsets.only(bottom: 2),
@@ -847,7 +848,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
           child: Text(
             _loc.noOpenTabs,
             style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: s.bodyFontFamily,
               fontSize: 13,
               color: s.fg3,
             ),
@@ -1069,8 +1070,8 @@ class _TabChipState extends State<_TabChip> {
             widget.onContextMenu(d.globalPosition);
           },
           child: AnimatedContainer(
-            duration: SuperTabBarThemeData.durBase,
-            curve: SuperTabBarThemeData.curveStandard,
+            duration: s.baseDuration,
+            curve: s.standardCurve,
             height: 36,
             width: widget.compact ? 40 : null,
             constraints: widget.compact
@@ -1097,7 +1098,7 @@ class _TabChipState extends State<_TabChip> {
                     child: Container(
                       width: 2,
                       decoration: BoxDecoration(
-                        color: SuperTabBarThemeData.accent,
+                        color: s.accentColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -1133,7 +1134,7 @@ class _TabChipState extends State<_TabChip> {
                 Icon(
                   Icons.tab_outlined,
                   size: 14,
-                  color: active ? SuperTabBarThemeData.accent : s.fg3,
+                  color: active ? s.accentColor : s.fg3,
                 ),
           ),
           if (tab.dirty)
@@ -1143,8 +1144,8 @@ class _TabChipState extends State<_TabChip> {
               child: Container(
                 width: 6,
                 height: 6,
-                decoration: const BoxDecoration(
-                  color: SuperTabBarThemeData.warning,
+                decoration: BoxDecoration(
+                  color: s.warningColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -1159,7 +1160,7 @@ class _TabChipState extends State<_TabChip> {
             Icon(
               Icons.tab_outlined,
               size: 14,
-              color: active ? SuperTabBarThemeData.accent : s.fg3,
+              color: active ? s.accentColor : s.fg3,
             ),
         const SizedBox(width: 8),
         Expanded(
@@ -1168,7 +1169,7 @@ class _TabChipState extends State<_TabChip> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontFamily: SuperTabBarThemeData.bodyFont,
+              fontFamily: s.bodyFontFamily,
               fontSize: 13,
               fontWeight: active ? FontWeight.w600 : FontWeight.w500,
               color: fg,
@@ -1188,8 +1189,8 @@ class _TabChipState extends State<_TabChip> {
         width: 8,
         height: 8,
         margin: const EdgeInsetsDirectional.only(end: 4),
-        decoration: const BoxDecoration(
-          color: SuperTabBarThemeData.warning,
+        decoration: BoxDecoration(
+          color: s.warningColor,
           shape: BoxShape.circle,
         ),
       );
@@ -1265,7 +1266,7 @@ class _StaticTab extends StatelessWidget {
               Icon(
                 Icons.tab_outlined,
                 size: 14,
-                color: active ? SuperTabBarThemeData.accent : s.fg3,
+                color: active ? s.accentColor : s.fg3,
               ),
           const SizedBox(width: 8),
           Flexible(
@@ -1274,7 +1275,7 @@ class _StaticTab extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontFamily: SuperTabBarThemeData.bodyFont,
+                fontFamily: s.bodyFontFamily,
                 fontSize: 13,
                 fontWeight: active ? FontWeight.w600 : FontWeight.w500,
                 color: active ? s.fg1 : s.fg2,

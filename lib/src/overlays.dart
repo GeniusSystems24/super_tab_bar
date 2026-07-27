@@ -20,8 +20,8 @@ typedef ScopeWrapper = Widget Function(Widget child);
 BoxDecoration _popDecoration(SuperTabBarThemeData s) => BoxDecoration(
   color: s.surface,
   border: Border.all(color: s.borderStrong),
-  borderRadius: BorderRadius.circular(SuperTabBarThemeData.radiusMd),
-  boxShadow: SuperTabBarThemeData.popShadow,
+  borderRadius: BorderRadius.circular(s.radiusMedium),
+  boxShadow: s.popShadows,
 );
 
 // ════════════════════════════════════════════════════════════
@@ -129,7 +129,7 @@ class _MenuRowState extends State<_MenuRow> {
   Widget build(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
     final it = widget.item;
-    final color = it.danger ? SuperTabBarThemeData.danger : s.fg1;
+    final color = it.danger ? s.dangerColor : s.fg1;
 
     return MouseRegion(
       cursor: it.disabled
@@ -165,7 +165,7 @@ class _MenuRowState extends State<_MenuRow> {
                     child: Text(
                       it.label ?? '',
                       style: TextStyle(
-                        fontFamily: SuperTabBarThemeData.bodyFont,
+                        fontFamily: s.bodyFontFamily,
                         fontSize: 13,
                         color: color,
                       ),
@@ -175,7 +175,7 @@ class _MenuRowState extends State<_MenuRow> {
                     Text(
                       it.hint!,
                       style: TextStyle(
-                        fontFamily: SuperTabBarThemeData.monoFont,
+                        fontFamily: s.monoFontFamily,
                         fontSize: 11,
                         color: s.fg3,
                       ),
@@ -245,7 +245,7 @@ class TabListDropdown extends StatelessWidget {
                   child: Text(
                     localizations.openTabsHeaderFor(tabs.length),
                     style: TextStyle(
-                      fontFamily: SuperTabBarThemeData.monoFont,
+                      fontFamily: s.monoFontFamily,
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 0.8,
@@ -330,7 +330,7 @@ class _ListRowState extends State<_ListRow> {
                 Icon(
                   Icons.tab_outlined,
                   size: 15,
-                  color: widget.active ? SuperTabBarThemeData.accent : s.fg3,
+                  color: widget.active ? s.accentColor : s.fg3,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -339,7 +339,7 @@ class _ListRowState extends State<_ListRow> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontFamily: SuperTabBarThemeData.bodyFont,
+                      fontFamily: s.bodyFontFamily,
                       fontSize: 13,
                       fontWeight: widget.active
                           ? FontWeight.w600
@@ -357,8 +357,8 @@ class _ListRowState extends State<_ListRow> {
                   Container(
                     width: 7,
                     height: 7,
-                    decoration: const BoxDecoration(
-                      color: SuperTabBarThemeData.warning,
+                    decoration: BoxDecoration(
+                      color: s.warningColor,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -436,12 +436,12 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
           excludeSemantics: true,
           child: AnimatedOpacity(
             opacity: _show ? 1 : 0,
-            duration: SuperTabBarThemeData.durBase,
-            curve: SuperTabBarThemeData.curveDecelerate,
+            duration: s.baseDuration,
+            curve: s.decelerateCurve,
             child: AnimatedSlide(
               offset: _show ? Offset.zero : Offset(0, above ? 0.03 : -0.03),
-              duration: SuperTabBarThemeData.durBase,
-              curve: SuperTabBarThemeData.curveDecelerate,
+              duration: s.baseDuration,
+              curve: s.decelerateCurve,
               child: SizedBox(
                 width: _w,
                 child: Stack(
@@ -468,10 +468,10 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(
+                                  Icon(
                                     Icons.tab_outlined,
                                     size: 15,
-                                    color: SuperTabBarThemeData.accent,
+                                    color: s.accentColor,
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -485,7 +485,7 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontFamily:
-                                                SuperTabBarThemeData.bodyFont,
+                                                s.bodyFontFamily,
                                             fontSize: 12.5,
                                             fontWeight: FontWeight.w600,
                                             color: s.fg1,
@@ -498,7 +498,7 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontFamily:
-                                                SuperTabBarThemeData.monoFont,
+                                                s.monoFontFamily,
                                             fontSize: 10.5,
                                             color: s.fg3,
                                           ),
@@ -519,8 +519,8 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
                                     Container(
                                       width: 7,
                                       height: 7,
-                                      decoration: const BoxDecoration(
-                                        color: SuperTabBarThemeData.warning,
+                                      decoration: BoxDecoration(
+                                        color: s.warningColor,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
@@ -635,7 +635,7 @@ class _Thumbnail extends StatelessWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     stops: const [0.78, 1],
-                    colors: [Colors.transparent, surface.withOpacity(0.7)],
+                    colors: [Colors.transparent, surface.withValues(alpha: 0.7)],
                   ),
                 ),
               ),
@@ -690,18 +690,19 @@ Future<String?> showSuperTabDirtyCloseDialog(
   BrowserTab tab, {
   SuperTabBarLocalizations localizations = SuperTabBarLocalizations.en,
 }) {
+  final s = SuperTabBarThemeData.of(context);
   return showGeneralDialog<String>(
     context: context,
     barrierDismissible: true,
     barrierLabel: localizations.cancel,
     barrierColor: const Color(0x61000000),
-    transitionDuration: SuperTabBarThemeData.durSlow,
+    transitionDuration: s.slowDuration,
     pageBuilder: (ctx, a1, a2) => const SizedBox.shrink(),
     transitionBuilder: (ctx, anim, _, __) {
       final s = SuperTabBarThemeData.of(ctx);
       final curved = CurvedAnimation(
         parent: anim,
-        curve: SuperTabBarThemeData.curveEmphasized,
+        curve: s.emphasizedCurve,
       );
       return FadeTransition(
         opacity: curved,
@@ -719,9 +720,9 @@ Future<String?> showSuperTabDirtyCloseDialog(
                     color: s.surface,
                     border: Border.all(color: s.borderStrong),
                     borderRadius: BorderRadius.circular(
-                      SuperTabBarThemeData.radiusXl,
+                      s.radiusExtraLarge,
                     ),
-                    boxShadow: SuperTabBarThemeData.popShadow,
+                    boxShadow: s.popShadows,
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -735,15 +736,15 @@ Future<String?> showSuperTabDirtyCloseDialog(
                             height: 36,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: SuperTabBarThemeData.warning.withOpacity(
+                              color: s.warningColor.withValues(alpha:
                                 0.14,
                               ),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.warning_amber_rounded,
                               size: 18,
-                              color: SuperTabBarThemeData.warning,
+                              color: s.warningColor,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -755,7 +756,7 @@ Future<String?> showSuperTabDirtyCloseDialog(
                                   localizations.discardChangesTitle,
                                   style: TextStyle(
                                     fontFamily:
-                                        SuperTabBarThemeData.displayFont,
+                                        s.displayFontFamily,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w700,
                                     color: s.fg1,
@@ -765,7 +766,7 @@ Future<String?> showSuperTabDirtyCloseDialog(
                                 Text(
                                   localizations.dirtyTabBody(tab.title),
                                   style: TextStyle(
-                                    fontFamily: SuperTabBarThemeData.bodyFont,
+                                    fontFamily: s.bodyFontFamily,
                                     fontSize: 13,
                                     height: 1.5,
                                     color: s.fg3,
@@ -844,12 +845,12 @@ class _DialogBtn extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 14),
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: danger ? SuperTabBarThemeData.danger : Colors.transparent,
+              color: danger ? s.dangerColor : Colors.transparent,
               border: Border.all(
                 color: danger ? Colors.transparent : s.borderStrong,
               ),
               borderRadius: BorderRadius.circular(
-                SuperTabBarThemeData.radiusMd,
+                s.radiusMedium,
               ),
             ),
             child: Row(
@@ -862,7 +863,7 @@ class _DialogBtn extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.bodyFont,
+                    fontFamily: s.bodyFontFamily,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: danger ? Colors.white : s.fg1,
@@ -899,13 +900,14 @@ class _AppearState extends State<_Appear> {
 
   @override
   Widget build(BuildContext context) {
+    final s = SuperTabBarThemeData.of(context);
     return AnimatedOpacity(
       opacity: _o,
-      duration: SuperTabBarThemeData.durFast,
+      duration: s.fastDuration,
       child: AnimatedSlide(
         offset: _o == 1 ? Offset.zero : const Offset(0, -0.02),
-        duration: SuperTabBarThemeData.durFast,
-        curve: SuperTabBarThemeData.curveDecelerate,
+        duration: s.fastDuration,
+        curve: s.decelerateCurve,
         child: widget.child,
       ),
     );

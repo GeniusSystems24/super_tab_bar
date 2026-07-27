@@ -124,7 +124,7 @@ class _CompactMobileExampleState extends State<CompactMobileExample> {
         ),
         title: Text('05 · Compact mode',
             style: TextStyle(
-                fontFamily: SuperTabBarThemeData.displayFont,
+                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                 fontWeight: FontWeight.w700,
                 fontSize: 16,
                 color: s.fg1)),
@@ -155,7 +155,7 @@ class _CompactMobileExampleState extends State<CompactMobileExample> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.displayFont,
+                                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w700,
                                 color: s.fg1,
@@ -192,7 +192,7 @@ class _CompactMobileExampleState extends State<CompactMobileExample> {
                             right: 16,
                             bottom: 16,
                             child: FloatingActionButton(
-                              backgroundColor: SuperTabBarThemeData.accent,
+                              backgroundColor: SuperTabBarThemeData.of(context).accentColor,
                               onPressed: _openSwitcher,
                               tooltip: 'Open tab switcher',
                               child: const Icon(Icons.grid_view_rounded,
@@ -216,18 +216,18 @@ class _CompactMobileExampleState extends State<CompactMobileExample> {
                   decoration: BoxDecoration(
                     color: s.surface,
                     borderRadius:
-                        BorderRadius.circular(SuperTabBarThemeData.radiusMd),
+                        BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
                     border: Border.all(color: s.border),
                   ),
                   child: Row(
                     children: [
                       Icon(Icons.info_outline,
-                          size: 15, color: SuperTabBarThemeData.accent),
+                          size: 15, color: SuperTabBarThemeData.of(context).accentColor),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(_log,
                             style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.bodyFont,
+                                fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
                                 fontSize: 12.5,
                                 color: s.fg2)),
                       ),
@@ -257,7 +257,7 @@ class _PhoneFrame extends StatelessWidget {
         color: s.bg,
         borderRadius: BorderRadius.circular(36),
         border: Border.all(color: s.borderStrong, width: 8),
-        boxShadow: SuperTabBarThemeData.cardShadow,
+        boxShadow: SuperTabBarThemeData.of(context).cardShadows,
       ),
       clipBehavior: Clip.antiAlias,
       child: child,
@@ -273,16 +273,16 @@ class _DirtyToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final s = SuperTabBarThemeData.of(context);
-    final c = dirty ? SuperTabBarThemeData.warning : s.fg3;
+    final c = dirty ? SuperTabBarThemeData.of(context).warningColor : s.fg3;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: 4),
         padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
         decoration: BoxDecoration(
-          color: c.withOpacity(0.12),
+          color: c.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: c.withOpacity(0.4)),
+          border: Border.all(color: c.withValues(alpha: 0.4)),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(
@@ -293,7 +293,7 @@ class _DirtyToggle extends StatelessWidget {
           const SizedBox(width: 6),
           Text(dirty ? 'Dirty' : 'Clean',
               style: TextStyle(
-                  fontFamily: SuperTabBarThemeData.monoFont,
+                  fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,
                   color: c)),
@@ -319,7 +319,7 @@ class _CountPill extends StatelessWidget {
       ),
       child: Text('$count tabs',
           style: TextStyle(
-              fontFamily: SuperTabBarThemeData.monoFont,
+              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
               fontSize: 10.5,
               color: s.fg3)),
     );

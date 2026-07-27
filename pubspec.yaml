@@ -6,11 +6,11 @@ description: >
   state-preserving pages, localization, callbacks, accessibility, RTL,
   dirty-aware back navigation, responsive compact mode, draggable mobile
   thumbnail previews, optional compact FAB, and automatic breakpoint
-  switching. Zero third-party dependencies.
+  switching. Integrates with the GeniusLink super_core design system.
 
 
 # package version
-version: 2.7.2
+version: 2.8.0
 
 # package homepage, repository, and issue tracker URLs
 homepage: https://github.com/GeniusSystems24/super_tab_bar
@@ -26,9 +26,9 @@ dependencies:
     sdk: flutter
   # Shared GeniusLink design-system foundation — provides SuperPalette,
   # SuperMaterialThemeData, and SuperThemeData for automatic light/dark theming.
-  # v1.1.0 adds SuperMaterialThemeData.maybeOf + SuperTabBarThemeData
-  # .fromMaterialTheme, both used by this package.
-  super_core: ">=2.1.0 <3.0.0"
+  # v3 provides the consolidated design-system tokens, responsive spacing,
+  # typography, semantic colors, and material theme bridge used here.
+  super_core: ">=3.0.0 <4.0.0"
 
 dev_dependencies:
   flutter_test:
