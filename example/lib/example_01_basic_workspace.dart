@@ -36,7 +36,7 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
 
   late final SuperTabBarController _ctrl;
 
-  Widget _buildPage(BuildContext ctx, BrowserTab tab) => _StatefulTabPage(
+  Widget _buildPage(BuildContext ctx, SuperTab tab) => _StatefulTabPage(
     key: ValueKey('page-${tab.id}-$_lazy'),
     tab: tab,
   );
@@ -46,10 +46,10 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
     super.initState();
     _ctrl = SuperTabBarController(
       tabs: [
-        BrowserTab(id: 1, title: 'Chart of Accounts', pageBuilder: _buildPage),
-        BrowserTab(id: 2, title: 'Journal Entry',      pageBuilder: _buildPage),
-        BrowserTab(id: 3, title: 'Dashboard',           pageBuilder: _buildPage),
-        BrowserTab(id: 4, title: 'Team',                pageBuilder: _buildPage),
+        SuperTab(id: 1, title: 'Chart of Accounts', pageBuilder: _buildPage),
+        SuperTab(id: 2, title: 'Journal Entry',      pageBuilder: _buildPage),
+        SuperTab(id: 3, title: 'Dashboard',           pageBuilder: _buildPage),
+        SuperTab(id: 4, title: 'Team',                pageBuilder: _buildPage),
       ],
       activeId: 1,
     );
@@ -153,7 +153,7 @@ class _BasicWorkspaceExampleState extends State<BasicWorkspaceExample> {
 // ── The stateful page: counter + text field + scroll list ─────────
 // THIS is the state we expect the tab bar to keep alive across switches.
 class _StatefulTabPage extends StatefulWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _StatefulTabPage({super.key, required this.tab});
   @override
   State<_StatefulTabPage> createState() => _StatefulTabPageState();

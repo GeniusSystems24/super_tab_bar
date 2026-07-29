@@ -196,7 +196,7 @@ class _MenuRowState extends State<_MenuRow> {
 
 class TabListDropdown extends StatelessWidget {
   final Rect anchor;
-  final List<BrowserTab> tabs;
+  final List<SuperTab> tabs;
   final int activeId;
   final ValueChanged<int> onPick;
   final VoidCallback onClose;
@@ -279,7 +279,7 @@ class TabListDropdown extends StatelessWidget {
 }
 
 class _ListRow extends StatefulWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final bool active;
   final ValueChanged<int> onPick;
   final VoidCallback onClose;
@@ -377,7 +377,7 @@ class _ListRowState extends State<_ListRow> {
 // ════════════════════════════════════════════════════════════
 
 class MiniPagePreview extends StatefulWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final Rect anchor;
   final ui.Image? snapshot;
   final ScopeWrapper? scope;
@@ -585,7 +585,7 @@ class _MiniPagePreviewState extends State<MiniPagePreview> {
 }
 
 class _Thumbnail extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final bool rtl;
   final double width, height;
   final Color surface;
@@ -687,7 +687,7 @@ class _Thumbnail extends StatelessWidget {
 /// Pass [localizations] to translate all dialog strings.
 Future<String?> showSuperTabDirtyCloseDialog(
   BuildContext context,
-  BrowserTab tab, {
+  SuperTab tab, {
   SuperTabBarLocalizations localizations = SuperTabBarLocalizations.en,
 }) {
   final s = SuperTabBarThemeData.of(context);
@@ -814,7 +814,7 @@ Future<String?> showSuperTabDirtyCloseDialog(
 /// Backward-compatible alias for [showSuperTabDirtyCloseDialog].
 Future<String?> showGLDirtyCloseDialog(
   BuildContext context,
-  BrowserTab tab, {
+  SuperTab tab, {
   SuperTabBarLocalizations localizations = SuperTabBarLocalizations.en,
 }) => showSuperTabDirtyCloseDialog(context, tab, localizations: localizations);
 

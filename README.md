@@ -1,59 +1,43 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.8.0-4A7CFF.svg)](https://pub.dev/packages/super_tab_bar)
-[![flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.32-1DB88A.svg)](https://flutter.dev)
-[![license](https://img.shields.io/badge/license-MIT-64748B.svg)](#license)
+[![pub package](https://img.shields.io/badge/pub-v2.8.0-0175C2.svg)](https://pub.dev/packages/super_tab_bar)
+[![Flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.32.0-02569B.svg)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.8.0-0175C2.svg)](https://dart.dev)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A browser-style workspace tab bar for Flutter — pinned / dirty / closable tabs,
-configurable **tab behavior types** (`requiredPinned` · `normal` · `uniqueNormal`),
-drag-to-reorder, context menu, overflow dropdown, **live mini-page previews** on
-hover, **state-preserving pages**, **localization support**, **direct event
-callbacks**, and accessibility semantics. New in 2.1: a mobile **compact mode**
-with a draggable thumbnail **tab switcher** and **dirty-aware back navigation**.
-RTL throughout. Styled by the shared `super_core` 3.0 design system.
+A browser-style workspace tab bar for Flutter applications. It supports pinned, dirty, closable, unique, and required tabs; drag-to-reorder; context menus; overflow navigation; page previews; state-preserving content; responsive compact mode; localization; accessibility; and RTL layouts.
 
----
+`super_tab_bar` integrates with the [`super_core`](https://pub.dev/packages/super_core) design system and can also derive its appearance from the ambient Material `ColorScheme`.
 
 ## Features
 
-- 🗂 **Browser-style strip** — active tab merges with the content surface.
-- 📌 **Pinned tabs** — icon-only, anchored to the start edge.
-- 💾 **Dirty tabs** — unsaved-changes dot; close triggers a confirm dialog.
-- ↔ **Drag-to-reorder** — drag any unpinned tab; blue indicator marks the drop.
-- 📋 **Context menu** — right-click / long-press: close · close others ·
-  close to right · duplicate · pin / unpin. Items hidden automatically
-  based on `SuperTabBehavior`.
-- ⟩ **Overflow** — scroll chevrons + `▾` dropdown list.
-- 👁 **Live preview** — hover-intent popover with the page's **real
-  `RepaintBoundary` capture** — live state, data and scroll position.
-  Fully configurable via `SuperTabBarPreviewOptions`.
-- ♻ **State-preserving pages** — `IndexedStack` keeps every page mounted;
-  scroll, text-field and controller state survives tab switches. Opt out
-  with `lazyPages: true`.
-- 🔒 **Tab behavior types** — `requiredPinned` (always pinned, UI-locked),
-  `normal` (full operations), `uniqueNormal` (no duplicate, deduplicates on
-  re-open by `uniqueKey`).
-- 🔔 **Direct callbacks** — `onTabSelected`, `onTabAdded`, `onTabClosed`,
-  `onTabDuplicated`, `onTabPinChanged`, `onTabDirtyChanged`,
-  `onTabReordered` — no need to listen to the controller for common events.
-- 📱 **Compact mode** — hide the strip on phones and switch tabs from a
-  full-screen grid of thumbnail previews (`SuperTabSwitcher` /
-  `showSuperTabSwitcher`). Tap to switch, **drag a thumbnail to reorder**.
-- 📐 **Auto-compact breakpoint** — `allowAutoCompact: true` + `compactWidth`
-  switch the widget into compact mode automatically based on its layout width.
-  No `MediaQuery` boilerplate needed.
-- 🔙 **Dirty-aware back** — `closeTabOnBack` closes the current tab on a back
-  gesture, but never a dirty one.
-- 🌐 **Localization** — all user-facing strings in `SuperTabBarLocalizations`;
-  built-in English and Arabic presets.
-- ♿ **Accessibility** — `Semantics` on every tab chip, close button and
-  context-menu row.
-- 🌍 **RTL** — strip, chevrons, drag, dropdown and switcher all mirror.
-- 🎨 **Shared design system** — colors, typography, radii, spacing, and motion derive from `super_core` 3.0.
+- Browser-style horizontal tab strip.
+- Pinned and required-pinned tabs.
+- Unique tabs identified by a stable `uniqueKey`.
+- Unsaved-change indicators and dirty-close confirmation.
+- Drag-and-drop tab reordering.
+- Context menu for close, close others, close to the right, duplicate, pin, and unpin.
+- Overflow scrolling and an open-tabs dropdown.
+- Per-tab page builders.
+- State-preserving pages through `IndexedStack`.
+- Optional lazy page construction.
+- Hover previews backed by page snapshots.
+- Responsive compact mode with a thumbnail tab switcher.
+- Direct callbacks for common user actions.
+- Built-in English and Arabic strings.
+- Accessibility semantics and RTL support.
 
----
+## Requirements
+
+| Tool | Minimum version |
+|---|---:|
+| Dart | `3.8.0` |
+| Flutter | `3.32.0` |
+| `super_core` | `3.0.0` |
 
 ## Installation
+
+Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
@@ -61,707 +45,682 @@ dependencies:
   super_tab_bar: ^2.8.0
 ```
 
+Then install the dependencies:
+
 ```bash
 flutter pub get
 ```
 
----
-
-## Setup
-
-Use `SuperMaterialThemeData` as the application theme. `SuperTabBarThemeData`
-is derived automatically from the active palette and device mode:
+Import the public library:
 
 ```dart
+import 'package:super_tab_bar/super_tab_bar.dart';
+```
+
+## Application setup
+
+The recommended setup uses `SuperMaterialThemeData` from `super_core`. `SuperTabBarThemeData` is derived automatically from the active palette, brightness, typography, spacing, and motion tokens.
+
+```dart
+import 'package:flutter/material.dart';
 import 'package:super_core/super_core.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
-MaterialApp(
-  theme: SuperMaterialThemeData.light(
-    palette: SuperPalette.purplePalette,
-  ),
-  darkTheme: SuperMaterialThemeData.dark(
-    palette: SuperPalette.purplePalette,
-  ),
-  themeMode: ThemeMode.system,
-  home: const MyHome(),
-);
-```
+void main() {
+  runApp(const WorkspaceApp());
+}
 
-An explicit `SuperTabBarThemeData` extension can still override individual
-component values. Without `super_core`, the component derives a fallback theme
-from the ambient Material `ColorScheme`.
-
----
-
-## Quick start
-
-### 1 · Zero-config
-
-```dart
-const SuperTabBar();
-```
-
-Owns a private controller seeded with five demo tabs.
-
-### 2 · External controller + per-tab page builders
-
-```dart
-class _WorkspaceState extends State<Workspace> {
-  final _ctrl = SuperTabBarController(
-    tabs: [
-      BrowserTab(
-        id: 1, title: 'Home',
-        pinned: true, behavior: SuperTabBehavior.requiredPinned,
-        pageBuilder: (ctx, tab) => const HomePage(),
-      ),
-      BrowserTab(
-        id: 2, title: 'Settings',
-        behavior: SuperTabBehavior.uniqueNormal, uniqueKey: 'settings',
-        pageBuilder: (ctx, tab) => const SettingsPage(),
-      ),
-      BrowserTab(
-        id: 3, title: 'Dashboard',
-        pageBuilder: (ctx, tab) => const DashboardPage(),
-      ),
-    ],
-    activeId: 3,
-  );
+class WorkspaceApp extends StatelessWidget {
+  const WorkspaceApp({super.key});
 
   @override
-  Widget build(BuildContext context) => SuperTabBar(
-    controller: _ctrl,
-    showChrome: false,
-    fillContent: true,
-    onAddTab: () => _ctrl.add(
-      title: 'New Tab',
-      pageBuilder: (ctx, tab) => const MyPage(),
-    ),
-    onTabSelected: (id) => debugPrint('selected $id'),
-    onTabClosed:   (id) => debugPrint('closed $id'),
-  );
-
-  @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: SuperMaterialThemeData.light(
+        palette: SuperPalette.purplePalette,
+      ),
+      darkTheme: SuperMaterialThemeData.dark(
+        palette: SuperPalette.purplePalette,
+      ),
+      themeMode: ThemeMode.system,
+      home: const WorkspaceScreen(),
+    );
+  }
 }
 ```
 
----
+When `SuperMaterialThemeData` is not present, the component falls back to the current Material `ColorScheme`.
 
-## Per-tab page builder (v2.5)
+## Quick start
 
-Each `BrowserTab` carries its own required `pageBuilder: TabPageBuilder`
-(`Widget Function(BuildContext context, BrowserTab tab)`). The builder receives
-the **live tab** at build time, so `tab.title` and `tab.dirty` are always current:
+Create and dispose the controller in the same way as other Flutter controllers.
 
 ```dart
-BrowserTab(
-  id: 1, title: 'Dashboard',
-  pageBuilder: (ctx, tab) => const DashboardPage(),
+class WorkspaceScreen extends StatefulWidget {
+  const WorkspaceScreen({super.key});
+
+  @override
+  State<WorkspaceScreen> createState() => _WorkspaceScreenState();
+}
+
+class _WorkspaceScreenState extends State<WorkspaceScreen> {
+  late final SuperTabBarController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = SuperTabBarController(
+      activeId: 2,
+      tabs: [
+        SuperTab(
+          id: 1,
+          title: 'Home',
+          pinned: true,
+          behavior: SuperTabBehavior.requiredPinned,
+          leading: const Icon(Icons.home_outlined, size: 16),
+          pageBuilder: (context, tab) => const _HomePage(),
+        ),
+        SuperTab(
+          id: 2,
+          title: 'Dashboard',
+          behavior: SuperTabBehavior.uniqueNormal,
+          uniqueKey: 'dashboard',
+          leading: const Icon(Icons.dashboard_outlined, size: 16),
+          pageBuilder: (context, tab) => const _DashboardPage(),
+        ),
+      ],
+    );
+  }
+
+  void _openReport() {
+    _controller.add(
+      title: 'Report ${_controller.length + 1}',
+      leading: const Icon(Icons.description_outlined, size: 16),
+      pageBuilder: (context, tab) => _ReportPage(tabId: tab.id),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SuperTabBar(
+          controller: _controller,
+          fillContent: true,
+          scrollContent: false,
+          allowAutoCompact: true,
+          compactWidth: 600,
+          useCompactFloatingActionButton: true,
+          closeTabOnBack: true,
+          onAddTab: _openReport,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+}
+
+class _HomePage extends StatelessWidget {
+  const _HomePage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Home'));
+  }
+}
+
+class _DashboardPage extends StatelessWidget {
+  const _DashboardPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Dashboard'));
+  }
+}
+
+class _ReportPage extends StatelessWidget {
+  const _ReportPage({required this.tabId});
+
+  final int tabId;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: Text('Report tab: $tabId'));
+  }
+}
+```
+
+The add button is displayed only when `onAddTab` is provided.
+
+## Core concepts
+
+### `SuperTab`
+
+`SuperTab` is an immutable description of one workspace tab.
+
+```dart
+SuperTab(
+  id: 42,
+  title: 'Customer account',
+  dirty: false,
+  pinned: false,
+  behavior: SuperTabBehavior.normal,
+  uniqueKey: null,
+  leading: const Icon(Icons.person_outline, size: 16),
+  trailing: const Badge(label: Text('3')),
+  pageBuilder: (context, tab) => CustomerPage(tabId: tab.id),
 )
 ```
 
-For dynamically created tabs, pass `pageBuilder` to `controller.add()`:
-
-```dart
-ctrl.add(
-  title: 'Report',
-  pageBuilder: (ctx, tab) => ReportPage(tabId: tab.id),
-);
-```
-
-Or use `setPageBuilder` when the id is only known after `add()` returns:
-
-```dart
-final id = ctrl.add(title: 'Report',
-    pageBuilder: (ctx, tab) => const SizedBox()); // placeholder
-ctrl.setPageBuilder(id, (ctx, tab) => ReportPage(tabId: id));
-```
-
----
-
-## Tab chip — `leading` and `trailing` widgets
-
-Every tab chip accepts optional `leading` and `trailing` widgets:
-
-```dart
-BrowserTab(
-  id: 1, title: 'Inbox',
-  leading:  const Icon(Icons.inbox_outlined, size: 14),
-  trailing: _UnreadBadge(count: 3),
-  pageBuilder: (ctx, tab) => const InboxPage(),
-)
-```
-
-- **`leading`** — replaces the default tab-outline icon. In pinned (icon-only) mode it fills the chip area.
-- **`trailing`** — shown after the title, before the dirty dot / close button.
-- Both are excluded from `operator ==` and `hashCode`.
-- Both propagate through `copyWith` and `ctrl.add()`.
-
----
-
-## Add button (`+`) visibility (v2.5)
-
-The `+` button is **only shown** when `onAddTab` is non-null. Supply a callback
-to display it and handle new-tab creation:
-
-```dart
-SuperTabBar(
-  controller: ctrl,
-  onAddTab: () => ctrl.add(
-    title: 'New tab',
-    pageBuilder: (ctx, tab) => const MyPage(),
-  ),
-)
-```
-
----
-
-## Tab behavior types
-
-`SuperTabBehavior` controls which UI actions are visible per tab.
-
-| Behavior | Close (UI) | Unpin (UI) | Duplicate (UI) | Programmatic close |
-|---|---|---|---|---|
-| `requiredPinned` | ✗ hidden | ✗ hidden | ✗ hidden | ✓ always |
-| `normal` | ✓ | ✓ | ✓ | ✓ |
-| `uniqueNormal` | ✓ | ✓ | ✗ hidden | ✓ |
-
-### `requiredPinned`
-
-Always pinned. The close button and the "Close tab", "Unpin tab", and
-"Duplicate tab" context-menu items are hidden. Users cannot remove or
-reposition it. Programmatic removal is always possible:
-
-```dart
-// UI-blocked — use programmatic removal:
-controller.close(id);       // or
-controller.forceClose(id);  // explicit alias, same effect
-```
-
-### `normal`
-
-Standard behaviour (default). All operations available.
-
-### `uniqueNormal`
-
-Duplicate is hidden. When `controller.add()` is called with a matching
-`uniqueKey`, the existing tab is activated instead of creating a copy:
-
-```dart
-// First call — creates the Settings tab:
-ctrl.add(
-  title: 'Settings',
-  behavior: SuperTabBehavior.uniqueNormal, uniqueKey: 'settings',
-);
-
-// Second call — selects the existing Settings tab, no new tab:
-ctrl.add(
-  title: 'Settings',
-  behavior: SuperTabBehavior.uniqueNormal, uniqueKey: 'settings',
-);
-```
-
----
-
-## `BrowserTab` model
-
-`BrowserTab` is `@immutable` — never mutate its fields directly.
-Use the controller's mutation methods.
-
-| Field | Type | Default | Description |
-|---|---|---|---|
-| `id` | `int` | **required** | Stable unique identity. Never reuse. |
-| `title` | `String` | **required** | Display text (truncated + tooltip at 200 px). |
-| `dirty` | `bool` | `false` | Unsaved-changes dot + confirm on close. |
-| `pinned` | `bool` | `false` | Icon-only, anchored to the start edge. |
-| `behavior` | `SuperTabBehavior` | `normal` | UI action guards. |
-| `uniqueKey` | `String?` | `null` | Deduplication key for `uniqueNormal` tabs. |
-| `leading` | `Widget?` | `null` | Widget before the title (replaces default icon). Excluded from `==`/`hashCode`. |
-| `trailing` | `Widget?` | `null` | Widget after the title, before close indicator. Excluded from `==`/`hashCode`. |
-| `pageBuilder` | `TabPageBuilder` | **required** | `Widget Function(BuildContext, BrowserTab)`. Excluded from `==`/`hashCode`. |
-
----
-
-## Direct event callbacks
-
-Set these on `SuperTabBar` to react to UI-triggered events without
-listening to the controller:
-
-```dart
-SuperTabBar(
-  controller: ctrl,
-  onTabSelected:    (id)       => print('selected $id'),
-  onTabAdded:       (id)       => print('added $id'),
-  onTabClosed:      (id)       => print('closed $id'),
-  onTabDuplicated:  (newId)    => print('duplicated → $newId'),
-  onTabPinChanged:  (id, pin)  => print('pin $id: $pin'),
-  onTabDirtyChanged:(id, dirty)=> print('dirty $id: $dirty'),
-  onTabReordered:   (from, to) => print('reorder $from → $to'),
-)
-```
-
-For `dirty` / `rename` changes that originate in **page content** (i.e.
-called via the controller from inside a page widget), set the controller's
-own callbacks instead:
-
-```dart
-ctrl.onDirtyChanged = (id, dirty) => print('dirty $id: $dirty');
-ctrl.onRenamed      = (id, title) => print('renamed $id: "$title"');
-```
-
----
-
-## Localization
-
-All user-facing strings are in `SuperTabBarLocalizations`. Pass a custom
-instance to `SuperTabBar.localizations`:
-
-```dart
-// Built-in Arabic:
-SuperTabBar(localizations: SuperTabBarLocalizations.ar)
-
-// Custom language:
-SuperTabBar(
-  localizations: const SuperTabBarLocalizations(
-    closeTab: 'Close tab',
-    closeOtherTabs: 'Close others',
-    closeTabsToRight: 'Close to right',
-    duplicateTab: 'Duplicate',
-    pinTab: 'Pin',
-    unpinTab: 'Unpin',
-    newTab: 'New tab',
-    showAllTabs: 'All tabs',
-    scrollForward: 'Forward',
-    scrollBack: 'Back',
-    noOpenTabs: 'No open tabs.',
-    openTabsHeader: 'TABS · {count}',   // {count} is replaced automatically
-    switcherTitle: 'Open tabs',
-    reorderHint: 'Drag to reorder',
-    discardChangesTitle: 'Discard changes?',
-    cancel: 'Cancel',
-    saveAndClose: 'Save & close',
-    discardAndClose: 'Discard & close',
-  ),
-)
-```
-
-Built-in presets: `SuperTabBarLocalizations.en` (default) and `.ar`.
-
----
-
-## Preview options
-
-```dart
-// Disable previews entirely:
-SuperTabBar(previewOptions: SuperTabBarPreviewOptions.disabled)
-
-// Faster appear, higher-quality snapshot:
-SuperTabBar(
-  previewOptions: const SuperTabBarPreviewOptions(
-    hoverDelay: Duration(milliseconds: 250),
-    snapshotPixelRatio: 1.0,
-    fallback: PreviewFallback.blank,  // blank surface when no snapshot yet
-  ),
-)
-```
-
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `enabled` | `bool` | `true` | Show previews at all. |
-| `hoverDelay` | `Duration` | 480 ms | Hover time before popover appears. |
-| `snapshotPixelRatio` | `double` | `0.6` | Capture quality (lower = faster). |
-| `fallback` | `PreviewFallback` | `liveRender` | Content when no snapshot yet. |
-
----
-
-## `SuperTabBarController` API
-
-```dart
-final ctrl = SuperTabBarController(tabs: [...], activeId: 2);
-```
-
-### Mutations
-
-| Method | Description |
+| Property | Description |
 |---|---|
-| `select(id)` | Activate a tab. |
-| `add({title, activate, pinned, at, behavior, uniqueKey, leading, trailing, pageBuilder*})` | Add a tab (`pageBuilder` required); returns its id (or existing for uniqueNormal dedup). |
-| `setPageBuilder(id, builder)` | Attach or replace `pageBuilder` after `add()` returns (v2.5). Does not notify. |
-| `close(id)` | Remove a tab; activates nearest neighbour. |
-| `forceClose(id)` | Explicit alias for `close` — makes intent clear for `requiredPinned` tabs. |
-| `closeOthers(id)` | Close all non-pinned tabs except `id`. |
-| `closeToRight(id)` | Close all non-pinned tabs after `id`. |
-| `duplicate(id)` | Clone as next sibling; returns new id or `-1` if disallowed. |
-| `togglePin(id)` | Flip pinned flag (no-op for `requiredPinned`). |
-| `setPinned(id, bool)` | Set pinned (no-op for `requiredPinned` when setting false). |
-| `reorder(fromId, toId)` | Move a tab to the position of another. |
-| `setDirty(id, bool)` | Set / clear the unsaved-changes flag. |
-| `rename(id, title)` | Change the display title. |
-| `mutate(fn)` | Escape hatch — call multiple ops inside `fn`, notifies once. |
+| `id` | Stable unique identifier. Do not reuse an ID after closing a tab. |
+| `title` | Text displayed in the tab strip and overlays. |
+| `dirty` | Marks the tab as containing unsaved changes. |
+| `pinned` | Anchors the tab at the start of the strip and renders it compactly. |
+| `behavior` | Controls the actions exposed by the user interface. |
+| `uniqueKey` | Deduplication key used by `uniqueNormal` tabs. |
+| `leading` | Optional widget displayed before the title. |
+| `trailing` | Optional widget displayed after the title. |
+| `pageBuilder` | Required builder for the tab content. |
 
-### Reads
+The `pageBuilder` receives the live `SuperTab` from the controller, so changes to its title and dirty state are reflected on subsequent builds.
 
-| Property / Method | Description |
-|---|---|
-| `tabs` | All tabs (unmodifiable). |
-| `activeId` / `activeTab` | Active tab id and model. |
-| `length` | Total tab count. |
-| `ordered` | Pinned-first visual order. |
-| `pinned` / `unpinned` | Filtered lists. |
-| `isActive(id)` | Whether `id` is active. |
-| `tabById(id)` | Lookup by id. |
-| `canCloseOthers(id)` / `canCloseRight(id)` | Guards for bulk-close operations. |
-| `canCloseFromUi(id)` | `false` for `requiredPinned`. |
-| `canDuplicateFromUi(id)` | `false` for `requiredPinned` / `uniqueNormal`. |
-| `canTogglePinFromUi(id)` | `false` for `requiredPinned`. |
-| `snapshot(id)` | Last captured page thumbnail (`ui.Image?`). |
+### Tab behavior
 
-### Controller callbacks
+`SuperTabBehavior` controls which operations are available from the tab user interface.
+
+| Behavior | Close | Duplicate | Pin or unpin | Deduplicate on add |
+|---|---:|---:|---:|---:|
+| `requiredPinned` | Hidden | Hidden | Hidden | No |
+| `normal` | Available | Available | Available | No |
+| `uniqueNormal` | Available | Hidden | Available | Yes |
+
+A required-pinned tab is always normalized to `pinned: true`.
+
+Programmatic methods such as `controller.close(id)` are not restricted by these UI rules.
+
+### Unique tabs
+
+Use `uniqueNormal` with a non-null `uniqueKey` when a workspace should contain only one instance of a destination.
 
 ```dart
-ctrl.onDirtyChanged = (id, dirty) { … };  // fires from setDirty()
-ctrl.onRenamed      = (id, title) { … };  // fires from rename()
+void openSettings(SuperTabBarController controller) {
+  controller.add(
+    title: 'Settings',
+    behavior: SuperTabBehavior.uniqueNormal,
+    uniqueKey: 'settings',
+    pageBuilder: (context, tab) => const SettingsPage(),
+  );
+}
 ```
 
-### `of(context)` / `read(context)`
+Calling this method again selects the existing tab and returns its ID instead of creating another tab.
+
+## Controller
+
+`SuperTabBarController` is the source of truth for open tabs, the active tab, ordering, dirty state, titles, and preview snapshots.
+
+### Read state
 
 ```dart
-// Listening — rebuilds on change. Use in build():
-SuperTabBarController.of(context)?.add(title: 'Report');
+final tabs = controller.tabs;
+final activeId = controller.activeId;
+final activeTab = controller.activeTab;
+final pinnedTabs = controller.pinned;
+final unpinnedTabs = controller.unpinned;
+final visualOrder = controller.ordered;
+final reportTab = controller.tabById(reportId);
+```
 
-// Non-listening — use in callbacks / initState:
+`tabs` is unmodifiable. Change state through controller methods.
+
+### Change state
+
+```dart
+controller.select(tabId);
+controller.rename(tabId, 'Updated title');
+controller.setDirty(tabId, true);
+controller.setPinned(tabId, true);
+controller.togglePin(tabId);
+controller.reorder(sourceId, targetId);
+controller.duplicate(tabId);
+controller.close(tabId);
+controller.closeOthers(tabId);
+controller.closeToRight(tabId);
+```
+
+Controller close operations are immediate. The built-in dirty confirmation is applied to close actions initiated by `SuperTabBar` itself. Add your own confirmation before calling controller close methods from application code.
+
+### Update a page builder
+
+A page builder is normally supplied when the tab is created. It can also be replaced later:
+
+```dart
+final tabId = controller.add(
+  title: 'Loading report',
+  pageBuilder: (context, tab) => const CircularProgressIndicator(),
+);
+
+controller.setPageBuilder(
+  tabId,
+  (context, tab) => ReportPage(tabId: tab.id),
+);
+```
+
+`setPageBuilder` takes effect on the next rebuild. Trigger the rebuild through an appropriate controller mutation or application state update.
+
+### Access the controller from a tab page
+
+Every page built by `SuperTabBar` is placed under `SuperTabBarScope`.
+
+```dart
+final controller = SuperTabBarController.of(context);
+controller?.setDirty(tabId, true);
+```
+
+Use the non-listening lookup inside callbacks:
+
+```dart
+final controller = SuperTabBarController.read(context);
+controller?.rename(tabId, 'Saved report');
+```
+
+Both methods return `null` when the widget is not hosted under `SuperTabBar`.
+
+## Dirty tabs
+
+Mark a tab dirty when its page contains unsaved edits:
+
+```dart
 SuperTabBarController.read(context)?.setDirty(tabId, true);
 ```
 
-Both return `null` when called outside a `SuperTabBar`.
+A dirty tab displays a warning indicator. Closing it from the tab strip or context menu opens the built-in confirmation dialog.
 
----
+Listen for all dirty-state changes made through the controller:
 
-## Embedding options
+```dart
+controller.onDirtyChanged = (id, isDirty) {
+  debugPrint('Tab $id dirty: $isDirty');
+};
+```
 
-| Property | Type | Default | Description |
-|---|---|---|---|
-| `showChrome` | `bool` | `true` | Bordered rounded card. `false` = edge-to-edge. |
-| `compact` | `bool` | `false` | Hide the strip unconditionally. |
-| `allowAutoCompact` | `bool` | `false` | v2.2 · Auto-hide strip when widget width ≤ `compactWidth`. |
-| `compactWidth` | `double` | `600.0` | v2.2 · Breakpoint (logical px) for `allowAutoCompact`. |
-| `useCompactFloatingActionButton` | `bool` | `false` | v2.3 · Built-in FAB in compact mode; opens the switcher. |
-| `closeTabOnBack` | `bool` | `false` | Back closes the active tab unless it is dirty. |
-| `fillContent` | `bool` | `false` | Page fills all height (`Expanded`). |
-| `scrollContent` | `bool` | `true` | Wrap page in `SingleChildScrollView`. |
-| `contentPadding` | `EdgeInsets` | `all(24)` | Padding inside the content surface. |
-| `contentBackground` | `Color?` | theme `surface` | Content surface background. |
-| `onAddTab` | `VoidCallback?` | `null` | **Required to show the `+` button.** Intercept new-tab creation (`onTabAdded` won't fire). |
-| `lazyPages` | `bool` | `false` | Rebuild-on-revisit instead of `IndexedStack`. |
-| `localizations` | `SuperTabBarLocalizations?` | `.en` | Translatable strings. |
-| `previewOptions` | `SuperTabBarPreviewOptions?` | defaults | Hover-preview configuration. |
+The low-level dialog is also public:
 
----
+```dart
+final result = await showSuperTabDirtyCloseDialog(
+  context,
+  tab,
+  localizations: SuperTabBarLocalizations.en,
+);
 
-## Built-in compact FAB (v2.3)
+switch (result) {
+  case 'save':
+    await saveTab(tab.id);
+    controller.setDirty(tab.id, false);
+    controller.close(tab.id);
+  case 'discard':
+    controller.close(tab.id);
+  case null:
+    break;
+}
+```
 
-Set `useCompactFloatingActionButton: true` and the widget renders its own FAB
-over the content area when in compact mode — no extra `Stack` or
-`Scaffold.floatingActionButton` needed:
+## Page layout and state
+
+### Preserve page state
+
+By default, `SuperTabBar` keeps all pages mounted in an `IndexedStack`. Scroll positions, text fields, focus, and stateful child widgets therefore survive tab changes.
 
 ```dart
 SuperTabBar(
-  controller: ctrl,
-  allowAutoCompact: true,
-  useCompactFloatingActionButton: true,
-  closeTabOnBack: true,
-  fillContent: true,
+  controller: controller,
+  lazyPages: false,
 )
 ```
 
-`pageBuilder` and `onTabClosed` are forwarded to the switcher automatically.
-The FAB sits at the bottom-end corner (RTL-aware).
+Set `lazyPages: true` to build only the active page. This uses less memory but page state is recreated when the user returns to a tab.
 
----
-
-## Auto-compact breakpoint (v2.2)
-
-`allowAutoCompact` removes the need to manage `MediaQuery` yourself — the
-widget watches its own layout width via `LayoutBuilder` and enters compact mode
-automatically:
+### Content sizing
 
 ```dart
 SuperTabBar(
-  controller: ctrl,
-  allowAutoCompact: true,   // auto-switch at compactWidth
-  compactWidth: 600,        // default — phones only
-  closeTabOnBack: true,
+  controller: controller,
   fillContent: true,
+  scrollContent: false,
+  contentPadding: const EdgeInsets.all(16),
+  contentBackground: Theme.of(context).colorScheme.surface,
 )
 ```
 
-| `compactWidth` | Covers |
+| Property | Behavior |
 |---|---|
-| `600` (default) | All phones |
-| `768` | Phones + small tablets |
-| `900` | Any mobile device |
+| `fillContent` | Expands the content surface to the available height. Otherwise the surface is capped at 440 logical pixels. |
+| `scrollContent` | Wraps each page in a `SingleChildScrollView`. Disable it when the page manages its own scrolling. |
+| `contentPadding` | Padding applied around each page. |
+| `contentBackground` | Overrides the content surface color. |
+| `showChrome` | Enables or removes the outer border, background, radius, and clipping shell. |
 
-The manual `compact: true` flag still works and always takes priority.
-`LayoutBuilder` measures the widget's own available width, so it responds
-correctly in split-view and multi-window layouts.
+Avoid nesting scroll views. Use `scrollContent: false` for pages containing `ListView`, `GridView`, `CustomScrollView`, or another primary scrollable.
 
----
+## Responsive compact mode
 
-## Compact mode (mobile)
+Compact mode hides the horizontal strip and keeps the active page visible. It is intended for phones and constrained layouts.
 
-On small screens the horizontal strip is too wide to be usable. Set
-`compact: true` to hide it and switch tabs from a full-screen grid of thumbnail
-previews instead.
+### Automatic breakpoint
 
 ```dart
-// 1 · Hide the strip; show only the active page.
 SuperTabBar(
-  controller: ctrl,
-  compact: true,
-  closeTabOnBack: true,   // back closes the current tab (unless dirty)
-  showChrome: false,
+  controller: controller,
   fillContent: true,
+  allowAutoCompact: true,
+  compactWidth: 600,
+  useCompactFloatingActionButton: true,
 )
+```
 
-// 2 · Open the switcher from a FloatingActionButton.
-FloatingActionButton(
-  child: const Icon(Icons.grid_view_rounded),
+The widget evaluates its own layout constraints, not the full screen width. This makes it suitable for split views and nested panels.
+
+- `compact: true` forces compact mode.
+- `allowAutoCompact: true` enables breakpoint-based switching.
+- `compactWidth` defaults to `600` logical pixels.
+- `useCompactFloatingActionButton` displays a built-in button that opens the tab switcher.
+
+### Open the switcher manually
+
+```dart
+IconButton(
+  tooltip: 'Open tabs',
+  icon: const Icon(Icons.grid_view_rounded),
   onPressed: () async {
-    final picked = await showSuperTabSwitcher(context, controller: ctrl);
-    if (picked != null) debugPrint('switched to $picked');
+    await showSuperTabSwitcher(
+      context,
+      controller: controller,
+      localizations: SuperTabBarLocalizations.en,
+      showCloseButtons: true,
+    );
   },
 )
 ```
 
-**`showSuperTabSwitcher`** opens a full-screen modal and returns the id of the
-tapped tab (or `null` if dismissed). Selecting a thumbnail activates that tab on
-the controller and pops the route.
+The switcher returns the selected tab ID, or `null` when dismissed.
 
-Inside the switcher:
-
-- **Tap** a thumbnail → jump to that tab.
-- **Long-press-drag** one thumbnail onto another → reorder
-  (`controller.reorder`).
-- **Close (×)** → close a tab. Pass `onCloseTab` to run your own
-  dirty-confirmation dialog first:
+### Embed `SuperTabSwitcher`
 
 ```dart
-showSuperTabSwitcher(
-  context,
-  controller: ctrl,
-  pageBuilder: (ctx, tab) => MyPage(tab: tab),  // for live thumbnail fallback
+SuperTabSwitcher(
+  controller: controller,
+  crossAxisCount: 3,
+  onSelect: controller.select,
   onCloseTab: (id) async {
-    final tab = ctrl.tabById(id)!;
-    if (tab.dirty) {
-      final r = await showSuperTabDirtyCloseDialog(context, tab);
-      if (r == 'discard') ctrl.close(id);
-      else if (r == 'save') { ctrl.setDirty(id, false); ctrl.close(id); }
-    } else {
-      ctrl.close(id);
+    final tab = controller.tabById(id);
+    if (tab == null) return;
+
+    if (!tab.dirty) {
+      controller.close(id);
+      return;
+    }
+
+    final result = await showSuperTabDirtyCloseDialog(context, tab);
+    if (result == 'discard') {
+      controller.close(id);
     }
   },
 )
 ```
 
-Thumbnails reuse the live page snapshots the controller already captures for
-hover previews; tabs without a fresh snapshot fall back to a scaled live render
-of their page (pass `pageBuilder` so it matches your real content), or a plain
-icon card when previews are disabled.
+When `onCloseTab` is supplied, the callback is responsible for closing the tab. When it is omitted, the switcher closes tabs directly when their UI behavior permits it.
 
-You can also embed `SuperTabSwitcher` directly (e.g. in a bottom sheet) for full
-control over presentation.
+## Hover previews
 
-| Parameter (`showSuperTabSwitcher`) | Type | Default | Description |
-|---|---|---|---|
-| `controller` | `SuperTabBarController` | **required** | Tabs to show / reorder. |
-| `pageBuilder` | `TabPageBuilder?` | `null` | Live thumbnail fallback for snapshot-less tabs. |
-| `localizations` | `SuperTabBarLocalizations?` | `.en` | Switcher strings. |
-| `crossAxisCount` | `int?` | adaptive | Fixed column count (else responsive). |
-| `showCloseButtons` | `bool` | `true` | Per-thumbnail close (×) button. |
-| `onCloseTab` | `void Function(int id)?` | `close` | Route the close button through your logic. |
-
----
-
-## Back navigation
-
-Set `closeTabOnBack: true` so a system back gesture / button closes the active
-tab instead of popping the route — **but only when that tab is not dirty**. A
-dirty tab is never auto-closed; the back proceeds normally so unsaved work is
-never discarded silently.
+Desktop pointer users can preview a tab without selecting it.
 
 ```dart
-SuperTabBar(controller: ctrl, closeTabOnBack: true)
-```
-
-| Active tab | Back gesture result |
-|---|---|
-| not dirty | tab is closed; route stays |
-| dirty | tab stays open; back pops the route normally |
-| none open | back pops the route normally |
-
-Implemented with `PopScope` (requires Flutter ≥ 3.16). Pairs naturally with
-`compact` on mobile.
-
----
-
-## Keyboard reference
-
-| Key | Action |
-|---|---|
-| `Esc` | Close context menu or tab-list dropdown. |
-
-> **Removed in 2.1.** The tab-navigation shortcuts (`← →`, `Home` / `End`,
-> `Ctrl/Cmd+T`, `Ctrl/Cmd+W`) and the `horizontalStep` / `arrowGoesInto`
-> helpers were removed. On mobile, use **compact mode** and the tab switcher.
-
----
-
-## Theming
-
-```dart
-ThemeData(
-  extensions: [
-    SuperTabBarThemeData.light.copyWith(
-      bg:      const Color(0xFFF5F3EF),
-      surface: const Color(0xFFFFFFFF),
-      border:  const Color(0xFFDDD8D0),
-    ),
-  ],
+SuperTabBar(
+  controller: controller,
+  previewOptions: const SuperTabBarPreviewOptions(
+    enabled: true,
+    hoverDelay: Duration(milliseconds: 300),
+    snapshotPixelRatio: 0.8,
+    fallback: PreviewFallback.liveRender,
+  ),
 )
 ```
 
-### Instance fields (lerped between dark / light)
+Disable previews when pages contain sensitive content or expensive rendering:
 
-| Field | Description |
-|---|---|
-| `bg` | Strip container / page base. |
-| `surface` | Active-tab content / card. |
-| `surface2` | Nested card. |
-| `inputBg` | Input fill / close-button hover. |
-| `hover` | Hover tint. |
-| `border` | Hairline divider. |
-| `borderStrong` | Solid divider / pop-card edge. |
-| `fg1` – `fg4` | Text ramp — primary → disabled. |
+```dart
+const SuperTabBarPreviewOptions.disabled
+```
 
-### Brand constants (theme-independent)
+`PreviewFallback.blank` shows only a surface when no page snapshot is available. `PreviewFallback.liveRender` builds a scaled fallback page.
 
-| Constant | Value |
-|---|---|
-| `accent` | `#4A7CFF` |
-| `success` | `#1DB88A` |
-| `warning` | `#F97316` |
-| `danger` | `#EF4444` |
-| `displayFont` | `'Manrope'` |
-| `bodyFont` | `'Inter'` |
-| `monoFont` | `'JetBrainsMono'` |
+## Events
 
----
+`SuperTabBar` exposes callbacks for actions initiated by its own UI:
 
-## RTL
+```dart
+SuperTabBar(
+  controller: controller,
+  onTabSelected: (id) => debugPrint('Selected $id'),
+  onTabClosed: (id) => debugPrint('Closed $id'),
+  onTabDuplicated: (newId) => debugPrint('Duplicated as $newId'),
+  onTabPinChanged: (id, pinned) {
+    debugPrint('Tab $id pinned: $pinned');
+  },
+  onTabDirtyChanged: (id, dirty) {
+    debugPrint('Tab $id dirty: $dirty');
+  },
+  onTabReordered: (fromId, toId) {
+    debugPrint('Moved $fromId to $toId');
+  },
+)
+```
+
+For state changes initiated directly through the controller, use `addListener`, `onDirtyChanged`, or `onRenamed` as appropriate.
+
+## Localization and RTL
+
+The package includes English and Arabic string presets.
 
 ```dart
 Directionality(
   textDirection: TextDirection.rtl,
-  child: SuperTabBar(controller: c),
+  child: SuperTabBar(
+    controller: controller,
+    localizations: SuperTabBarLocalizations.ar,
+  ),
 )
 ```
 
-What mirrors: pinned anchor on start edge, scroll chevrons, drag drop-indicator,
-dropdown anchor, and the compact tab switcher.
-
----
-
-## Architecture
-
-```
-lib/
-├── super_tab_bar.dart          public barrel
-└── src/
-    ├── models.dart             BrowserTab (immutable) · SuperTabBehavior
-    │                           GLTabKind · TabPageBuilder · helpers
-    ├── localizations.dart      SuperTabBarLocalizations (.en · .ar)
-    ├── preview_options.dart    SuperTabBarPreviewOptions · PreviewFallback
-    ├── theme.dart              SuperTabBarThemeData (ThemeExtension)
-    │                           alias: BrowserStyleTabBarThemeData
-    ├── controller.dart         SuperTabBarController (ChangeNotifier)
-    │                           SuperTabBarScope (InheritedNotifier)
-    │                           aliases: BrowserStyleTabBar*
-    ├── tab_bar.dart            SuperTabBar widget
-    │                           alias: BrowserStyleTabBar
-    ├── pages.dart              GLTabPage — built-in per-kind pages
-    ├── overlays.dart           TabContextMenu · TabListDropdown
-    │                           MiniPagePreview · showSuperTabDirtyCloseDialog
-    │                           alias: showGLDirtyCloseDialog
-    └── compact.dart            SuperTabSwitcher · showSuperTabSwitcher
-                                (mobile thumbnail switcher)
-```
-
----
-
-## Migration from v1 to v2
-
-### 1. Class renames (automatic — typedefs handle this)
-
-All old names still compile. Update at your own pace:
+Create a custom localization object to override all user-facing strings:
 
 ```dart
-// v1                              v2
-BrowserStyleTabBar          →   SuperTabBar
-BrowserStyleTabBarController→   SuperTabBarController
-BrowserStyleTabBarScope     →   SuperTabBarScope
-BrowserStyleTabBarThemeData →   SuperTabBarThemeData
-showGLDirtyCloseDialog      →   showSuperTabDirtyCloseDialog
+const strings = SuperTabBarLocalizations(
+  closeTab: 'Close',
+  closeOtherTabs: 'Close others',
+  closeTabsToRight: 'Close tabs after this one',
+  duplicateTab: 'Duplicate',
+  pinTab: 'Pin',
+  unpinTab: 'Unpin',
+  newTab: 'New tab',
+  showAllTabs: 'Show all tabs',
+  scrollForward: 'Scroll forward',
+  scrollBack: 'Scroll back',
+  noOpenTabs: 'No tabs are open.',
+  openTabsHeader: 'OPEN TABS · {count}',
+  switcherTitle: 'Open tabs',
+  reorderHint: 'Drag to reorder',
+  discardChangesTitle: 'Discard changes?',
+  cancel: 'Cancel',
+  saveAndClose: 'Save and close',
+  discardAndClose: 'Discard and close',
+);
 ```
 
-### 2. `BrowserTab` field mutation (compile error if used)
+The strip, pinned area, dropdown, preview placement, compact FAB, and switcher adapt to the ambient `Directionality`.
+
+## Theming
+
+### Automatic theme resolution
+
+`SuperTabBarThemeData.of(context)` resolves the theme in this order:
+
+1. An explicitly registered `SuperTabBarThemeData` extension.
+2. The ambient `SuperMaterialThemeData` from `super_core`.
+3. The ambient Material `ColorScheme`.
+
+Read resolved values from the current context:
 
 ```dart
-// v1 — no longer compiles (BrowserTab is now @immutable):
-tab.dirty = true;
-tab.title = 'New name';
-tab.pinned = true;
-
-// v2 — use the controller methods (existed in v1 too):
-controller.setDirty(tab.id, true);
-controller.rename(tab.id, 'New name');
-controller.setPinned(tab.id, true);
+final tabTheme = SuperTabBarThemeData.of(context);
+final accent = tabTheme.accentColor;
+final radius = tabTheme.radiusLarge;
 ```
 
-### 3. `showGLDirtyCloseDialog` signature
+### Component override
 
-The `localizations` parameter is new and optional with a default value,
-so existing calls still compile:
+Register a `SuperTabBarThemeData` extension when this component needs values different from the application design system:
 
 ```dart
-// v1 — still compiles:
-await showGLDirtyCloseDialog(context, tab);
+final baseTheme = SuperMaterialThemeData.light(
+  palette: SuperPalette.purplePalette,
+);
 
-// v2 — with localizations:
-await showSuperTabDirtyCloseDialog(context, tab,
-    localizations: SuperTabBarLocalizations.ar);
+final tabTheme = SuperTabBarThemeData.fromColorScheme(
+  baseTheme.colorScheme,
+).copyWith(
+  accentColor: Colors.indigo,
+  radiusLarge: 12,
+  fastDuration: const Duration(milliseconds: 80),
+);
+
+final theme = baseTheme.copyWith(
+  extensions: [
+    ...baseTheme.extensions.values,
+    tabTheme,
+  ],
+);
 ```
 
----
+`SuperTabBarThemeData` exposes:
 
-## Gotchas
+- Surfaces: `bg`, `surface`, `surface2`, `inputBg`, and `hover`.
+- Borders: `border` and `borderStrong`.
+- Foreground colors: `fg1`, `fg2`, `fg3`, and `fg4`.
+- Semantic colors: `accentColor`, `successColor`, `warningColor`, `dangerColor`, and `infoColor`.
+- Font families: `displayFontFamily`, `bodyFontFamily`, and `monoFontFamily`.
+- Radii: `radiusSmall`, `radiusMedium`, `radiusLarge`, and `radiusExtraLarge`.
+- Elevation: `cardShadows` and `popShadows`.
+- Motion: durations and animation curves.
 
-1. **Stable IDs.** Tab `id`s must be unique and stable. Never reuse an id.
-2. **`pageBuilder` is called during build.** Keep builders stateless; avoid heavy work. The same builder may be called for both the active surface and the scaled hover preview.
-3. **State preservation is the default.** Use `lazyPages: true` only for cheap read-only pages that should reset on revisit.
-4. **`of(context)` returns null outside a tab bar.** Guard all calls: `SuperTabBarController.of(context)?.add(…)`.
-5. **Register the theme extension.** One line in `ThemeData.extensions`.
-6. **`onAddTab` suppresses `onTabAdded`.** When `onAddTab` is set, the widget does not know the new tab's id, so `onTabAdded` cannot fire.
-7. **`+` button requires `onAddTab` (v2.5).** Supply the callback to show the button.
-8. **`BrowserTab.pageBuilder` excluded from `==`/`hashCode`.** Tabs are compared by data fields only — two tabs with different builders but matching id/title/dirty/pinned/behavior/uniqueKey are considered equal.
-9. **`BrowserTab.kind` was removed in v2.5.** Store kind in your `pageBuilder` closure if you need it.
-10. **`SuperTabBar.pageBuilder` was removed in v2.5.** Every tab must have its own `pageBuilder`.
+## Low-level overlays
 
----
+The package exports the overlay widgets used internally. They are available for custom workspace interfaces:
 
-## Additional information
+- `TabContextMenu` and `TabMenuItem`.
+- `TabListDropdown`.
+- `MiniPagePreview`.
+- `showSuperTabDirtyCloseDialog`.
 
-- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
-- **Repository:** <https://github.com/GeniusSystems24/super_tab_bar>
-- **Issues:** <https://github.com/GeniusSystems24/super_tab_bar/issues>
-- **License:** MIT — see [LICENSE](LICENSE)
+Most applications should prefer `SuperTabBar`, which coordinates their positioning, dismissal, and controller behavior.
+
+## Built-in helper types
+
+`GLTabKind`, `glTabIcon`, `glPreviewMeta`, and `kNewTabCycle` are optional helpers for applications that need a predefined set of tab categories.
+
+```dart
+final kind = GLTabKind.chart;
+
+SuperTab(
+  id: 10,
+  title: glPreviewMeta(kind),
+  leading: Icon(glTabIcon(kind), size: 16),
+  pageBuilder: (context, tab) => AnalyticsPage(tabId: tab.id),
+)
+```
+
+`GLTabPage` is a sample full-size page widget and is not required to use the tab system.
+
+## Public API overview
+
+| API | Purpose |
+|---|---|
+| `SuperTabBar` | Browser-style tab strip and page host. |
+| `SuperTab` | Immutable tab model. |
+| `TabPageBuilder` | Per-tab page builder signature. |
+| `SuperTabBehavior` | UI operation policy for a tab. |
+| `SuperTabBarController` | Tab state and operations. |
+| `SuperTabBarScope` | Provides the controller to tab descendants. |
+| `SuperTabSwitcher` | Responsive thumbnail grid for compact layouts. |
+| `showSuperTabSwitcher` | Opens the switcher as a full-screen route. |
+| `SuperTabBarPreviewOptions` | Hover and thumbnail preview configuration. |
+| `PreviewFallback` | Fallback behavior when a snapshot is unavailable. |
+| `SuperTabBarLocalizations` | User-facing strings. |
+| `SuperTabBarThemeData` | Component `ThemeExtension`. |
+| `TabContextMenu` | Low-level contextual menu overlay. |
+| `TabListDropdown` | Low-level open-tabs dropdown. |
+| `MiniPagePreview` | Low-level page preview overlay. |
+| `showSuperTabDirtyCloseDialog` | Built-in unsaved-changes dialog. |
+| `GLTabKind` and helpers | Optional predefined tab categories. |
+| `GLTabPage` | Optional sample page widget. |
+
+Backward-compatible aliases are available for the former `BrowserStyleTabBar` names.
+
+## Flutter usage guidelines
+
+- Own and dispose an external `SuperTabBarController` in a `State` object or dependency-injection scope.
+- Use stable, never-reused tab IDs.
+- Use `uniqueNormal` and a domain-specific `uniqueKey` for singleton destinations.
+- Keep `pageBuilder` focused on constructing the page; place business state in the page controller, view model, or application layer.
+- Disable `scrollContent` when a page contains its own scrollable.
+- Prefer the default state-preserving mode for forms and workspaces.
+- Enable `lazyPages` only after measuring memory or build cost.
+- Confirm dirty state before programmatic close operations.
+- Avoid placing secrets or sensitive data in previews; disable previews or use `PreviewFallback.blank` when necessary.
+- Use `Directionality` and the matching `SuperTabBarLocalizations` preset for RTL interfaces.
+
+## Testing
+
+Inject a controller with deterministic tabs into widget tests:
+
+```dart
+final controller = SuperTabBarController(
+  activeId: 1,
+  tabs: [
+    SuperTab(
+      id: 1,
+      title: 'Home',
+      pageBuilder: (context, tab) => const Text('Home content'),
+    ),
+  ],
+);
+
+await tester.pumpWidget(
+  MaterialApp(
+    home: Scaffold(
+      body: SuperTabBar(
+        controller: controller,
+        fillContent: true,
+        scrollContent: false,
+      ),
+    ),
+  ),
+);
+
+expect(find.text('Home'), findsOneWidget);
+expect(find.text('Home content'), findsOneWidget);
+```
+
+Dispose manually created controllers at the end of the test.
+
+## License
+
+This package is distributed under the MIT License. See [LICENSE](LICENSE).

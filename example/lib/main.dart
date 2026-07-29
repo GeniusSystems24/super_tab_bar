@@ -32,12 +32,8 @@ class _ExampleAppState extends State<ExampleApp> {
     return MaterialApp(
       title: 'super_tab_bar examples',
       debugShowCheckedModeBanner: false,
-      theme: SuperMaterialThemeData.light(
-        palette: SuperPalette.purplePalette,
-      ),
-      darkTheme: SuperMaterialThemeData.dark(
-        palette: SuperPalette.purplePalette,
-      ),
+      theme: SuperMaterialThemeData.light(),
+      darkTheme: SuperMaterialThemeData.dark(),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
       home: LauncherScreen(
         dark: _dark,
@@ -53,8 +49,11 @@ class _ExampleAppState extends State<ExampleApp> {
 class LauncherScreen extends StatelessWidget {
   final bool dark;
   final ValueChanged<bool> onToggleTheme;
-  const LauncherScreen(
-      {super.key, required this.dark, required this.onToggleTheme});
+  const LauncherScreen({
+    super.key,
+    required this.dark,
+    required this.onToggleTheme,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -122,7 +121,8 @@ class LauncherScreen extends StatelessWidget {
       ),
       _Demo(
         title: 'Tab behaviors + callbacks',
-        subtitle: 'requiredPinned tabs that cannot be closed or unpinned, '
+        subtitle:
+            'requiredPinned tabs that cannot be closed or unpinned, '
             'uniqueNormal tabs that deduplicate on re-open, and a live '
             'event log showing all seven direct callbacks.',
         badge: 'v2 · Behaviors · Callbacks',
@@ -168,28 +168,42 @@ class LauncherScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(children: [
-                            _Mark(),
-                            const SizedBox(width: 12),
-                            Text('SUPER_TAB_BAR',
+                          Row(
+                            children: [
+                              _Mark(),
+                              const SizedBox(width: 12),
+                              Text(
+                                'SUPER_TAB_BAR',
                                 style: TextStyle(
-                                    fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.8,
-                                    color: SuperTabBarThemeData.of(context).accentColor)),
-                            const SizedBox(width: 10),
-                            _VersionPill(),
-                          ]),
+                                  fontFamily: SuperTabBarThemeData.of(
+                                    context,
+                                  ).monoFontFamily,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 1.8,
+                                  color: SuperTabBarThemeData.of(
+                                    context,
+                                  ).accentColor,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              _VersionPill(),
+                            ],
+                          ),
                           const SizedBox(height: 16),
-                          Text('Browser-style workspace tabs',
-                              style: TextStyle(
-                                  fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.8,
-                                  height: 1.05,
-                                  color: s.fg1)),
+                          Text(
+                            'Browser-style workspace tabs',
+                            style: TextStyle(
+                              fontFamily: SuperTabBarThemeData.of(
+                                context,
+                              ).displayFontFamily,
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: -0.8,
+                              height: 1.05,
+                              color: s.fg1,
+                            ),
+                          ),
                           const SizedBox(height: 12),
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 640),
@@ -199,10 +213,13 @@ class LauncherScreen extends StatelessWidget {
                               'previews, and state-preserving pages. Open any '
                               'example to try it live in Light / Dark and LTR / RTL.',
                               style: TextStyle(
-                                  fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
-                                  fontSize: 14.5,
-                                  height: 1.6,
-                                  color: s.fg3),
+                                fontFamily: SuperTabBarThemeData.of(
+                                  context,
+                                ).bodyFontFamily,
+                                fontSize: 14.5,
+                                height: 1.6,
+                                color: s.fg3,
+                              ),
                             ),
                           ),
                         ],
@@ -213,37 +230,44 @@ class LauncherScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 36),
                 // ── grid ──────────────────────────────────────
-                LayoutBuilder(builder: (context, c) {
-                  final cols = c.maxWidth > 720 ? 2 : 1;
-                  return GridView.count(
-                    crossAxisCount: cols,
-                    crossAxisSpacing: 18,
-                    mainAxisSpacing: 18,
-                    childAspectRatio: 1.42,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      for (var i = 0; i < demos.length; i++)
-                        _DemoCard(
-                          index: i + 1,
-                          demo: demos[i],
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
+                LayoutBuilder(
+                  builder: (context, c) {
+                    final cols = c.maxWidth > 720 ? 2 : 1;
+                    return GridView.count(
+                      crossAxisCount: cols,
+                      crossAxisSpacing: 18,
+                      mainAxisSpacing: 18,
+                      childAspectRatio: 1.42,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        for (var i = 0; i < demos.length; i++)
+                          _DemoCard(
+                            index: i + 1,
+                            demo: demos[i],
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
                                 builder: (_) =>
-                                    _BackScaffold(child: demos[i].screen)),
+                                    _BackScaffold(child: demos[i].screen),
+                              ),
+                            ),
                           ),
-                        ),
-                    ],
-                  );
-                }),
+                      ],
+                    );
+                  },
+                ),
                 const SizedBox(height: 24),
                 Center(
                   child: Text(
-                      'MIT © GeniusSystems24 · Flutter + super_core 3.0',
-                      style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
-                          fontSize: 11,
-                          color: s.fg4)),
+                    'MIT © GeniusSystems24 · Flutter + super_core 3.0',
+                    style: TextStyle(
+                      fontFamily: SuperTabBarThemeData.of(
+                        context,
+                      ).monoFontFamily,
+                      fontSize: 11,
+                      color: s.fg4,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -272,8 +296,11 @@ class _DemoCard extends StatefulWidget {
   final int index;
   final _Demo demo;
   final VoidCallback onTap;
-  const _DemoCard(
-      {required this.index, required this.demo, required this.onTap});
+  const _DemoCard({
+    required this.index,
+    required this.demo,
+    required this.onTap,
+  });
   @override
   State<_DemoCard> createState() => _DemoCardState();
 }
@@ -298,10 +325,15 @@ class _DemoCardState extends State<_DemoCard> {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(
-                color: _h
-                    ? SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.55)
-                    : s.border),
-            borderRadius: BorderRadius.circular(SuperTabBarThemeData.of(context).radiusExtraLarge),
+              color: _h
+                  ? SuperTabBarThemeData.of(
+                      context,
+                    ).accentColor.withValues(alpha: 0.55)
+                  : s.border,
+            ),
+            borderRadius: BorderRadius.circular(
+              SuperTabBarThemeData.of(context).radiusExtraLarge,
+            ),
             boxShadow: _h ? SuperTabBarThemeData.of(context).cardShadows : null,
           ),
           clipBehavior: Clip.antiAlias,
@@ -325,12 +357,17 @@ class _DemoCardState extends State<_DemoCard> {
                           borderRadius: BorderRadius.circular(7),
                           border: Border.all(color: s.border),
                         ),
-                        child: Text('0${widget.index}',
-                            style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: s.fg2)),
+                        child: Text(
+                          '0${widget.index}',
+                          style: TextStyle(
+                            fontFamily: SuperTabBarThemeData.of(
+                              context,
+                            ).monoFontFamily,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: s.fg2,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -346,28 +383,44 @@ class _DemoCardState extends State<_DemoCard> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      Expanded(
-                        child: Text(widget.demo.title,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.demo.title,
                             style: TextStyle(
-                                fontFamily: SuperTabBarThemeData.of(context).displayFontFamily,
-                                fontSize: 16.5,
-                                fontWeight: FontWeight.w700,
-                                color: s.fg1)),
-                      ),
-                      Icon(Icons.arrow_outward,
+                              fontFamily: SuperTabBarThemeData.of(
+                                context,
+                              ).displayFontFamily,
+                              fontSize: 16.5,
+                              fontWeight: FontWeight.w700,
+                              color: s.fg1,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_outward,
                           size: 16,
-                          color: _h ? SuperTabBarThemeData.of(context).accentColor : s.fg3),
-                    ]),
+                          color: _h
+                              ? SuperTabBarThemeData.of(context).accentColor
+                              : s.fg3,
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 6),
-                    Text(widget.demo.subtitle,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
-                            fontSize: 12.5,
-                            height: 1.5,
-                            color: s.fg3)),
+                    Text(
+                      widget.demo.subtitle,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: SuperTabBarThemeData.of(
+                          context,
+                        ).bodyFontFamily,
+                        fontSize: 12.5,
+                        height: 1.5,
+                        color: s.fg3,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     _TagPill(widget.demo.badge),
                   ],
@@ -434,164 +487,204 @@ class _TabThumb extends StatelessWidget {
           color: active ? s.surface : Colors.transparent,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.description_outlined,
-              size: 9, color: active ? accent : s.fg3),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(labels[i],
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 9,
+              color: active ? accent : s.fg3,
+            ),
+            const SizedBox(width: 5),
+            Flexible(
+              child: Text(
+                labels[i],
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
-                    fontSize: 9.5,
-                    fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-                    color: active ? s.fg1 : s.fg3)),
-          ),
-          if (dirty.contains(i)) ...[
-            const SizedBox(width: 5),
-            Container(
+                  fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
+                  fontSize: 9.5,
+                  fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+                  color: active ? s.fg1 : s.fg3,
+                ),
+              ),
+            ),
+            if (dirty.contains(i)) ...[
+              const SizedBox(width: 5),
+              Container(
                 width: 5,
                 height: 5,
                 decoration: BoxDecoration(
-                    color: SuperTabBarThemeData.of(context).warningColor,
-                    shape: BoxShape.circle)),
+                  color: SuperTabBarThemeData.of(context).warningColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ],
-        ]),
+        ),
       );
     }
 
     return Container(
       color: s.bg,
-      child: Column(children: [
-        // strip
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-            if (pinned) ...[
-              Container(
-                width: 22,
-                height: 22,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: s.surface,
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(6)),
+      child: Column(
+        children: [
+          // strip
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                if (pinned) ...[
+                  Container(
+                    width: 22,
+                    height: 22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: s.surface,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(6),
+                      ),
+                    ),
+                    child: Icon(Icons.push_pin, size: 9, color: accent),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    color: s.borderStrong,
+                  ),
+                ],
+                Expanded(
+                  child: ClipRect(
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < labels.length; i++) tab(i),
+                      ],
+                    ),
+                  ),
                 ),
-                child:  Icon(Icons.push_pin, size: 9, color: accent),
-              ),
-              Container(
-                  width: 1,
-                  height: 14,
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  color: s.borderStrong),
-            ],
-            Expanded(
-              child: ClipRect(
-                child: Row(
-                    children: [for (var i = 0; i < labels.length; i++) tab(i)]),
-              ),
+                if (overflow) Icon(Icons.chevron_right, size: 13, color: s.fg3),
+                const SizedBox(width: 2),
+                Icon(Icons.add, size: 12, color: s.fg3),
+                const SizedBox(width: 2),
+                Icon(Icons.expand_more, size: 12, color: s.fg3),
+              ],
             ),
-            if (overflow) Icon(Icons.chevron_right, size: 13, color: s.fg3),
-            const SizedBox(width: 2),
-            Icon(Icons.add, size: 12, color: s.fg3),
-            const SizedBox(width: 2),
-            Icon(Icons.expand_more, size: 12, color: s.fg3),
-          ]),
-        ),
-        // content surface
-        Expanded(
-          child: Container(
-            margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            decoration: BoxDecoration(
-              color: s.surface,
-              borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(6), top: Radius.circular(2)),
-              border: Border.all(color: s.border),
-            ),
-            padding: const EdgeInsets.all(11),
-            child: _content(s),
           ),
-        ),
-      ]),
+          // content surface
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              decoration: BoxDecoration(
+                color: s.surface,
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(6),
+                  top: Radius.circular(2),
+                ),
+                border: Border.all(color: s.border),
+              ),
+              padding: const EdgeInsets.all(11),
+              child: _content(s),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _content(SuperTabBarThemeData s) {
     Widget bar(double w, {Color? c, double h = 6}) => Container(
-        width: w,
-        height: h,
-        decoration: BoxDecoration(
-            color: c ?? s.inputBg, borderRadius: BorderRadius.circular(3)));
+      width: w,
+      height: h,
+      decoration: BoxDecoration(
+        color: c ?? s.inputBg,
+        borderRadius: BorderRadius.circular(3),
+      ),
+    );
 
     switch (contentKind) {
       case _Content.form:
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          bar(70, c: s.fg1, h: 8),
-          const SizedBox(height: 10),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: s.bg,
-                borderRadius: BorderRadius.circular(5),
-                border: Border.all(color: s.border),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Column(children: [
-                bar(double.infinity, h: 5),
-                const SizedBox(height: 6),
-                bar(double.infinity, h: 5),
-                const SizedBox(height: 6),
-                bar(120, h: 5),
-              ]),
-            ),
-          ),
-        ]);
-      case _Content.cards:
-        return Column(children: [
-          Row(children: [
-            for (var i = 0; i < 3; i++) ...[
-              if (i > 0) const SizedBox(width: 6),
-              Expanded(
-                child: Container(
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: s.bg,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: s.border),
-                  ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            bar(70, c: s.fg1, h: 8),
+            const SizedBox(height: 10),
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: s.bg,
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(color: s.border),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  children: [
+                    bar(double.infinity, h: 5),
+                    const SizedBox(height: 6),
+                    bar(double.infinity, h: 5),
+                    const SizedBox(height: 6),
+                    bar(120, h: 5),
+                  ],
                 ),
               ),
-            ],
-          ]),
-          const SizedBox(height: 7),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: s.bg,
-                borderRadius: BorderRadius.circular(4),
-                border: Border.all(color: s.border),
+            ),
+          ],
+        );
+      case _Content.cards:
+        return Column(
+          children: [
+            Row(
+              children: [
+                for (var i = 0; i < 3; i++) ...[
+                  if (i > 0) const SizedBox(width: 6),
+                  Expanded(
+                    child: Container(
+                      height: 26,
+                      decoration: BoxDecoration(
+                        color: s.bg,
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(color: s.border),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 7),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: s.bg,
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: s.border),
+                ),
               ),
             ),
-          ),
-        ]);
+          ],
+        );
       case _Content.list:
-        return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          bar(70, c: s.fg1, h: 8),
-          const SizedBox(height: 9),
-          for (var i = 0; i < 4; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(children: [
-                bar(26, h: 5),
-                const SizedBox(width: 8),
-                Expanded(child: bar(double.infinity, h: 5)),
-                const SizedBox(width: 8),
-                bar(30, c: s.accentColor.withValues(alpha: 0.5), h: 5),
-              ]),
-            ),
-        ]);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            bar(70, c: s.fg1, h: 8),
+            const SizedBox(height: 9),
+            for (var i = 0; i < 4; i++)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    bar(26, h: 5),
+                    const SizedBox(width: 8),
+                    Expanded(child: bar(double.infinity, h: 5)),
+                    const SizedBox(width: 8),
+                    bar(30, c: s.accentColor.withValues(alpha: 0.5), h: 5),
+                  ],
+                ),
+              ),
+          ],
+        );
     }
   }
 }
@@ -619,17 +712,25 @@ class _VersionPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.13),
+        color: SuperTabBarThemeData.of(
+          context,
+        ).accentColor.withValues(alpha: 0.13),
         borderRadius: BorderRadius.circular(999),
-        border:
-            Border.all(color: SuperTabBarThemeData.of(context).accentColor.withValues(alpha: 0.35)),
+        border: Border.all(
+          color: SuperTabBarThemeData.of(
+            context,
+          ).accentColor.withValues(alpha: 0.35),
+        ),
       ),
-      child: Text('v3.0.0',
-          style: TextStyle(
-              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
-              fontSize: 10.5,
-              fontWeight: FontWeight.w700,
-              color: SuperTabBarThemeData.of(context).accentColor)),
+      child: Text(
+        'v3.0.0',
+        style: TextStyle(
+          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: SuperTabBarThemeData.of(context).accentColor,
+        ),
+      ),
     );
   }
 }
@@ -647,13 +748,16 @@ class _TagPill extends StatelessWidget {
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: s.border),
       ),
-      child: Text(text,
-          style: TextStyle(
-              fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.3,
-              color: s.fg3)),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
+          color: s.fg3,
+        ),
+      ),
     );
   }
 }
@@ -675,19 +779,29 @@ class _ThemeToggle extends StatelessWidget {
           decoration: BoxDecoration(
             color: s.surface,
             border: Border.all(color: s.borderStrong),
-            borderRadius: BorderRadius.circular(SuperTabBarThemeData.of(context).radiusMedium),
+            borderRadius: BorderRadius.circular(
+              SuperTabBarThemeData.of(context).radiusMedium,
+            ),
           ),
-          child: Row(children: [
-            Icon(dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
-                size: 15, color: s.fg2),
-            const SizedBox(width: 8),
-            Text(dark ? 'Dark' : 'Light',
+          child: Row(
+            children: [
+              Icon(
+                dark ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+                size: 15,
+                color: s.fg2,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                dark ? 'Dark' : 'Light',
                 style: TextStyle(
-                    fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: s.fg1)),
-          ]),
+                  fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: s.fg1,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -700,36 +814,53 @@ class _BackScaffold extends StatelessWidget {
   const _BackScaffold({required this.child});
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Positioned.fill(child: child),
-      Positioned(
-        left: 16,
-        bottom: 16,
-        child: SafeArea(
-          child: Material(
-            color: Colors.black.withValues(alpha: 0.62),
-            borderRadius: BorderRadius.circular(999),
-            child: InkWell(
+    return Stack(
+      children: [
+        Positioned.fill(child: child),
+        Positioned(
+          left: 16,
+          bottom: 16,
+          child: SafeArea(
+            child: Material(
+              color: Colors.black.withValues(alpha: 0.62),
               borderRadius: BorderRadius.circular(999),
-              onTap: () => Navigator.of(context).maybePop(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  const Icon(Icons.arrow_back, size: 16, color: Colors.white),
-                  const SizedBox(width: 7),
-                  Text('Demos',
-                      style: TextStyle(
-                          fontFamily: SuperTabBarThemeData.of(context).bodyFontFamily,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(999),
+                onTap: () => Navigator.of(context).maybePop(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.arrow_back,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 7),
+                      Text(
+                        'Demos',
+                        style: TextStyle(
+                          fontFamily: SuperTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white)),
-                ]),
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
 

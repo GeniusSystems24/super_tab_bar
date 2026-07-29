@@ -3,7 +3,7 @@ name: super-tab-bar
 description: >
   How to use the super_tab_bar Flutter package (v2.5) — a browser-style workspace
   tab strip. Each tab carries a required `pageBuilder: TabPageBuilder` (`Widget
-  Function(BuildContext, BrowserTab)`). BrowserTab.kind was removed in v2.5.
+  Function(BuildContext, SuperTab)`). SuperTab.kind was removed in v2.5.
   SuperTabBar.pageBuilder was removed in v2.5. The + button only shows when
   onAddTab is non-null. Use when building or modifying a Flutter multi-tab
   workspace UI with the super_tab_bar package.
@@ -34,16 +34,16 @@ MaterialApp(
 ```dart
 // External controller + required per-tab page builders (v2.5):
 final ctrl = SuperTabBarController(tabs: [
-  BrowserTab(
+  SuperTab(
     id: 1, title: 'Accounts',
     pinned: true, behavior: SuperTabBehavior.requiredPinned,
     pageBuilder: (ctx, tab) => const AccountsPage(),
   ),
-  BrowserTab(
+  SuperTab(
     id: 2, title: 'Journal', dirty: true,
     pageBuilder: (ctx, tab) => JournalPage(tabId: tab.id),
   ),
-  BrowserTab(
+  SuperTab(
     id: 3, title: 'Dashboard',
     pageBuilder: (ctx, tab) => const DashboardPage(),
   ),
@@ -62,10 +62,10 @@ Provide `tabsState` **or** `controller` — not both.
 
 ---
 
-## `BrowserTab` model  *(immutable)*
+## `SuperTab` model  *(immutable)*
 
 ```dart
-BrowserTab({
+SuperTab({
   required int id,              // stable unique identity — never reuse
   required String title,
   // kind was removed in v2.5 — store it in your pageBuilder closure
@@ -75,18 +75,18 @@ BrowserTab({
   String? uniqueKey,            // dedup key for uniqueNormal tabs
   Widget? leading,                     // widget before title (replaces default icon)
   Widget? trailing,                    // widget after title, before close indicator
-  required TabPageBuilder pageBuilder, // Widget Function(BuildContext, BrowserTab)
+  required TabPageBuilder pageBuilder, // Widget Function(BuildContext, SuperTab)
 })
 ```
 
-**`TabPageBuilder`** = `Widget Function(BuildContext context, BrowserTab tab)`
+**`TabPageBuilder`** = `Widget Function(BuildContext context, SuperTab tab)`
 
 The builder receives the **live tab** at build time — `tab.title` and
 `tab.dirty` reflect the current controller state.
 
 Excluded from `operator ==` and `hashCode`.
 
-`BrowserTab` is `@immutable` — **never mutate fields directly**.
+`SuperTab` is `@immutable` — **never mutate fields directly**.
 
 ---
 
@@ -229,7 +229,7 @@ await showSuperTabSwitcher(context, controller: ctrl,
 6. **`onAddTab` suppresses `onTabAdded`** — widget doesn't know the new id.
 7. **`+` button requires `onAddTab`** — supply callback to show it.
 8. **`pageBuilder` excluded from `==`/`hashCode`** — tabs compared by data fields.
-9. **`BrowserTab.kind` removed (v2.5)** — store kind in your closure if needed.
+9. **`SuperTab.kind` removed (v2.5)** — store kind in your closure if needed.
 10. **`SuperTabBar.pageBuilder` removed (v2.5)** — each tab must own its builder.
 
 ## Reference

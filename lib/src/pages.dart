@@ -67,7 +67,9 @@ class _Btn extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: primary ? BrowserStyleTabBarThemeData.of(context).accentColor : Colors.transparent,
+        color: primary
+            ? BrowserStyleTabBarThemeData.of(context).accentColor
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(
           BrowserStyleTabBarThemeData.of(context).radiusMedium,
         ),
@@ -166,7 +168,9 @@ class _Header extends StatelessWidget {
               Text(
                 crumb,
                 style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                  fontFamily: BrowserStyleTabBarThemeData.of(
+                    context,
+                  ).monoFontFamily,
                   fontSize: 11,
                   letterSpacing: 0.44,
                   color: s.fg3,
@@ -176,7 +180,9 @@ class _Header extends StatelessWidget {
               Text(
                 title,
                 style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.of(context).displayFontFamily,
+                  fontFamily: BrowserStyleTabBarThemeData.of(
+                    context,
+                  ).displayFontFamily,
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
                   height: 1.15,
@@ -190,7 +196,9 @@ class _Header extends StatelessWidget {
                   child: Text(
                     desc!,
                     style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                      fontFamily: BrowserStyleTabBarThemeData.of(
+                        context,
+                      ).bodyFontFamily,
                       fontSize: 13.5,
                       height: 1.5,
                       color: s.fg3,
@@ -234,7 +242,9 @@ class _Stat extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                fontFamily: BrowserStyleTabBarThemeData.of(
+                  context,
+                ).bodyFontFamily,
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
                 color: s.fg3,
@@ -244,7 +254,9 @@ class _Stat extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontFamily: BrowserStyleTabBarThemeData.of(context).displayFontFamily,
+                fontFamily: BrowserStyleTabBarThemeData.of(
+                  context,
+                ).displayFontFamily,
                 fontSize: 23,
                 fontWeight: FontWeight.w700,
                 color: s.fg1,
@@ -255,7 +267,9 @@ class _Stat extends StatelessWidget {
               Text(
                 '${up ? '▲' : '▼'} $delta',
                 style: TextStyle(
-                  fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                  fontFamily: BrowserStyleTabBarThemeData.of(
+                    context,
+                  ).bodyFontFamily,
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: up
@@ -336,7 +350,9 @@ class _Table extends StatelessWidget {
                       Text(
                         c.label.toUpperCase(),
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).monoFontFamily,
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.6,
@@ -354,7 +370,9 @@ class _Table extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 13),
               decoration: BoxDecoration(
                 color: highlight.contains(ri)
-                    ? BrowserStyleTabBarThemeData.of(context).accentColor.withValues(alpha: 0.07)
+                    ? BrowserStyleTabBarThemeData.of(
+                        context,
+                      ).accentColor.withValues(alpha: 0.07)
                     : Colors.transparent,
                 border: ri < rows.length - 1
                     ? Border(bottom: BorderSide(color: s.border))
@@ -399,7 +417,7 @@ String _sar(String n) => 'SAR $n';
 
 // ── PAGES ───────────────────────────────────────────────────
 class _PageLedger extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PageLedger(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -491,7 +509,7 @@ class _PageLedger extends StatelessWidget {
 }
 
 class _PageDoc extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PageDoc(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -558,7 +576,9 @@ class _PageDoc extends StatelessWidget {
                       Text(
                         meta[i][0].toUpperCase(),
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).monoFontFamily,
                           fontSize: 10.5,
                           letterSpacing: 0.5,
                           color: s.fg3,
@@ -568,7 +588,9 @@ class _PageDoc extends StatelessWidget {
                       Text(
                         meta[i][1],
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: s.fg1,
@@ -628,7 +650,7 @@ class _PageDoc extends StatelessWidget {
 }
 
 class _PageStore extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PageStore(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -676,7 +698,9 @@ class _PageStore extends StatelessWidget {
                     Text(
                       'BRANCH · RYD-01',
                       style: TextStyle(
-                        fontFamily: BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                        fontFamily: BrowserStyleTabBarThemeData.of(
+                          context,
+                        ).monoFontFamily,
                         fontSize: 11,
                         letterSpacing: 0.5,
                         color: Colors.white.withValues(alpha: 0.7),
@@ -686,7 +710,9 @@ class _PageStore extends StatelessWidget {
                     Text(
                       tab.title,
                       style: TextStyle(
-                        fontFamily: BrowserStyleTabBarThemeData.of(context).displayFontFamily,
+                        fontFamily: BrowserStyleTabBarThemeData.of(
+                          context,
+                        ).displayFontFamily,
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
@@ -742,7 +768,9 @@ class _PageStore extends StatelessWidget {
                       Text(
                         'Store details',
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: s.fg1,
@@ -762,8 +790,9 @@ class _PageStore extends StatelessWidget {
                               Text(
                                 details[i][0],
                                 style: TextStyle(
-                                  fontFamily:
-                                      BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                  fontFamily: BrowserStyleTabBarThemeData.of(
+                                    context,
+                                  ).bodyFontFamily,
                                   fontSize: 13,
                                   color: s.fg3,
                                 ),
@@ -774,8 +803,9 @@ class _PageStore extends StatelessWidget {
                                   details[i][1],
                                   textAlign: TextAlign.right,
                                   style: TextStyle(
-                                    fontFamily:
-                                        BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                    fontFamily: BrowserStyleTabBarThemeData.of(
+                                      context,
+                                    ).bodyFontFamily,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: s.fg1,
@@ -800,7 +830,9 @@ class _PageStore extends StatelessWidget {
                       Text(
                         'On shift',
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: s.fg1,
@@ -821,7 +853,9 @@ class _PageStore extends StatelessWidget {
                                     p[0],
                                     style: TextStyle(
                                       fontFamily:
-                                          BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                          BrowserStyleTabBarThemeData.of(
+                                            context,
+                                          ).bodyFontFamily,
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       color: s.fg1,
@@ -831,7 +865,9 @@ class _PageStore extends StatelessWidget {
                                     p[1],
                                     style: TextStyle(
                                       fontFamily:
-                                          BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                          BrowserStyleTabBarThemeData.of(
+                                            context,
+                                          ).bodyFontFamily,
                                       fontSize: 11.5,
                                       color: s.fg3,
                                     ),
@@ -854,7 +890,7 @@ class _PageStore extends StatelessWidget {
 }
 
 class _PageDashboard extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PageDashboard(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -924,7 +960,9 @@ class _PageDashboard extends StatelessWidget {
                   Text(
                     'Monthly revenue',
                     style: TextStyle(
-                      fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                      fontFamily: BrowserStyleTabBarThemeData.of(
+                        context,
+                      ).bodyFontFamily,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                       color: s.fg1,
@@ -952,8 +990,12 @@ class _PageDashboard extends StatelessWidget {
                                 height: ((bars[i][1] as int) / 100) * 122,
                                 decoration: BoxDecoration(
                                   color: i == 5
-                                      ? BrowserStyleTabBarThemeData.of(context).accentColor
-                                      : BrowserStyleTabBarThemeData.of(context).accentColor.withValues(alpha: 0.28),
+                                      ? BrowserStyleTabBarThemeData.of(
+                                          context,
+                                        ).accentColor
+                                      : BrowserStyleTabBarThemeData.of(
+                                          context,
+                                        ).accentColor.withValues(alpha: 0.28),
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(4),
                                   ),
@@ -964,8 +1006,9 @@ class _PageDashboard extends StatelessWidget {
                             Text(
                               bars[i][0] as String,
                               style: TextStyle(
-                                fontFamily:
-                                    BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                                fontFamily: BrowserStyleTabBarThemeData.of(
+                                  context,
+                                ).monoFontFamily,
                                 fontSize: 11,
                                 color: s.fg3,
                               ),
@@ -986,7 +1029,7 @@ class _PageDashboard extends StatelessWidget {
 }
 
 class _PagePeople extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PagePeople(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -1043,7 +1086,9 @@ class _PagePeople extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                            fontFamily: BrowserStyleTabBarThemeData.of(
+                              context,
+                            ).bodyFontFamily,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                             color: s.fg1,
@@ -1065,7 +1110,7 @@ class _PagePeople extends StatelessWidget {
 }
 
 class _PageGeneric extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PageGeneric(this.tab);
   @override
   Widget build(BuildContext context) {
@@ -1104,7 +1149,9 @@ class _PageGeneric extends StatelessWidget {
                       Text(
                         'Recent activity',
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: s.fg1,
@@ -1125,7 +1172,9 @@ class _PageGeneric extends StatelessWidget {
                                 width: 7,
                                 height: 7,
                                 decoration: BoxDecoration(
-                                  color: BrowserStyleTabBarThemeData.of(context).accentColor,
+                                  color: BrowserStyleTabBarThemeData.of(
+                                    context,
+                                  ).accentColor,
                                   shape: BoxShape.circle,
                                 ),
                               ),
@@ -1134,8 +1183,9 @@ class _PageGeneric extends StatelessWidget {
                                 child: Text(
                                   activity[i][0],
                                   style: TextStyle(
-                                    fontFamily:
-                                        BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                    fontFamily: BrowserStyleTabBarThemeData.of(
+                                      context,
+                                    ).bodyFontFamily,
                                     fontSize: 13,
                                     color: s.fg1,
                                   ),
@@ -1144,8 +1194,9 @@ class _PageGeneric extends StatelessWidget {
                               Text(
                                 activity[i][1],
                                 style: TextStyle(
-                                  fontFamily:
-                                      BrowserStyleTabBarThemeData.of(context).monoFontFamily,
+                                  fontFamily: BrowserStyleTabBarThemeData.of(
+                                    context,
+                                  ).monoFontFamily,
                                   fontSize: 11.5,
                                   color: s.fg3,
                                 ),
@@ -1167,7 +1218,9 @@ class _PageGeneric extends StatelessWidget {
                       Text(
                         'Connected platforms',
                         style: TextStyle(
-                          fontFamily: BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                          fontFamily: BrowserStyleTabBarThemeData.of(
+                            context,
+                          ).bodyFontFamily,
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
                           color: s.fg1,
@@ -1188,8 +1241,9 @@ class _PageGeneric extends StatelessWidget {
                                 child: Text(
                                   platforms[i][0] as String,
                                   style: TextStyle(
-                                    fontFamily:
-                                        BrowserStyleTabBarThemeData.of(context).bodyFontFamily,
+                                    fontFamily: BrowserStyleTabBarThemeData.of(
+                                      context,
+                                    ).bodyFontFamily,
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: s.fg1,
@@ -1217,7 +1271,7 @@ class _PageGeneric extends StatelessWidget {
 
 /// Full-size page for a tab. Fluid width — fills its container.
 class GLTabPage extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const GLTabPage({super.key, required this.tab});
   @override
   Widget build(BuildContext context) => _PageGeneric(tab);

@@ -39,11 +39,11 @@ MaterialApp(
 ```dart
 SuperTabBar(
   tabsState: [
-    BrowserTab(
+    SuperTab(
       id: 1, title: 'Home',
       pageBuilder: (ctx, tab) => const HomePage(),
     ),
-    BrowserTab(
+    SuperTab(
       id: 2, title: 'Report',
       pageBuilder: (ctx, tab) => const ReportPage(),
     ),
@@ -54,24 +54,24 @@ SuperTabBar(
 
 ---
 
-## `BrowserTab` model
+## `SuperTab` model
 
 ```dart
-BrowserTab({
+SuperTab({
   required int id,                    // stable unique identity — never reuse
   required String title,
-  // NOTE: kind field was removed in v2.5 — do NOT use GLTabKind on BrowserTab
+  // NOTE: kind field was removed in v2.5 — do NOT use GLTabKind on SuperTab
   bool dirty    = false,              // unsaved dot + close confirmation
   bool pinned   = false,              // icon-only, anchored to the start edge
   SuperTabBehavior behavior = SuperTabBehavior.normal,
   String? uniqueKey,                  // dedup key for uniqueNormal tabs
   Widget? leading,                     // widget before title (replaces default icon)
   Widget? trailing,                    // widget after title, before close indicator
-  required TabPageBuilder pageBuilder, // Widget Function(BuildContext, BrowserTab)
+  required TabPageBuilder pageBuilder, // Widget Function(BuildContext, SuperTab)
 })
 ```
 
-**`TabPageBuilder`** = `Widget Function(BuildContext context, BrowserTab tab)`
+**`TabPageBuilder`** = `Widget Function(BuildContext context, SuperTab tab)`
 
 The builder receives the **live tab** (current `title`/`dirty` state).
 It is excluded from `==` and `hashCode`.
@@ -198,8 +198,8 @@ await showSuperTabSwitcher(context, controller: ctrl,
 ## Gotchas
 
 1. **Stable IDs** — Never reuse a tab id after closing.
-2. **pageBuilder is required** — every BrowserTab must have one; SuperTabBar.pageBuilder was removed.
-3. **BrowserTab.kind removed (v2.5)** — do NOT reference `tab.kind`; store kind in your closure.
+2. **pageBuilder is required** — every SuperTab must have one; SuperTabBar.pageBuilder was removed.
+3. **SuperTab.kind removed (v2.5)** — do NOT reference `tab.kind`; store kind in your closure.
 4. **pageBuilder called during build** — keep stateless; renders both active surface and hover preview.
 5. **State-preservation is default** — `lazyPages: true` only for pages that should reset.
 6. **`of(context)` returns null outside a tab bar** — guard every call.

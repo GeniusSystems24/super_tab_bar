@@ -49,7 +49,7 @@ import 'compact.dart';
 class SuperTabBar extends StatefulWidget {
   // ── Seed / state ─────────────────────────────────────────
   /// Seed tabs used only when [controller] is null. Defaults to the demo set.
-  final List<BrowserTab>? tabsState;
+  final List<SuperTab>? tabsState;
 
   /// External controller. When provided the widget does NOT own/dispose it,
   /// and the same instance is accessible via `SuperTabBarController.of`.
@@ -743,7 +743,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
     );
   }
 
-  Widget _draggableTab(BrowserTab tab, bool first) {
+  Widget _draggableTab(SuperTab tab, bool first) {
     final active = _ctrl.isActive(tab.id);
     final isOver = _overId == tab.id && _dragId != tab.id;
     return DragTarget<int>(
@@ -790,7 +790,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
   }
 
   Widget _tabChip(
-    BrowserTab tab, {
+    SuperTab tab, {
     required bool compact,
     required bool first,
     bool isOver = false,
@@ -833,7 +833,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
     );
   }
 
-  Widget _buildContent(SuperTabBarThemeData s, BrowserTab? activeTab) {
+  Widget _buildContent(SuperTabBarThemeData s, SuperTab? activeTab) {
     final bg = widget.contentBackground ?? s.surface;
     final decoration = BoxDecoration(
       color: bg,
@@ -862,7 +862,7 @@ class _SuperTabBarState extends State<SuperTabBar> {
         .indexWhere((t) => t.id == activeTab.id)
         .clamp(0, ordered.length - 1);
 
-    Widget pageFor(BrowserTab t) {
+    Widget pageFor(SuperTab t) {
       final Widget raw = t.pageBuilder(context, t);
       final page = KeyedSubtree(
         key: ValueKey('tabpage-content-${t.id}'),
@@ -969,7 +969,7 @@ class _DismissLayer extends StatelessWidget {
 // ════════════════════════════════════════════════════════════
 
 class _TabChip extends StatefulWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final bool active, compact, first, isOver;
   final bool previewEnabled;
   final Duration previewDelay;
@@ -1121,7 +1121,7 @@ class _TabChipState extends State<_TabChip> {
 
   Widget _content(
     SuperTabBarThemeData s,
-    BrowserTab tab,
+    SuperTab tab,
     bool active,
     Color fg,
   ) {
@@ -1183,7 +1183,7 @@ class _TabChipState extends State<_TabChip> {
     );
   }
 
-  Widget _trailing(SuperTabBarThemeData s, BrowserTab tab, bool active) {
+  Widget _trailing(SuperTabBarThemeData s, SuperTab tab, bool active) {
     if (tab.dirty && !_hover) {
       return Container(
         width: 8,
@@ -1239,7 +1239,7 @@ class _TabChipState extends State<_TabChip> {
 // ════════════════════════════════════════════════════════════
 
 class _StaticTab extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final bool active;
   final bool feedback;
   const _StaticTab({

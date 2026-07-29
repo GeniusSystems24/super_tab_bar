@@ -40,7 +40,7 @@ import 'package:flutter/widgets.dart';
 import 'models.dart';
 
 class SuperTabBarController extends ChangeNotifier {
-  SuperTabBarController({List<BrowserTab>? tabs, int? activeId})
+  SuperTabBarController({List<SuperTab>? tabs, int? activeId})
     : _tabs = _normalize(tabs ?? _defaults()) {
     _seed = _tabs.fold<int>(0, (m, t) => t.id > m ? t.id : m);
     _activeId =
@@ -51,31 +51,31 @@ class SuperTabBarController extends ChangeNotifier {
   }
 
   // ── Default seed tabs ──────────────────────────────────────
-  static List<BrowserTab> _defaults() => [
-    BrowserTab(
+  static List<SuperTab> _defaults() => [
+    SuperTab(
       id: 1,
       title: 'Chart of Accounts',
       pinned: true,
       behavior: SuperTabBehavior.requiredPinned,
       pageBuilder: (ctx, tab) => _defaultPage(tab),
     ),
-    BrowserTab(
+    SuperTab(
       id: 2,
       title: 'Opening Journal Entry — JV-2024-0042',
       dirty: true,
       pageBuilder: (ctx, tab) => _defaultPage(tab),
     ),
-    BrowserTab(
+    SuperTab(
       id: 3,
       title: 'Downtown Central Store',
       pageBuilder: (ctx, tab) => _defaultPage(tab),
     ),
-    BrowserTab(
+    SuperTab(
       id: 4,
       title: 'Dashboard',
       pageBuilder: (ctx, tab) => _defaultPage(tab),
     ),
-    BrowserTab(
+    SuperTab(
       id: 5,
       title: 'Trial Balance — FY2024 Q3',
       pageBuilder: (ctx, tab) => _defaultPage(tab),
@@ -83,14 +83,14 @@ class SuperTabBarController extends ChangeNotifier {
   ];
 
   /// Ensures requiredPinned tabs always have pinned: true.
-  static List<BrowserTab> _normalize(List<BrowserTab> tabs) => [
+  static List<SuperTab> _normalize(List<SuperTab> tabs) => [
     for (final t in tabs)
       t.behavior == SuperTabBehavior.requiredPinned && !t.pinned
           ? t.copyWith(pinned: true)
           : t,
   ];
 
-  final List<BrowserTab> _tabs;
+  final List<SuperTab> _tabs;
   int? _activeId;
   late int _seed;
   final Map<int, ui.Image> _snaps = {};
@@ -105,13 +105,13 @@ class SuperTabBarController extends ChangeNotifier {
   void Function(int id, String newTitle)? onRenamed;
 
   // ── Reads ──────────────────────────────────────────────────
-  List<BrowserTab> get tabs => List.unmodifiable(_tabs);
+  List<SuperTab> get tabs => List.unmodifiable(_tabs);
   int? get activeId => _activeId;
   int get length => _tabs.length;
   bool isActive(int id) => id == _activeId;
 
-  BrowserTab? get activeTab => tabById(_activeId);
-  BrowserTab? tabById(int? id) {
+  SuperTab? get activeTab => tabById(_activeId);
+  SuperTab? tabById(int? id) {
     if (id == null) return null;
     for (final t in _tabs) {
       if (t.id == id) return t;
@@ -119,11 +119,11 @@ class SuperTabBarController extends ChangeNotifier {
     return null;
   }
 
-  List<BrowserTab> get pinned => _tabs.where((t) => t.pinned).toList();
-  List<BrowserTab> get unpinned => _tabs.where((t) => !t.pinned).toList();
+  List<SuperTab> get pinned => _tabs.where((t) => t.pinned).toList();
+  List<SuperTab> get unpinned => _tabs.where((t) => !t.pinned).toList();
 
   /// Visual order: pinned first (preserving relative order), then unpinned.
-  List<BrowserTab> get ordered => [...pinned, ...unpinned];
+  List<SuperTab> get ordered => [...pinned, ...unpinned];
 
   bool canCloseOthers(int id) => _tabs.any((t) => t.id != id && !t.pinned);
   bool canCloseRight(int id) {
@@ -190,7 +190,7 @@ class SuperTabBarController extends ChangeNotifier {
   /// `pinned: true` regardless of the [pinned] argument.
   ///
   // Simple page for zero-config demo tabs (no pages.dart dependency).
-  static Widget _defaultPage(BrowserTab tab) => Builder(
+  static Widget _defaultPage(SuperTab tab) => Builder(
     builder: (ctx) =>
         Padding(padding: const EdgeInsets.all(24), child: Text(tab.title)),
   );
@@ -225,7 +225,7 @@ class SuperTabBarController extends ChangeNotifier {
     }
 
     final id = ++_seed;
-    final tab = BrowserTab(
+    final tab = SuperTab(
       id: id,
       title: title ?? 'New Tab',
       pinned: behavior == SuperTabBehavior.requiredPinned ? true : pinned,
@@ -304,7 +304,7 @@ class SuperTabBarController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Updates the [BrowserTab.pageBuilder] for [id] after creation.
+  /// Updates the [SuperTab.pageBuilder] for [id] after creation.
   ///
   /// ```dart
   /// final id = ctrl.add(title: 'Report',
@@ -381,7 +381,7 @@ class SuperTabBarController extends ChangeNotifier {
   /// Escape hatch for arbitrary batch edits. Call inside [fn] and
   /// [notifyListeners] will fire once when it returns.
   ///
-  /// Note: [BrowserTab] is immutable — you cannot mutate tab fields
+  /// Note: [SuperTab] is immutable — you cannot mutate tab fields
   /// directly. Use [tabById] to read, then [mutate] with list-index
   /// replacement via [copyWith], e.g.:
   ///
@@ -422,7 +422,7 @@ class SuperTabBarController extends ChangeNotifier {
           ?.controller;
 
   // ── Private helpers ────────────────────────────────────────
-  BrowserTab? _findByUniqueKey(String key) {
+  SuperTab? _findByUniqueKey(String key) {
     for (final t in _tabs) {
       if (t.behavior == SuperTabBehavior.uniqueNormal && t.uniqueKey == key) {
         return t;

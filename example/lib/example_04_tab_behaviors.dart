@@ -32,7 +32,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
     _ctrl = SuperTabBarController(
       tabs: [
         // requiredPinned — always visible, cannot be closed/unpinned from UI
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Home',
           pinned: true,
@@ -40,7 +40,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
           pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
         ),
         // uniqueNormal — deduplicates on re-open
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Settings',
           behavior: SuperTabBehavior.uniqueNormal,
@@ -49,9 +49,9 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
           pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab),
         ),
         // normal — standard behavior
-        BrowserTab(id: 3, title: 'Dashboard',
+        SuperTab(id: 3, title: 'Dashboard',
             pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
-        BrowserTab(id: 4, title: 'Accounts',
+        SuperTab(id: 4, title: 'Accounts',
             pageBuilder: (ctx, tab) => _BehaviorPage(tab: tab)),
       ],
       activeId: 3,
@@ -332,7 +332,7 @@ class _TabBehaviorsExampleState extends State<TabBehaviorsExample> {
 
 // ── Tab page showing behavior info ────────────────────────────────
 class _BehaviorPage extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _BehaviorPage({required this.tab});
 
   @override

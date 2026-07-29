@@ -41,15 +41,15 @@ class _ThemeRtlOverflowExampleState
     super.initState();
     _ctrl = SuperTabBarController(
       tabs: [
-        BrowserTab(id: 1, title: 'Accounts', pinned: true,
+        SuperTab(id: 1, title: 'Accounts', pinned: true,
             pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-        BrowserTab(id: 2, title: 'Journal Entry',
+        SuperTab(id: 2, title: 'Journal Entry',
             pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-        BrowserTab(id: 3, title: 'Dashboard',
+        SuperTab(id: 3, title: 'Dashboard',
             pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-        BrowserTab(id: 4, title: 'Team',
+        SuperTab(id: 4, title: 'Team',
             pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-        BrowserTab(id: 5, title: 'Store',
+        SuperTab(id: 5, title: 'Store',
             pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
       ],
       activeId: 3,

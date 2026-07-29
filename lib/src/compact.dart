@@ -317,7 +317,7 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
   );
 
   // ── One thumbnail cell (draggable + drop target) ──────────
-  Widget _cell(SuperTabBarThemeData s, BrowserTab tab) {
+  Widget _cell(SuperTabBarThemeData s, SuperTab tab) {
     final isOver = _overId == tab.id && _dragId != tab.id;
     final card = _TabThumbnail(
       tab: tab,
@@ -390,7 +390,7 @@ class _SuperTabSwitcherState extends State<SuperTabSwitcher> {
 // ════════════════════════════════════════════════════════════
 
 class _TabThumbnail extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final bool active;
   final bool isOver;
   final bool dragging;
@@ -572,7 +572,7 @@ class _TabThumbnail extends StatelessWidget {
 
 // Preview area: cached snapshot, else scaled live render, else blank.
 class _PreviewArea extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final Color surface;
   final ui.Image? snapshot;
   final Widget Function(Widget) scope;

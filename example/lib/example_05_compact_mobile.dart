@@ -29,15 +29,15 @@ class _CompactMobileExampleState extends State<CompactMobileExample> {
   final _ctrl = SuperTabBarController(
     tabs: [
       // v2.5: per-tab pageBuilder; falls back to GLTabPage when null.
-      BrowserTab(id: 1, title: 'Inbox',
+      SuperTab(id: 1, title: 'Inbox',
           pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-      BrowserTab(id: 2, title: 'Invoice INV-2043', dirty: true,
+      SuperTab(id: 2, title: 'Invoice INV-2043', dirty: true,
           pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-      BrowserTab(id: 3, title: 'Downtown Store',
+      SuperTab(id: 3, title: 'Downtown Store',
           pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-      BrowserTab(id: 4, title: 'Sales Dashboard',
+      SuperTab(id: 4, title: 'Sales Dashboard',
           pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
-      BrowserTab(id: 5, title: 'Team Directory',
+      SuperTab(id: 5, title: 'Team Directory',
           pageBuilder: (ctx, tab) => GLTabPage(tab: tab)),
     ],
     activeId: 1,

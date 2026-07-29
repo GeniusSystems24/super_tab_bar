@@ -13,7 +13,7 @@ void main() {
   // ════════════════════════════════════════════════════════
   group('BrowserTab — immutability', () {
     test('all fields are final — copyWith produces a new instance', () {
-      final tab = BrowserTab(
+      final tab = SuperTab(
         id: 1,
         title: 'Test',
         pageBuilder: (ctx, tab) => const SizedBox(),
@@ -26,7 +26,7 @@ void main() {
     });
 
     test('copyWith preserves untouched fields', () {
-      final tab = BrowserTab(
+      final tab = SuperTab(
         id: 1,
         title: 'T',
         dirty: true,
@@ -45,12 +45,12 @@ void main() {
     });
 
     test('value equality holds for identical data', () {
-      final a = BrowserTab(
+      final a = SuperTab(
         id: 5,
         title: 'Same',
         pageBuilder: (ctx, tab) => const SizedBox(),
       );
-      final b = BrowserTab(
+      final b = SuperTab(
         id: 5,
         title: 'Same',
         pageBuilder: (ctx, tab) => const SizedBox(),
@@ -62,12 +62,12 @@ void main() {
     test(
         'pageBuilder is excluded from == (different builders, same data → equal)',
         () {
-      final a = BrowserTab(
+      final a = SuperTab(
         id: 1,
         title: 'Same',
         pageBuilder: (ctx, tab) => const SizedBox(),
       );
-      final b = BrowserTab(
+      final b = SuperTab(
         id: 1,
         title: 'Same',
         pageBuilder: (ctx, tab) => const Text('Same'),
@@ -77,12 +77,12 @@ void main() {
     });
 
     test('pageBuilder is excluded from hashCode', () {
-      final tab1 = BrowserTab(
+      final tab1 = SuperTab(
         id: 5,
         title: 'T',
         pageBuilder: (ctx, tab) => const SizedBox(),
       );
-      final tab2 = BrowserTab(
+      final tab2 = SuperTab(
         id: 5,
         title: 'T',
         pageBuilder: (ctx, tab) => const Text('T'),
@@ -91,8 +91,8 @@ void main() {
     });
 
     test('copyWith preserves pageBuilder when not specified', () {
-      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
-      final tab = BrowserTab(
+      Widget builder(BuildContext ctx, SuperTab tab) => const Text('page');
+      final tab = SuperTab(
         id: 1,
         title: 'T',
         pageBuilder: builder,
@@ -102,12 +102,12 @@ void main() {
     });
 
     test('value equality fails for different data', () {
-      final a = BrowserTab(
+      final a = SuperTab(
         id: 1,
         title: 'A',
         pageBuilder: (ctx, tab) => const SizedBox(),
       );
-      final b = BrowserTab(
+      final b = SuperTab(
         id: 2,
         title: 'A',
         pageBuilder: (ctx, tab) => const SizedBox(),
@@ -124,14 +124,14 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Home',
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Normal',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -184,7 +184,7 @@ void main() {
     test('_normalize enforces pinned: true on requiredPinned tabs', () {
       // Construct with pinned: false — controller must normalise to true.
       final c = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 99,
           title: 'X',
           pinned: false, // intentionally wrong
@@ -205,12 +205,12 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Normal',
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Settings',
           behavior: SuperTabBehavior.uniqueNormal,
@@ -294,17 +294,17 @@ void main() {
 
     setUp(() {
       ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Two',
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 3,
           title: 'Three',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -330,7 +330,7 @@ void main() {
     });
 
     test('add stores pageBuilder on the new tab (v2.5)', () {
-      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
+      Widget builder(BuildContext ctx, SuperTab tab) => const Text('page');
       final id = ctrl.add(
         title: 'New',
         pageBuilder: builder,
@@ -345,7 +345,7 @@ void main() {
       );
       // pageBuilder is required — always non-null
       expect(ctrl.tabById(id)?.pageBuilder, isNotNull);
-      Widget builder(BuildContext ctx, BrowserTab tab) => const Text('page');
+      Widget builder(BuildContext ctx, SuperTab tab) => const Text('page');
       ctrl.setPageBuilder(id, builder);
       expect(ctrl.tabById(id)?.pageBuilder, same(builder));
     });
@@ -541,12 +541,12 @@ void main() {
 
     testWidgets('onTabSelected fires when a tab is tapped', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Two',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -571,7 +571,7 @@ void main() {
     testWidgets('onTabAdded fires when a tab is added programmatically',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -601,7 +601,7 @@ void main() {
     testWidgets('+ button is hidden when onAddTab is null (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -616,7 +616,7 @@ void main() {
     testWidgets('+ button is shown and fires onAddTab when set (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -638,7 +638,7 @@ void main() {
     testWidgets('per-tab pageBuilder is used when provided (v2.5)',
         (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'One',
           pageBuilder: (ctx, tab) => const Text('custom-page-content'),
@@ -655,14 +655,14 @@ void main() {
 
     testWidgets('requiredPinned tab appears in pinned region', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Home',
           pinned: true,
           behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: (ctx, tab) => const SizedBox(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2,
           title: 'Doc',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -679,7 +679,7 @@ void main() {
 
     testWidgets('custom localizations are used', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Tab',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -718,7 +718,7 @@ void main() {
 
     testWidgets('preview disabled prevents capture', (tester) async {
       final ctrl = SuperTabBarController(tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1,
           title: 'Tab',
           pageBuilder: (ctx, tab) => const SizedBox(),
@@ -749,12 +749,12 @@ void main() {
 
     SuperTabBarController two({bool dirty = false}) => SuperTabBarController(
           tabs: [
-            BrowserTab(
+            SuperTab(
               id: 1,
               title: 'One',
               pageBuilder: (ctx, tab) => const SizedBox(),
             ),
-            BrowserTab(
+            SuperTab(
               id: 2,
               title: 'Two',
               dirty: dirty,
@@ -857,17 +857,17 @@ void main() {
 
       SuperTabBarController three() => SuperTabBarController(
             tabs: [
-              BrowserTab(
+              SuperTab(
                 id: 1,
                 title: 'One',
                 pageBuilder: (ctx, tab) => const SizedBox(),
               ),
-              BrowserTab(
+              SuperTab(
                 id: 2,
                 title: 'Two',
                 pageBuilder: (ctx, tab) => const SizedBox(),
               ),
-              BrowserTab(
+              SuperTab(
                 id: 3,
                 title: 'Three',
                 pageBuilder: (ctx, tab) => const SizedBox(),

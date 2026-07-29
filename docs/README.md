@@ -115,9 +115,9 @@ through `onCloseTab` for dirty-confirmation.
 | `BrowserStyleTabBarController` | ChangeNotifier | State + operations. |
 | `BrowserStyleTabBarScope` | InheritedNotifier | Scope that exposes the controller to descendants. |
 | `BrowserStyleTabBarThemeData` | ThemeExtension | All theme tokens. |
-| `BrowserTab` | Class | Tab model (`id · title · kind · dirty · pinned`). |
+| `SuperTab` | Class | Tab model (`id · title · kind · dirty · pinned`). |
 | `GLTabKind` | Enum | `ledger · doc · store · chart · user · globe`. |
-| `TabPageBuilder` | Typedef | `Widget Function(BuildContext, BrowserTab)`. |
+| `TabPageBuilder` | Typedef | `Widget Function(BuildContext, SuperTab)`. |
 | `glTabIcon` | Function | `GLTabKind → IconData`. |
 | `glPreviewMeta` | Function | `GLTabKind → String` subtitle for the preview header. |
 | `kNewTabCycle` | Const | Rotating kind list for the `+` button. |

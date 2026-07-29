@@ -32,17 +32,17 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
       tabs: [
         // requiredPinned — always pinned; close / unpin / duplicate
         // are hidden in the UI. Programmatic close() still works.
-        BrowserTab(
+        SuperTab(
             id: 1,
             title: 'Chart of Accounts',
             pinned: true,
             behavior: SuperTabBehavior.requiredPinned,
             pageBuilder: (ctx, tab) => _pageForKind(GLTabKind.ledger, tab)),
-        BrowserTab(
+        SuperTab(
             id: 2,
             title: 'New Journal Entry',
             pageBuilder: (ctx, tab) => _pageForKind(GLTabKind.doc, tab)),
-        BrowserTab(
+        SuperTab(
             id: 3,
             title: 'Dashboard',
             pageBuilder: (ctx, tab) => _pageForKind(GLTabKind.chart, tab)),
@@ -199,7 +199,7 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
 
   // Build a page based on the tab kind captured at creation time.
   // GLTabKind enum still exists for callers — it's just not stored on BrowserTab.
-  static Widget _pageForKind(GLTabKind kind, BrowserTab tab) {
+  static Widget _pageForKind(GLTabKind kind, SuperTab tab) {
     switch (kind) {
       case GLTabKind.ledger:
         return _CoAPage(tab: tab);
@@ -224,7 +224,7 @@ class _DocumentShellExampleState extends State<DocumentShellExample> {
 // ── Chart of Accounts page ────────────────────────────────────────
 // Rows call SuperTabBarController.of(context) to open a new tab.
 class _CoAPage extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _CoAPage({required this.tab});
 
   static const _accounts = [
@@ -310,7 +310,7 @@ class _CoAPage extends StatelessWidget {
 // ── Journal Entry form ────────────────────────────────────────────
 // Marks the tab dirty on first keystroke; Save clears dirty + renames.
 class _JournalEntryPage extends StatefulWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   final ValueChanged<bool> onDirty;
   final ValueChanged<String> onSave;
   const _JournalEntryPage(
@@ -416,7 +416,7 @@ class _JournalEntryPageState extends State<_JournalEntryPage> {
 
 // ── Placeholder page ──────────────────────────────────────────────
 class _PlaceholderPage extends StatelessWidget {
-  final BrowserTab tab;
+  final SuperTab tab;
   const _PlaceholderPage({required this.tab});
   @override
   Widget build(BuildContext context) {

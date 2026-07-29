@@ -5,10 +5,10 @@
 
 import 'package:flutter/material.dart';
 
-/// Page builder type for [BrowserTab.pageBuilder].
+/// Page builder type for [SuperTab.pageBuilder].
 ///
 /// Called at build time with the current [BuildContext] and the live
-/// [BrowserTab] (as read from the controller, reflecting current
+/// [SuperTab] (as read from the controller, reflecting current
 /// dirty / title state):
 /// ```dart
 /// BrowserTab(
@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 ///   pageBuilder: (ctx, tab) => HomePage(title: tab.title),
 /// )
 /// ```
-typedef TabPageBuilder = Widget Function(BuildContext context, BrowserTab tab);
+typedef TabPageBuilder = Widget Function(BuildContext context, SuperTab tab);
 
 // ── Tab-kind enum ──────────────────────────────────────────
 /// The page-type of a workspace tab. Drives the leading icon, mini-page
@@ -44,17 +44,22 @@ enum SuperTabBehavior {
 
   /// Like [normal] but cannot be duplicated from the UI.
   /// When [SuperTabBarController.add] is called with a matching
-  /// [BrowserTab.uniqueKey], the existing tab is selected instead of
+  /// [SuperTab.uniqueKey], the existing tab is selected instead of
   /// creating a duplicate.
   uniqueNormal,
 }
+
+@Deprecated(
+  'Use SuperTab instead of BrowserTab. This alias will be removed in v3.0.',
+)
+typedef BrowserTab = SuperTab; // alias for legacy code
 
 // ── BrowserTab model ───────────────────────────────────────
 /// A single workspace tab. Immutable — all mutations go through
 /// [SuperTabBarController] which produces new instances via [copyWith].
 @immutable
-class BrowserTab {
-  const BrowserTab({
+class SuperTab {
+  const SuperTab({
     required this.id,
     required this.title,
     this.dirty = false,
@@ -125,7 +130,7 @@ class BrowserTab {
 
   /// Builds the content page for this tab.
   ///
-  /// Required. Receives the current [BuildContext] and the live [BrowserTab]
+  /// Required. Receives the current [BuildContext] and the live [SuperTab]
   /// (as read from the controller at build time, reflecting current dirty /
   /// title state):
   ///
@@ -136,7 +141,7 @@ class BrowserTab {
   /// )
   /// ```
   ///
-  /// **Note:** excluded from [operator ==] and [hashCode] — two [BrowserTab]
+  /// **Note:** excluded from [operator ==] and [hashCode] — two [SuperTab]
   /// instances are considered equal when their data fields match, regardless
   /// of their [pageBuilder] function references.
   final TabPageBuilder pageBuilder;
@@ -144,7 +149,7 @@ class BrowserTab {
   /// Returns a copy with the given fields replaced.
   ///
   /// Note: passing `null` for [pageBuilder] keeps the existing value.
-  BrowserTab copyWith({
+  SuperTab copyWith({
     int? id,
     String? title,
     bool? dirty,
@@ -155,7 +160,7 @@ class BrowserTab {
     Widget? trailing,
     TabPageBuilder? pageBuilder,
   }) {
-    return BrowserTab(
+    return SuperTab(
       id: id ?? this.id,
       title: title ?? this.title,
       dirty: dirty ?? this.dirty,
@@ -171,7 +176,7 @@ class BrowserTab {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is BrowserTab &&
+      (other is SuperTab &&
           other.id == id &&
           other.title == title &&
           other.dirty == dirty &&

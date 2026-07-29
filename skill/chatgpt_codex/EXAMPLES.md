@@ -1,9 +1,9 @@
 # super_tab_bar — comprehensive examples (v2.5)
 
 Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
-registration from `AGENTS.md`. In v2.5 every `BrowserTab` has a required
-`pageBuilder: TabPageBuilder` (`Widget Function(BuildContext, BrowserTab)`).
-`BrowserTab.kind` and `SuperTabBar.pageBuilder` were removed.
+registration from `AGENTS.md`. In v2.5 every `SuperTab` has a required
+`pageBuilder: TabPageBuilder` (`Widget Function(BuildContext, SuperTab)`).
+`SuperTab.kind` and `SuperTabBar.pageBuilder` were removed.
 
 ---
 
@@ -24,16 +24,16 @@ class _ErpWorkspaceState extends State<ErpWorkspace> {
     super.initState();
     _ctrl = SuperTabBarController(
       tabs: [
-        BrowserTab(
+        SuperTab(
           id: 1, title: 'Chart of Accounts',
           pinned: true, behavior: SuperTabBehavior.requiredPinned,
           pageBuilder: (ctx, tab) => const ChartOfAccountsPage(),
         ),
-        BrowserTab(
+        SuperTab(
           id: 2, title: 'Journal Entry — Draft', dirty: true,
           pageBuilder: (ctx, tab) => JournalEntryPage(tabId: tab.id),
         ),
-        BrowserTab(
+        SuperTab(
           id: 3, title: 'Dashboard',
           pageBuilder: (ctx, tab) => const DashboardPage(),
         ),
@@ -142,12 +142,12 @@ Directionality(
   child: SuperTabBar(
     localizations: SuperTabBarLocalizations.ar,
     tabsState: [
-      BrowserTab(
+      SuperTab(
         id: 1, title: 'دليل الحسابات',
         pinned: true, behavior: SuperTabBehavior.requiredPinned,
         pageBuilder: (ctx, tab) => const ChartOfAccountsPage(),
       ),
-      BrowserTab(
+      SuperTab(
         id: 2, title: 'قيد يومية', dirty: true,
         pageBuilder: (ctx, tab) => JournalEntryPage(tabId: tab.id),
       ),
@@ -192,11 +192,11 @@ await showSuperTabSwitcher(context, controller: ctrl,
 
 ```dart
 // ── v2.3 (will not compile in v2.5) ─────────────────────────────
-BrowserTab(id: 1, title: 'Ledger', kind: GLTabKind.ledger)  // kind removed
+SuperTab(id: 1, title: 'Ledger', kind: GLTabKind.ledger)  // kind removed
 SuperTabBar(pageBuilder: (ctx, tab) => MyPage(tab: tab))     // removed
 
 // ── v2.5 ─────────────────────────────────────────────────────────
-BrowserTab(
+SuperTab(
   id: 1, title: 'Ledger',
   pageBuilder: (ctx, tab) => const LedgerPage(), // kind lives in closure
 )
@@ -222,21 +222,21 @@ ctrl.mutate(() {
 
 ```dart
 // Custom icon as leading:
-BrowserTab(
+SuperTab(
   id: 1, title: 'Inbox',
   leading: const Icon(Icons.inbox_outlined, size: 14),
   pageBuilder: (ctx, tab) => const InboxPage(),
 )
 
 // Unread-count badge as trailing:
-BrowserTab(
+SuperTab(
   id: 2, title: 'Alerts',
   trailing: _Badge(count: 5),
   pageBuilder: (ctx, tab) => const AlertsPage(),
 )
 
 // Both together:
-BrowserTab(
+SuperTab(
   id: 3, title: 'Notifications',
   leading:  const Icon(Icons.notifications_outlined, size: 14),
   trailing: _Badge(count: 12),

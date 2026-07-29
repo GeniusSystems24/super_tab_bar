@@ -1,5 +1,6 @@
 name: super_tab_bar_example
 description: Runnable examples for the super_tab_bar package.
+publish_to: none
 
 # version
 version: 1.0.0
