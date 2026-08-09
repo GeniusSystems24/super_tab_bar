@@ -6,6 +6,31 @@ versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [2.8.2] — 2026-08-10
+
+### Changed
+
+- Requires `super_core >=3.3.0 <4.0.0`.
+- Updated all `SuperMaterialThemeData.light` / `.dark` examples to provide the
+  required `SuperTextTheme` values through `textTheme` and `primaryTextTheme`.
+- `SuperTabBarThemeData.fromMaterialTheme` now reads body/display font families
+  from `SuperMaterialThemeData.textTheme`, the typography source of truth in
+  `super_core 3.3.0`; monospace remains token-driven.
+- Updated README, example app, and Claude Code / ChatGPT-Codex skills for the
+  `super_core 3.3.0` theme contract.
+
+### Compatibility
+
+- Do not read `SuperThemeData.textTheme`; that getter was removed in
+  `super_core 3.3.0`. Use `SuperMaterialThemeData.textTheme` or
+  `context.superTextTheme` instead.
+- Do not assume `SuperTokensData.bodyFont` / `displayFont` mirror a supplied
+  `SuperTextTheme`; explicit typography is now independent from those token
+  metadata fields unless `fontFamily` is passed explicitly to the material
+  theme.
+
+---
+
 ## [2.8.0] — 2026-07-27
 
 ### Breaking changes

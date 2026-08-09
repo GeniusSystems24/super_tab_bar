@@ -1,7 +1,7 @@
 ---
 name: super-tab-bar
 description: >
-  How to use the super_tab_bar Flutter package (v2.5) — a browser-style workspace
+  How to use the super_tab_bar Flutter package (v2.8.2) — a browser-style workspace
   tab strip. Each tab carries a required `pageBuilder: TabPageBuilder` (`Widget
   Function(BuildContext, SuperTab)`). SuperTab.kind was removed in v2.5.
   SuperTabBar.pageBuilder was removed in v2.5. The + button only shows when
@@ -9,7 +9,7 @@ description: >
   workspace UI with the super_tab_bar package.
 ---
 
-# super_tab_bar · SuperTabBar — v2.5
+# super_tab_bar · SuperTabBar — v2.8.2
 
 A browser-style workspace tab strip. Renders the strip **and** the active page
 below it. Keeps every page's state alive across tab switches via `IndexedStack`.
@@ -19,13 +19,34 @@ below it. Keeps every page's state alive across tab switches via `IndexedStack`.
 ## Import & theme setup
 
 ```dart
+import 'package:super_core/super_core.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
+final typography = SuperTextTheme();
+
 MaterialApp(
-  theme:     ThemeData(extensions: const [SuperTabBarThemeData.light]),
-  darkTheme: ThemeData(extensions: const [SuperTabBarThemeData.dark]),
+  theme: SuperMaterialThemeData.light(
+    textTheme: typography,
+    primaryTextTheme: typography,
+  ),
+  darkTheme: SuperMaterialThemeData.dark(
+    textTheme: typography,
+    primaryTextTheme: typography,
+  ),
 )
 ```
+
+### super_core 3.3.0 typography rule
+
+- `SuperMaterialThemeData.light` and `.dark` require `SuperTextTheme` for both
+  `textTheme` and `primaryTextTheme`.
+- Never use `context.superTheme.textTheme` or
+  `SuperThemeData.of(context).textTheme`; `SuperThemeData.textTheme` was removed.
+- Read active typography with `context.superTextTheme` or
+  `SuperMaterialThemeData.of(context).textTheme`.
+- Do not assume `SuperTokensData.bodyFont` / `displayFont` mirror the supplied
+  `SuperTextTheme`. `super_tab_bar` derives its body/display families from the
+  active material `textTheme`; monospace remains token-driven.
 
 ---
 
@@ -225,7 +246,7 @@ await showSuperTabSwitcher(context, controller: ctrl,
 2. **pageBuilder called during build** — keep stateless; renders active surface and hover preview.
 3. **State-preservation is default** — `lazyPages: true` only for pages that should reset.
 4. **`of(context)` returns null outside a tab bar** — guard every call.
-5. **Register theme extension** — one line in `ThemeData.extensions`.
+5. **With super_core 3.3.0, prefer `SuperMaterialThemeData`** — no manual tab extension is required; explicit `SuperTabBarThemeData` remains an override.
 6. **`onAddTab` suppresses `onTabAdded`** — widget doesn't know the new id.
 7. **`+` button requires `onAddTab`** — supply callback to show it.
 8. **`pageBuilder` excluded from `==`/`hashCode`** — tabs compared by data fields.

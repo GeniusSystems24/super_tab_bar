@@ -1,6 +1,6 @@
 # super_tab_bar
 
-[![pub package](https://img.shields.io/badge/pub-v2.8.0-0175C2.svg)](https://pub.dev/packages/super_tab_bar)
+[![pub package](https://img.shields.io/badge/pub-v2.8.2-0175C2.svg)](https://pub.dev/packages/super_tab_bar)
 [![Flutter](https://img.shields.io/badge/Flutter-%E2%89%A53.32.0-02569B.svg)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-%E2%89%A53.8.0-0175C2.svg)](https://dart.dev)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -33,7 +33,7 @@ A browser-style workspace tab bar for Flutter applications. It supports pinned, 
 |---|---:|
 | Dart | `3.8.0` |
 | Flutter | `3.32.0` |
-| `super_core` | `3.0.0` |
+| `super_core` | `3.3.0` |
 
 ## Installation
 
@@ -41,8 +41,8 @@ Add the package to `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  super_core: ^3.0.0
-  super_tab_bar: ^2.8.0
+  super_core: ^3.3.0
+  super_tab_bar: ^2.8.2
 ```
 
 Then install the dependencies:
@@ -59,7 +59,10 @@ import 'package:super_tab_bar/super_tab_bar.dart';
 
 ## Application setup
 
-The recommended setup uses `SuperMaterialThemeData` from `super_core`. `SuperTabBarThemeData` is derived automatically from the active palette, brightness, typography, spacing, and motion tokens.
+The recommended setup uses `SuperMaterialThemeData` from `super_core`. With
+`super_core 3.3.0`, `textTheme` and `primaryTextTheme` are required
+`SuperTextTheme` values. `SuperTabBarThemeData` is derived automatically from
+the active palette, brightness, typography, spacing, and motion tokens.
 
 ```dart
 import 'package:flutter/material.dart';
@@ -75,13 +78,19 @@ class WorkspaceApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final typography = SuperTextTheme();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: SuperMaterialThemeData.light(
         palette: SuperPalette.purplePalette,
+        textTheme: typography,
+        primaryTextTheme: typography,
       ),
       darkTheme: SuperMaterialThemeData.dark(
         palette: SuperPalette.purplePalette,
+        textTheme: typography,
+        primaryTextTheme: typography,
       ),
       themeMode: ThemeMode.system,
       home: const WorkspaceScreen(),
@@ -577,6 +586,11 @@ The strip, pinned area, dropdown, preview placement, compact FAB, and switcher a
 2. The ambient `SuperMaterialThemeData` from `super_core`.
 3. The ambient Material `ColorScheme`.
 
+In `super_core 3.3.0`, body/display font families are read from the active
+`SuperMaterialThemeData.textTheme`. They are not inferred from
+`SuperThemeData.textTheme` (removed) or implicitly synchronized through
+`SuperTokensData`.
+
 Read resolved values from the current context:
 
 ```dart
@@ -590,8 +604,11 @@ final radius = tabTheme.radiusLarge;
 Register a `SuperTabBarThemeData` extension when this component needs values different from the application design system:
 
 ```dart
+final typography = SuperTextTheme();
 final baseTheme = SuperMaterialThemeData.light(
   palette: SuperPalette.purplePalette,
+  textTheme: typography,
+  primaryTextTheme: typography,
 );
 
 final tabTheme = SuperTabBarThemeData.fromColorScheme(

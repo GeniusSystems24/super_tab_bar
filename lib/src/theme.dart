@@ -1,7 +1,7 @@
 // ============================================================
 // SuperTabBarThemeData — the component ThemeExtension.
 // ------------------------------------------------------------
-// v3.0.0 derives brand colors, typography, radii, and motion from super_core's
+// v3.3.0 derives brand colors, typography, radii, and motion from super_core's
 // ambient SuperMaterialThemeData. Explicit extension overrides still win.
 // ============================================================
 
@@ -65,7 +65,8 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
   final Color dangerColor;
   final Color infoColor;
 
-  // Typography resolved from SuperTokensData.
+  // Typography resolved from SuperMaterialThemeData.textTheme. Mono remains
+  // token-driven because SuperTextTheme has no monospace family contract.
   final String displayFontFamily;
   final String bodyFontFamily;
   final String monoFontFamily;
@@ -209,6 +210,7 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
     final s = theme.superTheme;
     final tokens = s.tokens;
     final spacing = s.spacing;
+    final textTheme = theme.textTheme;
     return SuperTabBarThemeData(
       bg: s.bg,
       surface: s.surface,
@@ -226,8 +228,12 @@ class SuperTabBarThemeData extends ThemeExtension<SuperTabBarThemeData> {
       warningColor: tokens.warning,
       dangerColor: tokens.danger,
       infoColor: tokens.info,
-      displayFontFamily: tokens.displayFont,
-      bodyFontFamily: tokens.bodyFont,
+      // super_core 3.3.0 makes SuperTextTheme the typography source of truth.
+      // Do not infer body/display families from SuperTokensData: they are no
+      // longer synchronized implicitly from the supplied SuperTextTheme.
+      displayFontFamily:
+          textTheme.displayLarge?.fontFamily ?? tokens.displayFont,
+      bodyFontFamily: textTheme.bodyMedium?.fontFamily ?? tokens.bodyFont,
       monoFontFamily: tokens.monoFont,
       radiusSmall: spacing.radiusControl,
       radiusMedium: spacing.radiusMd,

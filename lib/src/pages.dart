@@ -6,6 +6,8 @@
 //   File: lib/src/pages.dart
 // ============================================================
 
+// ignore_for_file: unused_element
+
 import 'package:flutter/material.dart';
 import 'theme.dart';
 import 'models.dart';

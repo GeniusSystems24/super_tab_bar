@@ -5,9 +5,28 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:super_core/super_core.dart';
 import 'package:super_tab_bar/super_tab_bar.dart';
 
 void main() {
+  group('super_core 3.3.0 theme integration', () {
+    test('derives body and display families from SuperTextTheme', () {
+      final typography = SuperTextTheme(
+        bodyFont: const TextStyle(fontFamily: 'TabBody'),
+        otherFont: const TextStyle(fontFamily: 'TabDisplay'),
+      );
+      final material = SuperMaterialThemeData.light(
+        textTheme: typography,
+        primaryTextTheme: typography,
+      );
+
+      final tabTheme = SuperTabBarThemeData.fromMaterialTheme(material);
+
+      expect(tabTheme.bodyFontFamily, 'TabBody');
+      expect(tabTheme.displayFontFamily, 'TabDisplay');
+    });
+  });
+
   // ════════════════════════════════════════════════════════
   // BrowserTab immutability
   // ════════════════════════════════════════════════════════

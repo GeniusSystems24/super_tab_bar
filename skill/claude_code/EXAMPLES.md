@@ -1,7 +1,7 @@
-# super_tab_bar — comprehensive examples (v2.5)
+# super_tab_bar — comprehensive examples (v2.8.2)
 
-Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
-registration from `SKILL.md`.
+Copy-ready recipes. Each assumes the `super_core 3.3.0` `SuperMaterialThemeData`
+setup from `SKILL.md`, including required `SuperTextTheme` values.
 
 ---
 

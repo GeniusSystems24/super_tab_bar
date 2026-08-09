@@ -10,7 +10,7 @@ description: >
 
 
 # package version
-version: 2.8.1
+version: 2.8.2
 
 # package homepage, repository, and issue tracker URLs
 homepage: https://github.com/GeniusSystems24/super_tab_bar
@@ -25,10 +25,9 @@ dependencies:
   flutter:
     sdk: flutter
   # Shared GeniusLink design-system foundation — provides SuperPalette,
-  # SuperMaterialThemeData, and SuperThemeData for automatic light/dark theming.
-  # v3 provides the consolidated design-system tokens, responsive spacing,
-  # typography, semantic colors, and material theme bridge used here.
-  super_core: ">=3.0.0 <4.0.0"
+  # SuperMaterialThemeData, SuperTextTheme, and SuperThemeData for automatic
+  # light/dark theming. v3.3 makes SuperTextTheme explicit on material themes.
+  super_core: ">=3.3.0 <4.0.0"
 
 dev_dependencies:
   flutter_test:

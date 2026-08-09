@@ -1,7 +1,8 @@
-# super_tab_bar — comprehensive examples (v2.5)
+# super_tab_bar — comprehensive examples (v2.8.2)
 
 Copy-ready recipes. Each assumes the import and `SuperTabBarThemeData`
-registration from `AGENTS.md`. In v2.5 every `SuperTab` has a required
+theme setup from `AGENTS.md`. With super_core 3.3.0, provide the required
+`SuperTextTheme` values. In v2.5 every `SuperTab` has a required
 `pageBuilder: TabPageBuilder` (`Widget Function(BuildContext, SuperTab)`).
 `SuperTab.kind` and `SuperTabBar.pageBuilder` were removed.
 

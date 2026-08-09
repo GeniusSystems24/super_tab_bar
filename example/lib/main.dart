@@ -29,11 +29,19 @@ class _ExampleAppState extends State<ExampleApp> {
 
   @override
   Widget build(BuildContext context) {
+    final typography = SuperTextTheme();
+
     return MaterialApp(
       title: 'super_tab_bar examples',
       debugShowCheckedModeBanner: false,
-      theme: SuperMaterialThemeData.light(),
-      darkTheme: SuperMaterialThemeData.dark(),
+      theme: SuperMaterialThemeData.light(
+        textTheme: typography,
+        primaryTextTheme: typography,
+      ),
+      darkTheme: SuperMaterialThemeData.dark(
+        textTheme: typography,
+        primaryTextTheme: typography,
+      ),
       themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
       home: LauncherScreen(
         dark: _dark,
@@ -723,7 +731,7 @@ class _VersionPill extends StatelessWidget {
         ),
       ),
       child: Text(
-        'v3.0.0',
+        'v2.8.2',
         style: TextStyle(
           fontFamily: SuperTabBarThemeData.of(context).monoFontFamily,
           fontSize: 10.5,

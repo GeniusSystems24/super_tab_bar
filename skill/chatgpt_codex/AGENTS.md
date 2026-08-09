@@ -1,4 +1,4 @@
-# super_tab_bar — ChatGPT / Codex agent instructions (v2.5)
+# super_tab_bar — ChatGPT / Codex agent instructions (v2.8.2)
 
 Use these instructions when asked to build or modify a Flutter UI that needs a
 **browser-style workspace tab bar** using the `super_tab_bar` package.
@@ -9,7 +9,7 @@ Use these instructions when asked to build or modify a Flutter UI that needs a
 
 ```
 name:    super_tab_bar
-version: 2.5.0
+version: 2.8.2
 import:  package:super_tab_bar/super_tab_bar.dart
 ```
 
@@ -26,11 +26,28 @@ Apply this skill when the user asks for:
 ## Theme setup (required)
 
 ```dart
+final typography = SuperTextTheme();
+
 MaterialApp(
-  theme:     ThemeData(extensions: const [SuperTabBarThemeData.light]),
-  darkTheme: ThemeData(extensions: const [SuperTabBarThemeData.dark]),
+  theme: SuperMaterialThemeData.light(
+    textTheme: typography,
+    primaryTextTheme: typography,
+  ),
+  darkTheme: SuperMaterialThemeData.dark(
+    textTheme: typography,
+    primaryTextTheme: typography,
+  ),
 )
 ```
+
+`super_core 3.3.0` rules:
+
+- `textTheme` and `primaryTextTheme` are required `SuperTextTheme` values.
+- Never generate `context.superTheme.textTheme` or
+  `SuperThemeData.of(context).textTheme`; that getter no longer exists.
+- Use `context.superTextTheme` / `SuperMaterialThemeData.of(context).textTheme`.
+- Body/display families must follow the active `SuperTextTheme`, not assumed
+  `SuperTokensData` synchronization. Monospace may remain token-driven.
 
 ---
 
@@ -203,7 +220,7 @@ await showSuperTabSwitcher(context, controller: ctrl,
 4. **pageBuilder called during build** — keep stateless; renders both active surface and hover preview.
 5. **State-preservation is default** — `lazyPages: true` only for pages that should reset.
 6. **`of(context)` returns null outside a tab bar** — guard every call.
-7. **Register theme extension** — one line in `ThemeData.extensions`.
+7. **Prefer `SuperMaterialThemeData` with super_core 3.3.0** — an explicit tab-bar extension is optional and only needed as an override.
 8. **`onAddTab` suppresses `onTabAdded`** — widget doesn't know the new id.
 9. **`+` button requires `onAddTab`** — supply callback to show it.
 10. **Provide `tabsState` OR `controller`** — never both.
