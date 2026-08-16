@@ -1,7 +1,12 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    # منع أي استيراد مباشر لملفات src/ من خارج المكتبة
+    implementation_imports: error
 linter:
   rules:
+    - implementation_imports
     - prefer_const_constructors
     - prefer_const_declarations
     - avoid_print

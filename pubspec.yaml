@@ -10,7 +10,7 @@ description: >
 
 
 # package version
-version: 2.8.2
+version: 2.8.2+2
 
 # package homepage, repository, and issue tracker URLs
 homepage: https://github.com/GeniusSystems24/super_tab_bar
